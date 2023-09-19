@@ -1,7 +1,7 @@
 openapi: 3.0.3
 
 #  This file is part of the eliona project.
-#  Copyright © 2022 LEICOM iTEC AG. All Rights Reserved.
+#  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
 #  ______ _ _
 # |  ____| (_)
 # | |__  | |_  ___  _ __   __ _
@@ -17,65 +17,205 @@ openapi: 3.0.3
 
 info:
   version: 1.0.0
-  title: App template API
-  description: API to access and configure the app template
+  title: App SAML 2.0 SSO API
+  description: API to access and configure the SAML 2.0 SSO service provider
 externalDocs:
   description: Find out more about the app template
-  url: https://github.com/eliona-smart-building-assistant/app-template
+  url: https://github.com/eliona-smart-building-assistant/app-saml-sso
 servers:
-  - url: http://template/v1
+  - url: http://saml-sso/v1
+  - url: https://cust.eliona.cloud/apps/saml-sso/api/
+security:
+  - ApiKeyAuth: []
 
 tags:
   - name: Configuration
     description: Configure the app
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/app-template
+      url: https://github.com/eliona-smart-building-assistant/app-saml-sso
 
   - name: Version
     description: API version
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/app-template
+      url: https://github.com/eliona-smart-building-assistant/app-saml-sso
 
-  - name: Customization
-    description: Help to customize Eliona environment
+  - name: SAML2.0
+    description: SAML 2.0 specific entpoint
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/app-template
+      url: https://github.com/eliona-smart-building-assistant/app-saml-sso
+
+  - name: Generic Single Sign-On
+    description: Generic endpoints for all Single Sign-On Applications
+    externalDocs:
+      url: https://github.com/eliona-smart-building-assistant/sso
 
 paths:
-  /configurations:
+  /sso/active:
     get:
       tags:
-        - Configuration
-      summary: Get configurations
-      description: Gets information about all configurations.
-      operationId: getConfigurations
+        - Generic Single Sign-On
+      summary: Check, if a SSO service is available and configured
+      description: This endpoint is for checking, if any SSO service is running on Eliona
+      operationId: getSSOActive
       responses:
         "200":
-          description: Successfully returned all configurations
+          description: Successfully returned, if any SSO service is running
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Configuration'
+                $ref: '#/components/schemas/Active'
+
+  /sso/auth:
+    get:
+      tags:
+        - Generic Single Sign-On
+      summary: Begin authorization / login procedure
+      description: Startpoint for each SSO service to process the authorization
+      operationId: getAuthorizationProcedure
+      responses:
+        "302":
+          description: Started login, redirect to the IdP with the SAML request
+
+  /saml/acs:
+    description: all SAML spcific things like /saml/acs for asumption consumtion service
     post:
       tags:
+        - SAML2.0
+      responses:
+        "302":
+          description: SAML response returned from the IdP redirected to the auth endpoint to evaluate
+
+  /configuration/basic:
+    get:
+      tags:
         - Configuration
-      summary: Creates a configuration
-      description: Creates a configuration.
-      operationId: postConfiguration
+      summary: Get Basic Configurations
+      description: Get all the Basic Configuration which the SAML SP needs to work.
+      operationId: getBasicConfiguration
+      responses:
+        "200":
+          description: Successfully returned all basic configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicConfiguration'
+    put:
+      tags:
+        - Configuration
+      summary: Creates or Update Basic Configuration
+      description: Creates or Update the Basic Configuration which the SAML SP needs to work.
+      operationId: putBasicConfiguration
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Configuration'
+              $ref: '#/components/schemas/BasicConfiguration'
       responses:
-        "201":
-          description: Successfully created a configuration
+        "200":
+          description: Successfully created / updated the basic configuration
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Configuration'
+                $ref: '#/components/schemas/BasicConfiguration'
+
+  /configuration/advanced:
+    get:
+      tags:
+        - Configuration
+      summary: Get Advanced Configuration
+      description: Get all the Advanced Configuration for the SAML SP (optional options).
+      operationId: getAdvancedConfiguration
+      responses:
+        "200":
+          description: Successfully returned all advanced configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedConfiguration'
+    put:
+      tags:
+        - Configuration
+      summary: Creates or Update Advanced Configuration
+      description: Creates or Update the Advanced Configuration for the SAML SP (optional options).
+      operationId: putAdvancedConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvancedConfiguration'
+      responses:
+        "200":
+          description: Successfully created / updated the advanced configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedConfiguration'
+
+  /configuration/attribute-mapping:
+    get:
+      tags:
+        - Configuration
+      summary: Get Attribute Mapping
+      description: Get the configuration which maps SAML Attributes with the Eliona User Attributes like email address.
+      operationId: getAttributeMapping
+      responses:
+        "200":
+          description: Successfully returned the attribute mapping configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttributeMap'
+    put:
+      tags:
+        - Configuration
+      summary: Creates or Update Attribute Mapping
+      description: Creates or Update the mapping between SAML Attributes and the Eliona User Attributes.
+      operationId: putAttributeMapping
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttributeMap'
+      responses:
+        "200":
+          description: Successfully created / updated the attribute mapping configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttributeMap'
+
+  /configuration/permission-mapping:
+    get:
+      tags:
+        - Configuration
+      summary: Get Permission Mapping
+      description: Get the configuration which maps SAML Attributes/Values with the Eliona Roles.
+      operationId: getPermissionMapping
+      responses:
+        "200":
+          description: Successfully returned the permission mapping configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permissions'
+    put:
+      tags:
+        - Configuration
+      summary: Creates or Update Permission Mapping Configurations
+      description: Creates or Update the configuration which maps SAML Attributes/Values with the Eliona Roles.
+      operationId: putPermissionMapping
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Permissions'
+      responses:
+        "200":
+          description: Successfully created / updated the permission mapping configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permissions'
 
   /version:
     get:
@@ -107,53 +247,268 @@ paths:
               schema:
                 type: object
 
-  /dashboard-templates/{dashboard-template-name}:
-    get:
-      tags:
-        - Customization
-      summary: Get a full dashboard template
-      description: Delivers a dashboard template which can assigned to users in Eliona
-      externalDocs:
-        description: The API to assign the dashboard to users in Eliona (see post /dashboards endpoint).
-        url: https://github.com/eliona-smart-building-assistant/eliona-api
-      operationId: getDashboardTemplateByName
-      parameters:
-        - name: dashboard-template-name
-          in: path
-          description: Name of the dashboard template
-          required: true
-          schema:
-            type: string
-            example: Template
-        - name: projectId
-          in: query
-          description: Define the project the dashboard should be
-          required: true
-          schema:
-            type: string
-            example: 99
-      responses:
-        "200":
-          description: Successfully returned dashboard template
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/eliona-smart-building-assistant/eliona-api/main/openapi.yaml#/components/schemas/Dashboard'
-        "404":
-          description: Template name not found
-
 components:
   schemas:
-    Configuration:
+    BasicConfiguration:
       type: object
-      description: Simply a example configuration
+      description: The Basic Configurations for running a SAML 2.0 Service Provider
       properties:
-        id:
-          type: integer
-          format: int64
-          description: A id identifying the example configuration
-          readOnly: true
-          nullable: true
-        config:
+        enable:
+          type: boolean
+          description: If the configuration is enabled or not
+          nullable: false
+          readOnly: false
+          default: true
+          example: true
+        serviceProviderCertificate:
           type: string
-          description: Configuration data for example
+          nullable: false
+          readOnly: false
+          example:
+            "-----BEGIN CERTIFICATE-----
+            MIIEGzCCAwOgAwIBAgIUc/HUg5byijWRmU7Qqe5OSQtiNOwwDQYJKoZIhvcNAQEL
+            BQAwgZwxCzAJBgNVBAYTAkNIMQ8wDQYDVQQIDAZadXJpY2gxEzARBgNVBAcMCldp
+            bnRlcnRodXIxEjAQBgNVBAoMCUxlaWNvbSBBRzEXMBUGA1UECwwOU21hcnQgQnVp
+            bGRpbmcxGjAYBgNVBAMMEW15LmRvbWFpbi5leGFtcGxlMR4wHAYJKoZIhvcNAQkB
+            Fg9teUBtYWlsLmV4YW1wbGUwHhcNMjMwOTE5MTU0NDI3WhcNMjMwOTIwMTU0NDI3
+            WjCBnDELMAkGA1UEBhMCQ0gxDzANBgNVBAgMBlp1cmljaDETMBEGA1UEBwwKV2lu
+            dGVydGh1cjESMBAGA1UECgwJTGVpY29tIEFHMRcwFQYDVQQLDA5TbWFydCBCdWls
+            ZGluZzEaMBgGA1UEAwwRbXkuZG9tYWluLmV4YW1wbGUxHjAcBgkqhkiG9w0BCQEW
+            D215QG1haWwuZXhhbXBsZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+            AMT/3A9znGEn8J9WNKfJIrPDBtrMgt3UUwWzYsNOBBH5l/A8NBROP2YsgQpUA903
+            Z/vpDf1sPzwgpwC065e5INtmPC8PWOk1xPL8mKgFXVHZKIxxdyQhs71FGelWkF/Y
+            7yv3oXf7ruxBzdXYqm1nmkz+lISOMj1o/KsL3O8VuAaNHmBMd5O/N6k3KHK9kyDc
+            2w6eA97gMk/Qb8A1tT9xPDkCuK048jmGtpLnIpFFQOX54wumY6ERjalI87CeouAD
+            U2SqJjKNjfJ0280zaGiO6uMOBpYASoDfSJeyx7A0aj9yYF04uvCpqjnAAccDfFjw
+            yDCENuXnZrnwxjf1foi/XGsCAwEAAaNTMFEwHQYDVR0OBBYEFHC2lw5oqM9aQ9Ma
+            zRRedJpu0lXTMB8GA1UdIwQYMBaAFHC2lw5oqM9aQ9MazRRedJpu0lXTMA8GA1Ud
+            EwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAGN9U54MXlG6HeA9UEnDOBC0
+            YwxNlvQs698sfGeonzeCLpxvHMF6i/f8HIOzEbtB7j6McWf6DBN/+j2cGzP1zIG/
+            GgYq3IFRM5wg6T/O25JR0xOOyBqwxZDofe+lJFar6NAYMaN2/sSBm/MwCLiy3Ry3
+            uKpeeXUf0iw/AdEsWoGeNNt2SLvYayULGzCzXgHjUEEHzoxxWtwxyCS0t01Obhnn
+            G/Pvj0QgLqW2g/kNED4iVbnxknRcvx99oKPUu1hPyZp42O3MpMf50U7dITrAMpkC
+            uOS2ky5T1OAhaBUKok/R72Bz9LbrGuhZcPdTn44F+2bddSw314UAOSWph5sRvHc=
+            -----END CERTIFICATE-----"
+          description: The Certificate of this SAML Service Provider (SP). Can be a self-signed x509 certificate.
+        serviceProviderPrivateKey:
+          type: string
+          nullable: false
+          readOnly: false
+          example:
+            "-----BEGIN PRIVATE KEY-----
+            MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDE/9wPc5xhJ/Cf
+            VjSnySKzwwbazILd1FMFs2LDTgQR+ZfwPDQUTj9mLIEKVAPdN2f76Q39bD88IKcA
+            tOuXuSDbZjwvD1jpNcTy/JioBV1R2SiMcXckIbO9RRnpVpBf2O8r96F3+67sQc3V
+            2KptZ5pM/pSEjjI9aPyrC9zvFbgGjR5gTHeTvzepNyhyvZMg3NsOngPe4DJP0G/A
+            NbU/cTw5AritOPI5hraS5yKRRUDl+eMLpmOhEY2pSPOwnqLgA1NkqiYyjY3ydNvN
+            M2hojurjDgaWAEqA30iXssewNGo/cmBdOLrwqao5wAHHA3xY8MgwhDbl52a58MY3
+            9X6Iv1xrAgMBAAECggEATI2u+vQuy1SFfa22xZL0YM3Dbqg1nLWDU75LfWDmVQPc
+            ptcGV/O2UGKv/I78d20uA+cjcB0uD5QSwcQMn0eqPIgkkBcTMoEaGWDOg9Cd3I4a
+            Y0U+irRsD/t338SrUwvOmZPf0+vipF3H+rd5Nw2hGRV/KmnFnTacpW11PBWBD039
+            we2hGkPDXpS/B3XyTOhVu6tiuHpzODyVLrCdaVtrj019zccX33tyuimG3RYN9QPS
+            3eEJMb+t1gGvE0Ut4PAd9MWwu0FlTn2NL5COhQchzjdy5vdrqKSXBXACMRlKgH/9
+            jp7wCO126H9AcgUpHCspo/aHIE0mLQlpd6N/IpPfGQKBgQDVbbwaCzRhsktEBAjy
+            9GivRTG7dbe3y3OEeXblLMtoL5oOjdbeLmtjTkb8LFzFnU0CgRYLR+plevHZWYdI
+            6O+lydUHacYda1PIU27FRLwTO73eSLWTH7xbSLS/HMkRTe0wvC+rNPi5ZiGlV3qq
+            ImzRt5rB4byeTEQCLu84AzoR6QKBgQDsSzQu1SzgzqWXpJb27JJhiPK1sA7xxwZk
+            WvT+ADbLXqJq2jifSdAmKdwI4BD+70EyKq200vRjam5aN11NTveA3UZhpVlzHMPd
+            7BzNgNvOMjWfuInpg2a7NYAFHevd2nsomLZd7Jls+DTUmEoR7zlIfZWeBSyxat6V
+            ZLHAEJ2TMwKBgQCWj0ratHzHTpd5677EZVZUDmP+8hQgPA3JrkYJdYgofywWiEjD
+            g8uNynKZAlKPtV/WHGoImzrnS8vAoD+nV2t3cOIu0JdJuaTo9LJ3xv1GNCbE4FX2
+            67RcUPXwu8W7x1VDw/18sWmkoD+r/AI0cwSBDRzHGQ+OPA7d2241/VDBwQKBgQCg
+            QeECYlItpflo/5fjoE8nF1qFHwMDt5f+ODIwkrSW+XfuQFJmtgkV2Q4CdvUP8fSl
+            sYxeNzTIuEZfqWz+IbB7FZfGYf5os/mjaZ+fQOXS0vrLeL0QQq5KCd7pmYF+1c7x
+            maEV0oG8BhrOlPqnbzfKkmIG6juFmJWdfM2RFbPJQQKBgF0zqBS1L8JZGgm1IZxR
+            yjoW0a7HfA3FVzF9mzge5QMyiTwg/Uz6nTrSlee3WcP4fBsZQEqgXyvL0xZ8g8bv
+            dCyLlTdlz1H1x5tilyojDurBKoHL17sEo9rduSNH8a9XyjKfHl38OitjP4sVZfe7
+            JCo61PNOxqzTBd7Jpyg8bCsr
+            -----END PRIVATE KEY-----"
+          description: The Private Key matching the Certificate of this SAML Service Provider (SP). Can be the Private Key of a self-signed x509 certificate. DO NOT use rsa key length lower than 2048
+        idpMetadataUrl:
+          type: string
+          nullable: true
+          readOnly: false
+          example: "https://login.thirdparty-idp.example/federationmetadata/metadata.xml"
+          description: The Metadata URL of the Identity Provider (IdP) if available. Otherwise use the metadataXml to provide Metadata of IdP directly and leave this null
+        idpMetadataXml:
+          type: string
+          nullable: true
+          readOnly: false
+          default: null
+          example:
+            '<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" validUntil="2099-02-21T00:00:00.00Z" entityID="https://somewhere.or.anywhere">
+            <SPSSODescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" validUntil="2099-02-21T00:00:00.00Z" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="false" WantAssertionsSigned="true">
+            <KeyDescriptor use="encryption">
+            <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+            <X509Data>
+            <X509Certificate>MIIG.........W3J</X509Certificate>
+            </X509Data>
+            </KeyInfo>
+            <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"></EncryptionMethod>
+            <EncryptionMethod ........."></EncryptionMethod>
+            </KeyDescriptor>
+            ....
+            </EntityDescriptor>'
+          description: Provide the IdP Metadata XML directly, if you have not the idpMetadataUrl accessable
+        ownUrl:
+          type: string
+          nullable: false
+          example: "https://my.eliona-instance.example"
+          description: "The own URL of this Eliona instance"
+
+    AdvancedConfiguration:
+      type: object
+      description: Advanced options to fine tune this SAML Service Provider (SP)
+      properties:
+        enable:
+          type: boolean
+          description: If the configuration is enabled or not (connected to the basic config)
+          nullable: false
+          readOnly: true
+        allowInitializationByIdp:
+          type: boolean
+          description: If the configuration is enabled or not
+          nullable: false
+          readOnly: false
+          default: false
+          example: false
+        signedRequest:
+          type: boolean
+          description: If the SP should make a signed SAML Authn-Request or not
+          nullable: false
+          readOnly: false
+          default: true
+          example: true
+        forceAuthn:
+          type: boolean
+          description: Normaly this value is set to false for a SP. If set to true the user has to re-authenticate (login at IdP) even it has a valid session to the IdP.
+          nullable: false
+          readOnly: false
+          default: false
+          example: false
+        entityId:
+          type: string
+          description: If you have to use a customized Entity Id, you can overwrite it here. Normaly the default value can be leave as it is.
+          nullable: false
+          readOnly: false
+          default: "{ownUrl}/saml/metadata"
+          example: "{ownUrl}/saml/metadata"
+        cookieSecure:
+          description: ff
+          nullable: false
+          readOnly: false
+          default: false
+          example: false
+        loginFailedUrl:
+          description: The url to redirect if the login failed. If this value is null the default page /noLogin will showed up
+          nullable: true
+          readOnly: false
+          default: "{ownUrl}/noLogin"
+          example: "https://myFancyLogoutPage.example"
+
+    AttributeMap:
+      type: object
+      description: Maps SAML Attributes to the Eliona User Attributes
+      properties:
+        enable:
+          description: If the attribute mapping is active or not. References to the basic config
+          type: boolean
+          nullable: false
+          readOnly: true
+        email:
+          description: SAML attribute to map to the email (login) of a user
+          nullable: false
+          readOnly: false
+          default: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"
+          example: "email"
+        first_name:
+          nullable: true
+          readOnly: false
+          default: null
+          example: "name"
+        last_name:
+          nullable: true
+          readOnly: false
+          default: null
+          example: "lastName"
+        phone:
+          nullable: true
+          readOnly: false
+          default: null
+          example: "phoneNumber"
+
+    Permissions:
+      type: object
+      description: Sets default user permissions and optionaly maps SAML Attributes and Content to eliona's roles
+      properties:
+        enable:
+          description: If the permisson settings is enabled. References to the basic config
+          type: boolean
+          nullable: false
+          readOnly: true
+          example: true
+        default_system_role:
+          type: string
+          readOnly: false
+          nullable: false
+          default: 'regular'
+          example: 'regular'
+        default_proj_role:
+          type: string
+          nullable: false
+          readOnly: false
+          default: 'operator'
+          example: 'operator'
+        system_role_saml_attribute:
+          type: string
+          nullable: true
+          readOnly: false
+          example: 'systemRightsSamlAttribute'
+        system_role_map:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleMap'
+          nullable: true
+          readOnly: false
+        proj_role_saml_attribute:
+          type: string
+          nullable: true
+          readOnly: false
+          example: 'projectRightsSamlAttribute'
+        proj_role_map:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleMap'
+          nullable: true
+          readOnly: false
+
+    RoleMap:
+      type: object
+      description: Maps eliona user attributes to attribute:values sent in SAML Response
+      properties:
+        elionaRole:
+          type: string
+          nullable: false
+          example: 'admin'
+        samlValue:
+          type: string
+          nullable: false
+          example: 'Administrator'
+
+    Active:
+      type: object
+      description: If the service is active
+      properties:
+        active:
+          type: boolean
+          nullable: false
+          readOnly: true
+          default: true
+          example: true
+
+  securitySchemes:
+    ApiKeyAuth:
+      description: Use the API key as a secret for authorizing and identifying an app or agent
+      in: header
+      name: X-API-Key
+      type: apiKey
