@@ -41,6 +41,7 @@ type GenericSingleSignOnApiRouter interface {
 // pass the data to a SAML20ApiServicer to perform the required actions, then write the service results to the http response.
 type SAML20ApiRouter interface {
 	SamlAcsPost(http.ResponseWriter, *http.Request)
+	SamlSloPost(http.ResponseWriter, *http.Request)
 }
 
 // VersionApiRouter defines the required methods for binding the api requests to a responses for the VersionApi
@@ -81,6 +82,7 @@ type GenericSingleSignOnApiServicer interface {
 // and updated with the logic required for the API.
 type SAML20ApiServicer interface {
 	SamlAcsPost(context.Context) (ImplResponse, error)
+	SamlSloPost(context.Context) (ImplResponse, error)
 }
 
 // VersionApiServicer defines the api actions for the VersionApi service

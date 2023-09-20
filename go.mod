@@ -21,6 +21,7 @@ replace github.com/ericlagergren/decimal => github.com/ericlagergren/decimal v0.
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.4.14 // indirect
+	github.com/go-test/deep v1.1.0 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.0 // indirect
@@ -36,10 +37,7 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
-	github.com/volatiletech/null v8.0.0+incompatible // indirect
-	github.com/volatiletech/null/v9 v9.0.0 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
-	github.com/volatiletech/sqlboiler v3.7.1+incompatible // indirect
 	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect

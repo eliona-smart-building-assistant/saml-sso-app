@@ -9,8 +9,8 @@ add-enum-types = true
 dbname = "iot"
 host   = "localhost"
 port   = 5433
-user   = "generate"
-pass   = "generate"
+user   = "leicom"
+pass   = ".test"
 schema = "saml_sp"
 sslmode = "disable"
 

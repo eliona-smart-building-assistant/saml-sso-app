@@ -29,7 +29,7 @@ type BasicConfig struct {
 	SPPrivateKey   string      `boil:"sp_private_key" json:"sp_private_key" toml:"sp_private_key" yaml:"sp_private_key"`
 	IdpMetadataURL null.String `boil:"idp_metadata_url" json:"idp_metadata_url,omitempty" toml:"idp_metadata_url" yaml:"idp_metadata_url,omitempty"`
 	MetadataXML    null.String `boil:"metadata_xml" json:"metadata_xml,omitempty" toml:"metadata_xml" yaml:"metadata_xml,omitempty"`
-	OwnURL         null.String `boil:"own_url" json:"own_url,omitempty" toml:"own_url" yaml:"own_url,omitempty"`
+	OwnURL         string      `boil:"own_url" json:"own_url" toml:"own_url" yaml:"own_url"`
 
 	R *basicConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L basicConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -75,14 +75,14 @@ var BasicConfigWhere = struct {
 	SPPrivateKey   whereHelperstring
 	IdpMetadataURL whereHelpernull_String
 	MetadataXML    whereHelpernull_String
-	OwnURL         whereHelpernull_String
+	OwnURL         whereHelperstring
 }{
 	Enable:         whereHelperbool{field: "\"saml_sp\".\"basic_config\".\"enable\""},
 	SPCertificate:  whereHelperstring{field: "\"saml_sp\".\"basic_config\".\"sp_certificate\""},
 	SPPrivateKey:   whereHelperstring{field: "\"saml_sp\".\"basic_config\".\"sp_private_key\""},
 	IdpMetadataURL: whereHelpernull_String{field: "\"saml_sp\".\"basic_config\".\"idp_metadata_url\""},
 	MetadataXML:    whereHelpernull_String{field: "\"saml_sp\".\"basic_config\".\"metadata_xml\""},
-	OwnURL:         whereHelpernull_String{field: "\"saml_sp\".\"basic_config\".\"own_url\""},
+	OwnURL:         whereHelperstring{field: "\"saml_sp\".\"basic_config\".\"own_url\""},
 }
 
 // BasicConfigRels is where relationship names are stored.
@@ -134,8 +134,8 @@ type basicConfigL struct{}
 
 var (
 	basicConfigAllColumns            = []string{"enable", "sp_certificate", "sp_private_key", "idp_metadata_url", "metadata_xml", "own_url"}
-	basicConfigColumnsWithoutDefault = []string{"sp_certificate", "sp_private_key"}
-	basicConfigColumnsWithDefault    = []string{"enable", "idp_metadata_url", "metadata_xml", "own_url"}
+	basicConfigColumnsWithoutDefault = []string{"sp_certificate", "sp_private_key", "own_url"}
+	basicConfigColumnsWithDefault    = []string{"enable", "idp_metadata_url", "metadata_xml"}
 	basicConfigPrimaryKeyColumns     = []string{"enable"}
 	basicConfigGeneratedColumns      = []string{}
 )

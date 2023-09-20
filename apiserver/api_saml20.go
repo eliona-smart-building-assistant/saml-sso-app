@@ -53,12 +53,31 @@ func (c *SAML20ApiController) Routes() Routes {
 			"/v1/saml/acs",
 			c.SamlAcsPost,
 		},
+		{
+			"SamlSloPost",
+			strings.ToUpper("Post"),
+			"/v1/saml/slo",
+			c.SamlSloPost,
+		},
 	}
 }
 
 // SamlAcsPost -
 func (c *SAML20ApiController) SamlAcsPost(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.SamlAcsPost(r.Context())
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// SamlSloPost -
+func (c *SAML20ApiController) SamlSloPost(w http.ResponseWriter, r *http.Request) {
+	result, err := c.service.SamlSloPost(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

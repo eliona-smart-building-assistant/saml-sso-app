@@ -16,16 +16,13 @@
 package conf
 
 import (
+	"context"
+
 	"github.com/eliona-smart-building-assistant/go-utils/db"
 )
 
 // InitConfiguration initialize the configuration of the app
 func InitConfiguration(connection db.Connection) error {
 
-	//
-	// Todo: do anything which is necessary to initialize the app like creating text data to demonstrate the configuration
-	//
-
-	return nil
-
+	return InsertAutoSamlConfiguration(context.Background())
 }

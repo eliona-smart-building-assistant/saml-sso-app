@@ -43,3 +43,14 @@ func (s *SAML20ApiService) SamlAcsPost(ctx context.Context) (apiserver.ImplRespo
 
 	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("SamlAcsPost method not implemented")
 }
+
+// SamlSloPost -
+func (s *SAML20ApiService) SamlSloPost(ctx context.Context) (apiserver.ImplResponse, error) {
+	// TODO - update SamlSloPost with the required logic for this service method.
+	// Add api_saml20_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	//TODO: Uncomment the next line to return response Response(302, {}) or use other options such as http.Ok ...
+	//return Response(302, nil),nil
+
+	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("SamlSloPost method not implemented")
+}

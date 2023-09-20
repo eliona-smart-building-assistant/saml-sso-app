@@ -27,11 +27,11 @@ type AdvancedConfiguration struct {
 	// If you have to use a customized Entity Id, you can overwrite it here. Normaly the default value can be leave as it is.
 	EntityId string `json:"entityId,omitempty"`
 
-	// ff
-	CookieSecure *interface{} `json:"cookieSecure,omitempty"`
+	// only send cookies over encrypted connection (HTTPS)
+	CookieSecure bool `json:"cookieSecure,omitempty"`
 
 	// The url to redirect if the login failed. If this value is null the default page /noLogin will showed up
-	LoginFailedUrl *interface{} `json:"loginFailedUrl,omitempty"`
+	LoginFailedUrl string `json:"loginFailedUrl,omitempty"`
 }
 
 // AssertAdvancedConfigurationRequired checks if the required fields are not zero-ed

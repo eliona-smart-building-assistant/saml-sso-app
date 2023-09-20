@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS saml_sp.basic_config (
     sp_private_key   TEXT                NOT NULL             ,
     idp_metadata_url TEXT                                     ,
     metadata_xml     TEXT                         DEFAULT NULL,
-    own_url          TEXT
+    own_url          TEXT                NOT NULL
 ) ;
 
 CREATE TABLE IF NOT EXISTS saml_sp.attribute_map (

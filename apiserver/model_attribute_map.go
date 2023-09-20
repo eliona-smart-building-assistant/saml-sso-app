@@ -16,13 +16,16 @@ type AttributeMap struct {
 	Enable bool `json:"enable,omitempty"`
 
 	// SAML attribute to map to the email (login) of a user
-	Email *interface{} `json:"email,omitempty"`
+	Email string `json:"email,omitempty"`
 
-	FirstName *interface{} `json:"first_name,omitempty"`
+	// SAML attribute to map to the first name of a user
+	FirstName *string `json:"first_name,omitempty"`
 
-	LastName *interface{} `json:"last_name,omitempty"`
+	// SAML attribute to map to the last name of a user
+	LastName *string `json:"last_name,omitempty"`
 
-	Phone *interface{} `json:"phone,omitempty"`
+	// SAML attribute to map to the phone number of a user
+	Phone *string `json:"phone,omitempty"`
 }
 
 // AssertAttributeMapRequired checks if the required fields are not zero-ed

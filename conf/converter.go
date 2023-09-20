@@ -1,3 +1,18 @@
+//  This file is part of the eliona project.
+//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  ______ _ _
+// |  ____| (_)
+// | |__  | |_  ___  _ __   __ _
+// |  __| | | |/ _ \| '_ \ / _` |
+// | |____| | | (_) | | | | (_| |
+// |______|_|_|\___/|_| |_|\__,_|
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+//  BUT NOT LIMITED  TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+//  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package conf
 
 import (
@@ -20,13 +35,13 @@ func ConvertApiToDbForm(apiForm any) (any, error) {
 	case *apiserver.BasicConfiguration:
 		dbForm, err = BasicConfigApiToDbForm(a)
 	case *apiserver.AdvancedConfiguration:
-		err = errors.New("not implemented")
+		dbForm, err = AdvancedConfigApiToDbForm(a)
 	case *apiserver.AttributeMap:
-		err = errors.New("not implemented")
+		dbForm, err = AttributeMapApiToDbForm(a)
 	case *apiserver.Permissions:
-		err = errors.New("not implemented")
+		dbForm, err = PermissionApiToDbForm(a)
 	default:
-		err = errors.New("unknown datatype")
+		err = errors.New("unknown api datatype")
 	}
 
 	return dbForm, err
@@ -43,13 +58,13 @@ func ConvertDbToApiForm(dbForm any) (any, error) {
 	case *appdb.BasicConfig:
 		apiForm, err = BasicConfigDbToApiForm(d)
 	case *appdb.AdvancedConfig:
-		err = errors.New("not implemented")
+		apiForm, err = AdvancedConfigDbToApiForm(d)
 	case *appdb.AttributeMap:
-		err = errors.New("not implemented")
+		apiForm, err = AttributeMapDbToApiForm(d)
 	case *appdb.Permission:
-		err = errors.New("not implemented")
+		apiForm, err = PermissionDbToApiForm(d)
 	default:
-		err = errors.New("unknown datatype")
+		err = errors.New("unknown db datatype")
 	}
 
 	return apiForm, err
@@ -61,9 +76,9 @@ func BasicConfigApiToDbForm(config *apiserver.BasicConfiguration) (*appdb.BasicC
 		Enable:         config.Enable,
 		SPCertificate:  config.ServiceProviderCertificate,
 		SPPrivateKey:   config.ServiceProviderPrivateKey,
-		IdpMetadataURL: null.NewString(*config.IdpMetadataUrl, config.IdpMetadataUrl != nil),
-		MetadataXML:    null.NewString(*config.IdpMetadataXml, config.IdpMetadataXml != nil),
-		OwnURL:         null.NewString(config.OwnUrl, config.OwnUrl != ""),
+		IdpMetadataURL: null.StringFromPtr(config.IdpMetadataUrl),
+		MetadataXML:    null.StringFromPtr(config.IdpMetadataXml),
+		OwnURL:         config.OwnUrl,
 	}, nil
 }
 func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfiguration, error) {
@@ -74,7 +89,7 @@ func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfigur
 		ServiceProviderPrivateKey:  config.SPPrivateKey,
 		IdpMetadataUrl:             config.IdpMetadataURL.Ptr(),
 		IdpMetadataXml:             config.MetadataXML.Ptr(),
-		OwnUrl:                     config.OwnURL.String,
+		OwnUrl:                     config.OwnURL,
 	}, nil
 }
 
@@ -85,8 +100,8 @@ func AdvancedConfigApiToDbForm(config *apiserver.AdvancedConfiguration) (*appdb.
 		SignedRequest:            config.SignedRequest,
 		ForceAuthn:               config.ForceAuthn,
 		EntityID:                 config.EntityId,
-		CookieSecure:             config.CookieSecure != nil,
-		LoginFailedURL:           "",
+		CookieSecure:             config.CookieSecure,
+		LoginFailedURL:           config.LoginFailedUrl,
 	}, nil
 }
 func AdvancedConfigDbToApiForm(config *appdb.AdvancedConfig) (*apiserver.AdvancedConfiguration, error) {
@@ -96,8 +111,8 @@ func AdvancedConfigDbToApiForm(config *appdb.AdvancedConfig) (*apiserver.Advance
 		SignedRequest:            config.SignedRequest,
 		ForceAuthn:               config.ForceAuthn,
 		EntityId:                 config.EntityID,
-		CookieSecure:             nil,
-		LoginFailedUrl:           nil,
+		CookieSecure:             config.CookieSecure,
+		LoginFailedUrl:           config.LoginFailedURL,
 	}, nil
 }
 
@@ -105,9 +120,9 @@ func AttributeMapApiToDbForm(config *apiserver.AttributeMap) (*appdb.AttributeMa
 	return &appdb.AttributeMap{
 		Enable:    config.Enable,
 		Email:     config.Email,
-		FirstName: null.NewString("", config.FirstName != nil),
-		LastName:  null.NewString("", config.LastName != nil),
-		Phone:     null.NewString("", config.Phone != nil),
+		FirstName: null.StringFromPtr(config.FirstName),
+		LastName:  null.StringFromPtr(config.LastName),
+		Phone:     null.StringFromPtr(config.Phone),
 	}, nil
 }
 func AttributeMapDbToApiForm(config *appdb.AttributeMap) (*apiserver.AttributeMap, error) {
@@ -125,9 +140,9 @@ func PermissionApiToDbForm(permissions *apiserver.Permissions) (*appdb.Permissio
 		Enable:                  permissions.Enable,
 		DefaultSystemRole:       permissions.DefaultSystemRole,
 		DefaultProjRole:         permissions.DefaultProjRole,
-		SystemRoleSamlAttribute: null.NewString(*permissions.SystemRoleSamlAttribute, permissions.SystemRoleSamlAttribute != nil),
+		SystemRoleSamlAttribute: null.StringFromPtr(permissions.SystemRoleSamlAttribute),
 		SystemRoleMap:           null.JSONFrom(marshal(permissions.SystemRoleMap)),
-		ProjRoleSamlAttribute:   null.NewString(*permissions.ProjRoleSamlAttribute, permissions.ProjRoleSamlAttribute != nil),
+		ProjRoleSamlAttribute:   null.StringFromPtr(permissions.ProjRoleSamlAttribute),
 		ProjRoleMap:             null.JSONFrom(marshal(permissions.ProjRoleMap)),
 	}, nil
 }

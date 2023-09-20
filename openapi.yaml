@@ -412,7 +412,7 @@ components:
         loginFailedUrl:
           description: The url to redirect if the login failed. If this value is null the default page /noLogin will showed up
           type: string
-          nullable: true
+          nullable: false
           readOnly: false
           default: "{ownUrl}/noLogin"
           example: "https://myFancyLogoutPage.example"
