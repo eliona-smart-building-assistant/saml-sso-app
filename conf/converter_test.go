@@ -114,7 +114,7 @@ func TestConverter_ConvertPermissionCnf(t *testing.T) {
 		}
 		diff := deep.Equal(apiPermReturned.(*apiserver.Permissions), &apiPerm)
 		if diff != nil {
-			t.Error("convert permissions config from db to api wrong content (not origin): ", err)
+			t.Error("convert permissions config from db to api wrong content (not origin): ", diff)
 		}
 	}
 }
@@ -199,38 +199,50 @@ func compareAttributeMaps(db *appdb.AttributeMap, api *apiserver.AttributeMap) e
 }
 
 func comparePermissions(db *appdb.Permission, api *apiserver.Permissions) error {
+
 	if db.DefaultProjRole != api.DefaultProjRole {
 		return errors.New("default project role")
 	}
+
 	if db.DefaultSystemRole != api.DefaultSystemRole {
 		return errors.New("default system role")
 	}
+
 	if db.Enable != api.Enable {
 		return errors.New("enable")
 	}
+
 	dbJson := []apiserver.RoleMap{}
-	dbJsonB := db.ProjRoleMap.JSON
-	err := json.Unmarshal(dbJsonB, &dbJson)
-	if err != nil {
-		return err
+	if !db.ProjRoleMap.IsZero() {
+		dbJsonB := db.ProjRoleMap.JSON
+		err := json.Unmarshal(dbJsonB, &dbJson)
+		if err != nil {
+			return err
+		}
 	}
-	if !(db.ProjRoleMap.Ptr() == nil && api.ProjRoleMap == nil) || (deep.Equal(&dbJson, api.ProjRoleMap) != nil) {
+	if !(db.ProjRoleMap.Ptr() == nil && api.ProjRoleMap == nil) && (deep.Equal(&dbJson, api.ProjRoleMap) != nil) {
 		return errors.New("project role map")
 	}
-	if deep.Equal(db.ProjRoleSamlAttribute, api.ProjRoleSamlAttribute) != nil {
+
+	if deep.Equal(db.ProjRoleSamlAttribute.Ptr(), api.ProjRoleSamlAttribute) != nil {
 		return errors.New("project role saml attribute")
 	}
+
 	dbJson = []apiserver.RoleMap{}
-	dbJsonB = db.SystemRoleMap.JSON
-	err = json.Unmarshal(dbJsonB, &dbJson)
-	if err != nil {
-		return err
+	if !db.SystemRoleMap.IsZero() {
+		dbJsonB := db.SystemRoleMap.JSON
+		err := json.Unmarshal(dbJsonB, &dbJson)
+		if err != nil {
+			return err
+		}
 	}
-	if !(db.SystemRoleMap.Ptr() == nil && api.SystemRoleMap == nil) || (deep.Equal(&dbJson, api.SystemRoleMap) != nil) {
+	if !(db.SystemRoleMap.Ptr() == nil && api.SystemRoleMap == nil) && (deep.Equal(&dbJson, api.SystemRoleMap) != nil) {
 		return errors.New("system role map")
 	}
-	if deep.Equal(db.SystemRoleSamlAttribute, api.SystemRoleSamlAttribute) != nil {
+
+	if deep.Equal(db.SystemRoleSamlAttribute.Ptr(), api.SystemRoleSamlAttribute) != nil {
 		return errors.New("system role saml attribute")
 	}
+
 	return nil
 }

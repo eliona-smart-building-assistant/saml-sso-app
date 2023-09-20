@@ -136,55 +136,80 @@ func AttributeMapDbToApiForm(config *appdb.AttributeMap) (*apiserver.AttributeMa
 }
 
 func PermissionApiToDbForm(permissions *apiserver.Permissions) (*appdb.Permission, error) {
+
+	sysRoleMap, err := RoleMapToNullableJSON(permissions.SystemRoleMap)
+	if err != nil {
+		return nil, err
+	}
+
+	projRoleMap, err := RoleMapToNullableJSON(permissions.ProjRoleMap)
+	if err != nil {
+		return nil, err
+	}
+
 	return &appdb.Permission{
 		Enable:                  permissions.Enable,
 		DefaultSystemRole:       permissions.DefaultSystemRole,
 		DefaultProjRole:         permissions.DefaultProjRole,
 		SystemRoleSamlAttribute: null.StringFromPtr(permissions.SystemRoleSamlAttribute),
-		SystemRoleMap:           null.JSONFrom(marshal(permissions.SystemRoleMap)),
+		SystemRoleMap:           sysRoleMap,
 		ProjRoleSamlAttribute:   null.StringFromPtr(permissions.ProjRoleSamlAttribute),
-		ProjRoleMap:             null.JSONFrom(marshal(permissions.ProjRoleMap)),
+		ProjRoleMap:             projRoleMap,
 	}, nil
 }
 
 func PermissionDbToApiForm(permission *appdb.Permission) (*apiserver.Permissions, error) {
 
 	var (
-		systemRoleMap []apiserver.RoleMap
-		projRoleMap   []apiserver.RoleMap
+		systemRoleMap *[]apiserver.RoleMap
+		projRoleMap   *[]apiserver.RoleMap
+		err           error
 	)
 
-	if err := unmarshal(permission.SystemRoleMap.JSON, &systemRoleMap); err != nil {
-		systemRoleMap = nil
+	systemRoleMap, err = NullableJSONToRoleMapPtr(permission.ProjRoleMap)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := unmarshal(permission.ProjRoleMap.JSON, &projRoleMap); err != nil {
-		projRoleMap = nil
+	projRoleMap, err = NullableJSONToRoleMapPtr(permission.SystemRoleMap)
+	if err != nil {
+		return nil, err
 	}
 
 	return &apiserver.Permissions{
 		Enable:                  permission.Enable,
 		DefaultSystemRole:       permission.DefaultSystemRole,
 		DefaultProjRole:         permission.DefaultProjRole,
-		SystemRoleSamlAttribute: getNullableString(permission.SystemRoleSamlAttribute),
-		SystemRoleMap:           &systemRoleMap,
-		ProjRoleSamlAttribute:   getNullableString(permission.ProjRoleSamlAttribute),
-		ProjRoleMap:             &projRoleMap,
+		SystemRoleSamlAttribute: permission.SystemRoleSamlAttribute.Ptr(),
+		SystemRoleMap:           systemRoleMap,
+		ProjRoleSamlAttribute:   permission.ProjRoleSamlAttribute.Ptr(),
+		ProjRoleMap:             projRoleMap,
 	}, nil
 }
 
-func marshal(v interface{}) []byte {
-	data, _ := json.Marshal(v)
-	return data
-}
+func RoleMapToNullableJSON(roleMapPtr *[]apiserver.RoleMap) (null.JSON, error) {
+	var (
+		jsonBytes []byte
+		err       error
+	)
 
-func unmarshal(data []byte, v interface{}) error {
-	return json.Unmarshal(data, v)
-}
-
-func getNullableString(s null.String) *string {
-	if s.Valid {
-		return &s.String
+	if roleMapPtr == nil {
+		return null.JSONFromPtr(nil), nil
 	}
-	return nil
+	jsonBytes, err = json.Marshal(*roleMapPtr)
+	return null.JSONFrom(jsonBytes), err
+}
+
+func NullableJSONToRoleMapPtr(nullableJson null.JSON) (*[]apiserver.RoleMap, error) {
+	var (
+		roleMap []apiserver.RoleMap = []apiserver.RoleMap{}
+		err     error
+	)
+
+	if nullableJson.Ptr() == nil {
+		return nil, nil
+	}
+
+	err = json.Unmarshal(nullableJson.JSON, &roleMap)
+	return &roleMap, err
 }
