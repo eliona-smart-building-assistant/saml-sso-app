@@ -20,7 +20,7 @@ info:
   title: App SAML 2.0 SSO API
   description: API to access and configure the SAML 2.0 SSO service provider
 externalDocs:
-  description: Find out more about the app template
+  description: Find out more about the app saml-sso
   url: https://github.com/eliona-smart-building-assistant/app-saml-sso
 servers:
   - url: http://saml-sso/v1

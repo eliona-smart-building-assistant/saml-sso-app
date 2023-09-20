@@ -16,8 +16,7 @@
 package main
 
 import (
-	"template/conf"
-	"template/eliona"
+	"saml-sso/conf"
 	"time"
 
 	"github.com/eliona-smart-building-assistant/go-eliona/app"
@@ -50,7 +49,6 @@ func main() {
 	app.Init(db.Pool(), app.AppName(),
 		app.ExecSqlFile("conf/init.sql"),
 		conf.InitConfiguration,
-		eliona.InitEliona,
 	)
 
 	// Starting the service to collect the data for this app.

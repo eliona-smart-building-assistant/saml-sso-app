@@ -15,6 +15,14 @@
 
 package conf
 
-//
+import (
+	"errors"
+
+	"github.com/eliona-smart-building-assistant/go-utils/db"
+)
+
 // Todo: Define anything for configuration like structures and methods to read and process configuration
-//
+func InsertDefaultSamlConfiguration(connection db.Connection) error {
+
+	return errors.New("not implemented")
+}

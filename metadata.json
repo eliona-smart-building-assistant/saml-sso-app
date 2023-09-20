@@ -1,17 +1,14 @@
 {
-  "name": "template",
+  "name": "saml-sso",
   "elionaMinVersion": "v10.1.0",
   "displayName": {
-    "en": "App template",
-    "de": "App Vorlage"
+    "en": "App SAML 2.0 Service Provider (SP) for Single Sign-On (SSO)",
+    "de": "App SAML 2.0 Service Provider (SP) für Single Sign-On (SSO)"
   },
   "description": {
-    "en": "This template can be used to create an app stub for an Eliona environment.",
-    "de": "Diese Vorlage kann verwendet werden um eine App für Eliona zu erstellen."
+    "en": "The SAML SSO App provides a Single Sign-On (SSO) service using Security Assertion Markup Language (SAML 2.0) for an Eliona environment.",
+    "de": "Die SAML SSO App bietet einen Service für die Eliona Umgebung, um ein Single Sign-On mithilfe von der Security Assertion Markup Language (SAML 2.0) zur Verfügung zu stellen."
   },
-  "dashboardTemplateNames": [
-    "Template"
-  ],
   "apiUrl": "v1",
   "apiSpecificationPath": "/version/openapi.json",
   "documentationUrl": "https://doc.eliona.io/eliona/referenzen/app-entwicklung",

@@ -1,6 +1,6 @@
-# App Template
+# App SAML SSO
 
-This template is a part of the Eliona App SDK. It can be used to create an app stub for an Eliona environment.
+This app is a part of the Eliona App SDK. It can be used to create an app stub for an Eliona environment.
 
 ## Configuration
 

@@ -17,12 +17,14 @@ package main
 
 import (
 	"net/http"
-	"template/apiserver"
-	"template/apiservices"
+	"saml-sso/apiserver"
+	"saml-sso/apiservices"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
+
+const API_SERVER_PORT = 3000
 
 // doAnything is the main app function which is called periodically
 func doAnything() {
