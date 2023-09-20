@@ -77,13 +77,22 @@ paths:
           description: Started login, redirect to the IdP with the SAML request
 
   /saml/acs:
-    description: all SAML spcific things like /saml/acs for asumption consumtion service
+    description: SAML's Assertion Consumer Service
     post:
       tags:
         - SAML2.0
       responses:
         "302":
-          description: SAML response returned from the IdP redirected to the auth endpoint to evaluate
+          description: SAML response returned from the IdP redirected to the auth endpoint to evaluate and login
+
+  /saml/slo:
+    description: SAML's Single Logout Service
+    post:
+      tags:
+        - SAML2.0
+      responses:
+        "302":
+          description: SAML response returned from the IdP redirected to the auth endpoint to logout
 
   /configuration/basic:
     get:
@@ -361,46 +370,48 @@ components:
       description: Advanced options to fine tune this SAML Service Provider (SP)
       properties:
         enable:
-          type: boolean
           description: If the configuration is enabled or not (connected to the basic config)
+          type: boolean
           nullable: false
           readOnly: true
         allowInitializationByIdp:
-          type: boolean
           description: If the configuration is enabled or not
+          type: boolean
           nullable: false
           readOnly: false
           default: false
           example: false
         signedRequest:
-          type: boolean
           description: If the SP should make a signed SAML Authn-Request or not
+          type: boolean
           nullable: false
           readOnly: false
           default: true
           example: true
         forceAuthn:
-          type: boolean
           description: Normaly this value is set to false for a SP. If set to true the user has to re-authenticate (login at IdP) even it has a valid session to the IdP.
+          type: boolean
           nullable: false
           readOnly: false
           default: false
           example: false
         entityId:
-          type: string
           description: If you have to use a customized Entity Id, you can overwrite it here. Normaly the default value can be leave as it is.
+          type: string
           nullable: false
           readOnly: false
           default: "{ownUrl}/saml/metadata"
           example: "{ownUrl}/saml/metadata"
         cookieSecure:
-          description: ff
+          description: only send cookies over encrypted connection (HTTPS)
+          type: boolean
           nullable: false
           readOnly: false
           default: false
           example: false
         loginFailedUrl:
           description: The url to redirect if the login failed. If this value is null the default page /noLogin will showed up
+          type: string
           nullable: true
           readOnly: false
           default: "{ownUrl}/noLogin"
@@ -417,21 +428,28 @@ components:
           readOnly: true
         email:
           description: SAML attribute to map to the email (login) of a user
+          type: string
           nullable: false
           readOnly: false
           default: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"
           example: "email"
         first_name:
+          description: SAML attribute to map to the first name of a user
+          type: string
           nullable: true
           readOnly: false
           default: null
           example: "name"
         last_name:
+          description: SAML attribute to map to the last name of a user
+          type: string
           nullable: true
           readOnly: false
           default: null
           example: "lastName"
         phone:
+          description: SAML attribute to map to the phone number of a user
+          type: string
           nullable: true
           readOnly: false
           default: null

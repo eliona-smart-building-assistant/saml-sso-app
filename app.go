@@ -19,27 +19,30 @@ import (
 	"net/http"
 	"saml-sso/apiserver"
 	"saml-sso/apiservices"
+	"strconv"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
-const API_SERVER_PORT = 3000
+const (
+	LOG_REGIO       = "app"
+	API_SERVER_PORT = 3000
+)
 
-// doAnything is the main app function which is called periodically
-func doAnything() {
+func start() {
 
-	// Todo: implement everything the app should do
-	log.Debug("main", "do anything")
+	log.Debug(LOG_REGIO, "start")
 
 }
 
 // listenApi starts the API server and listen for requests
 func listenApi() {
-	err := http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", "3000"), apiserver.NewRouter(
+	err := http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT)), apiserver.NewRouter(
 		apiserver.NewConfigurationApiController(apiservices.NewConfigurationApiService()),
 		apiserver.NewVersionApiController(apiservices.NewVersionApiService()),
-		apiserver.NewCustomizationApiController(apiservices.NewCustomizationApiService()),
+		apiserver.NewGenericSingleSignOnApiController(apiservices.NewGenericSingleSignOnApiService()),
+		// apiserver.NewSAML20ApiController(apiservices.NewSAML20ApiService()), // managed over thirdparty lib crewjam/saml
 	))
-	log.Fatal("main", "API server: %v", err)
+	log.Fatal(LOG_REGIO, "API server: %v", err)
 }
