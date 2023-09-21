@@ -175,9 +175,11 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 	log.Debug(LOG_REGIO, "basic config exists %v", exists)
 
 	if exists {
-		_, err = basicConfigDb.Update(ctx, getDb(), boil.Blacklist(appdb.BasicConfigColumns.ID))
+		_, err = basicConfigDb.Update(ctx, getDb(),
+			boil.Blacklist(appdb.BasicConfigColumns.ID))
 	} else {
-		err = basicConfigDb.Insert(ctx, getDb(), boil.Greylist(appdb.BasicConfigColumns.Enable))
+		err = basicConfigDb.Insert(ctx, getDb(),
+			boil.Greylist(appdb.BasicConfigColumns.Enable))
 	}
 
 	apiForm, err = ConvertDbToApiForm(basicConfigDb)
@@ -251,9 +253,11 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 	log.Debug(LOG_REGIO, "advanced config exists %v", exists)
 
 	if exists {
-		_, err = advancedConfigDb.Update(ctx, getDb(), boil.Blacklist(appdb.AdvancedConfigColumns.ID))
+		_, err = advancedConfigDb.Update(ctx, getDb(),
+			boil.Greylist(appdb.AdvancedConfigColumns.SignedRequest))
 	} else {
-		err = advancedConfigDb.Insert(ctx, getDb(), boil.Blacklist(appdb.AdvancedConfigColumns.ID))
+		err = advancedConfigDb.Insert(ctx, getDb(),
+			boil.Greylist(appdb.AdvancedConfigColumns.SignedRequest))
 	}
 
 	apiForm, err = ConvertDbToApiForm(advancedConfigDb)
@@ -327,9 +331,11 @@ func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
 	log.Debug(LOG_REGIO, "attribute map exists %v", exists)
 
 	if exists {
-		_, err = attributeMappingDb.Update(ctx, getDb(), boil.Blacklist(appdb.AttributeMapColumns.ID))
+		_, err = attributeMappingDb.Update(ctx, getDb(),
+			boil.Blacklist(appdb.AttributeMapColumns.ID))
 	} else {
-		err = attributeMappingDb.Insert(ctx, getDb(), boil.Blacklist(appdb.AttributeMapColumns.ID))
+		err = attributeMappingDb.Insert(ctx, getDb(),
+			boil.Blacklist(appdb.AttributeMapColumns.ID))
 	}
 
 	apiForm, err = ConvertDbToApiForm(attributeMappingDb)
@@ -403,9 +409,11 @@ func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissio
 	log.Debug(LOG_REGIO, "permissions exists %v", exists)
 
 	if exists {
-		_, err = permissionsDb.Update(ctx, getDb(), boil.Blacklist(appdb.PermissionColumns.ID))
+		_, err = permissionsDb.Update(ctx, getDb(),
+			boil.Blacklist(appdb.PermissionColumns.ID))
 	} else {
-		err = permissionsDb.Insert(ctx, getDb(), boil.Blacklist(appdb.PermissionColumns.ID))
+		err = permissionsDb.Insert(ctx, getDb(),
+			boil.Blacklist(appdb.PermissionColumns.ID))
 	}
 
 	apiForm, err = ConvertDbToApiForm(permissionsDb)
