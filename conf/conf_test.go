@@ -42,6 +42,7 @@ func TestConf_LoadAutoConfig(t *testing.T) {
 		t.Error(err)
 	}
 	if basicConfig.Enable != conf.AUTO_CNF_DEFAULT_ENABLED ||
+		basicConfig.UserToArchive != conf.AUTO_CNF_DEFAULT_USER_TO_ARCHIVE ||
 		!strings.Contains(basicConfig.OwnUrl, "https://") ||
 		basicConfig.IdpMetadataUrl != nil ||
 		basicConfig.IdpMetadataXml != nil ||

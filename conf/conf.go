@@ -37,6 +37,7 @@ const (
 
 const (
 	AUTO_CNF_DEFAULT_ENABLED           = true
+	AUTO_CNF_DEFAULT_USER_TO_ARCHIVE   = false
 	AUTO_CNF_DEFAULT_ALLOW_INIT_BY_IDP = false
 	AUTO_CNF_DEFAULT_SIGNING_REQ       = true
 	AUTO_CNF_DEFAULT_FORCE_AUTHN       = false
@@ -57,6 +58,7 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 			Enable:         AUTO_CNF_DEFAULT_ENABLED,
 			IdpMetadataURL: null.StringFromPtr(nil),
 			MetadataXML:    null.StringFromPtr(nil),
+			UserToArchive:  AUTO_CNF_DEFAULT_USER_TO_ARCHIVE,
 		}
 		advancedConfig appdb.AdvancedConfig = appdb.AdvancedConfig{
 			Enable:                   AUTO_CNF_DEFAULT_ENABLED,

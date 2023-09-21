@@ -79,6 +79,7 @@ func BasicConfigApiToDbForm(config *apiserver.BasicConfiguration) (*appdb.BasicC
 		IdpMetadataURL: null.StringFromPtr(config.IdpMetadataUrl),
 		MetadataXML:    null.StringFromPtr(config.IdpMetadataXml),
 		OwnURL:         config.OwnUrl,
+		UserToArchive:  config.UserToArchive,
 	}, nil
 }
 func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfiguration, error) {
@@ -90,6 +91,7 @@ func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfigur
 		IdpMetadataUrl:             config.IdpMetadataURL.Ptr(),
 		IdpMetadataXml:             config.MetadataXML.Ptr(),
 		OwnUrl:                     config.OwnURL,
+		UserToArchive:              config.UserToArchive,
 	}, nil
 }
 

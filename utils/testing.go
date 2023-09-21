@@ -25,8 +25,9 @@ import (
 
 func CreateRandomApiBasicConfig() apiserver.BasicConfiguration {
 	var basicCnf apiserver.BasicConfiguration = apiserver.BasicConfiguration{
-		Enable: RandomBoolean(),
-		OwnUrl: RandomUrl(),
+		Enable:        RandomBoolean(),
+		OwnUrl:        RandomUrl(),
+		UserToArchive: RandomBoolean(),
 	}
 
 	cert, key, err := CreateSelfsignedX509Certificate(RandomInt(10, 1000), 2048, nil, nil)

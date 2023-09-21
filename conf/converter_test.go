@@ -144,6 +144,10 @@ func compareBasicConfig(db *appdb.BasicConfig, api *apiserver.BasicConfiguration
 		return errors.New("private key")
 	}
 
+	if db.UserToArchive != api.UserToArchive {
+		return errors.New("user to archive")
+	}
+
 	return nil
 }
 

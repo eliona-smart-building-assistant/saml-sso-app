@@ -17,15 +17,9 @@ package apiservices
 
 import (
 	"context"
-	"encoding/json"
-	"io"
+	"errors"
 	"net/http"
-	"os"
 	"saml-sso/apiserver"
-
-	"github.com/eliona-smart-building-assistant/go-utils/common"
-	"github.com/eliona-smart-building-assistant/go-utils/log"
-	"gopkg.in/yaml.v3"
 )
 
 // VersionApiService is a service that implements the logic for the VersionApiServicer
@@ -41,39 +35,22 @@ func NewVersionApiService() apiserver.VersionApiServicer {
 
 // GetOpenAPI - OpenAPI specification for this API version
 func (s *VersionApiService) GetOpenAPI(ctx context.Context) (apiserver.ImplResponse, error) {
-	bytes, err := os.ReadFile("openapi.yaml")
-	if err != nil {
-		log.Error("services", "%s: %v", "GetOpenAPI", err)
-		return apiserver.ImplResponse{Code: http.StatusNotFound}, err
-	}
-	var body interface{}
-	err = yaml.Unmarshal(bytes, &body)
-	if err != nil {
-		log.Error("services", "%s: %v", "GetOpenAPI", err)
-		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
-	}
-	if err := tryJSONEncoding(body); err != nil {
-		log.Error("services", "openapi file not encodable to JSON: %v", err)
-		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, nil
-	}
-	return apiserver.Response(http.StatusOK, body), nil
-}
+	// TODO - update GetOpenAPI with the required logic for this service method.
+	// Add api_version_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
-func tryJSONEncoding(i interface{}) error {
-	return json.NewEncoder(io.Discard).Encode(i)
-}
+	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
+	//return Response(200, map[string]interface{}{}), nil
 
-var BuildTimestamp string // injected during linking, see Dockerfile
-var GitCommit string      // injected during linking, see Dockerfile
+	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetOpenAPI method not implemented")
+}
 
 // GetVersion - Version of the API
 func (s *VersionApiService) GetVersion(ctx context.Context) (apiserver.ImplResponse, error) {
-	return apiserver.Response(http.StatusOK, common.Ptr(version())), nil
-}
+	// TODO - update GetVersion with the required logic for this service method.
+	// Add api_version_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
-func version() map[string]any {
-	return map[string]any{
-		"timestamp": BuildTimestamp,
-		"commit":    GitCommit,
-	}
+	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
+	//return Response(200, map[string]interface{}{}), nil
+
+	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetVersion method not implemented")
 }
