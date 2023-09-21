@@ -12,8 +12,8 @@ package apiserver
 // Permissions - Sets default user permissions and optionaly maps SAML Attributes and Content to eliona's roles
 type Permissions struct {
 
-	// If the permisson settings is enabled. References to the basic config
-	Enable bool `json:"enable,omitempty"`
+	// Configuration Id refer to basic config's id. Can only be 1
+	Id int32 `json:"id,omitempty"`
 
 	DefaultSystemRole string `json:"default_system_role,omitempty"`
 

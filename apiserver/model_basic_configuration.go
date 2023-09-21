@@ -12,6 +12,9 @@ package apiserver
 // BasicConfiguration - The Basic Configurations for running a SAML 2.0 Service Provider
 type BasicConfiguration struct {
 
+	// Configuration Id. Can only be 1
+	Id int32 `json:"id,omitempty"`
+
 	// If the configuration is enabled or not
 	Enable bool `json:"enable,omitempty"`
 

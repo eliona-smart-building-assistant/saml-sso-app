@@ -24,7 +24,7 @@ import (
 
 // Permission is an object representing the database table.
 type Permission struct {
-	Enable                  bool        `boil:"enable" json:"enable" toml:"enable" yaml:"enable"`
+	ID                      int32       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	DefaultSystemRole       string      `boil:"default_system_role" json:"default_system_role" toml:"default_system_role" yaml:"default_system_role"`
 	DefaultProjRole         string      `boil:"default_proj_role" json:"default_proj_role" toml:"default_proj_role" yaml:"default_proj_role"`
 	SystemRoleSamlAttribute null.String `boil:"system_role_saml_attribute" json:"system_role_saml_attribute,omitempty" toml:"system_role_saml_attribute" yaml:"system_role_saml_attribute,omitempty"`
@@ -37,7 +37,7 @@ type Permission struct {
 }
 
 var PermissionColumns = struct {
-	Enable                  string
+	ID                      string
 	DefaultSystemRole       string
 	DefaultProjRole         string
 	SystemRoleSamlAttribute string
@@ -45,7 +45,7 @@ var PermissionColumns = struct {
 	ProjRoleSamlAttribute   string
 	ProjRoleMap             string
 }{
-	Enable:                  "enable",
+	ID:                      "id",
 	DefaultSystemRole:       "default_system_role",
 	DefaultProjRole:         "default_proj_role",
 	SystemRoleSamlAttribute: "system_role_saml_attribute",
@@ -55,7 +55,7 @@ var PermissionColumns = struct {
 }
 
 var PermissionTableColumns = struct {
-	Enable                  string
+	ID                      string
 	DefaultSystemRole       string
 	DefaultProjRole         string
 	SystemRoleSamlAttribute string
@@ -63,7 +63,7 @@ var PermissionTableColumns = struct {
 	ProjRoleSamlAttribute   string
 	ProjRoleMap             string
 }{
-	Enable:                  "permissions.enable",
+	ID:                      "permissions.id",
 	DefaultSystemRole:       "permissions.default_system_role",
 	DefaultProjRole:         "permissions.default_proj_role",
 	SystemRoleSamlAttribute: "permissions.system_role_saml_attribute",
@@ -99,7 +99,7 @@ func (w whereHelpernull_JSON) IsNull() qm.QueryMod    { return qmhelper.WhereIsN
 func (w whereHelpernull_JSON) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var PermissionWhere = struct {
-	Enable                  whereHelperbool
+	ID                      whereHelperint32
 	DefaultSystemRole       whereHelperstring
 	DefaultProjRole         whereHelperstring
 	SystemRoleSamlAttribute whereHelpernull_String
@@ -107,7 +107,7 @@ var PermissionWhere = struct {
 	ProjRoleSamlAttribute   whereHelpernull_String
 	ProjRoleMap             whereHelpernull_JSON
 }{
-	Enable:                  whereHelperbool{field: "\"saml_sp\".\"permissions\".\"enable\""},
+	ID:                      whereHelperint32{field: "\"saml_sp\".\"permissions\".\"id\""},
 	DefaultSystemRole:       whereHelperstring{field: "\"saml_sp\".\"permissions\".\"default_system_role\""},
 	DefaultProjRole:         whereHelperstring{field: "\"saml_sp\".\"permissions\".\"default_proj_role\""},
 	SystemRoleSamlAttribute: whereHelpernull_String{field: "\"saml_sp\".\"permissions\".\"system_role_saml_attribute\""},
@@ -118,14 +118,14 @@ var PermissionWhere = struct {
 
 // PermissionRels is where relationship names are stored.
 var PermissionRels = struct {
-	EnableBasicConfig string
+	IDBasicConfig string
 }{
-	EnableBasicConfig: "EnableBasicConfig",
+	IDBasicConfig: "IDBasicConfig",
 }
 
 // permissionR is where relationships are stored.
 type permissionR struct {
-	EnableBasicConfig *BasicConfig `boil:"EnableBasicConfig" json:"EnableBasicConfig" toml:"EnableBasicConfig" yaml:"EnableBasicConfig"`
+	IDBasicConfig *BasicConfig `boil:"IDBasicConfig" json:"IDBasicConfig" toml:"IDBasicConfig" yaml:"IDBasicConfig"`
 }
 
 // NewStruct creates a new relationship struct
@@ -133,21 +133,21 @@ func (*permissionR) NewStruct() *permissionR {
 	return &permissionR{}
 }
 
-func (r *permissionR) GetEnableBasicConfig() *BasicConfig {
+func (r *permissionR) GetIDBasicConfig() *BasicConfig {
 	if r == nil {
 		return nil
 	}
-	return r.EnableBasicConfig
+	return r.IDBasicConfig
 }
 
 // permissionL is where Load methods for each relationship are stored.
 type permissionL struct{}
 
 var (
-	permissionAllColumns            = []string{"enable", "default_system_role", "default_proj_role", "system_role_saml_attribute", "system_role_map", "proj_role_saml_attribute", "proj_role_map"}
-	permissionColumnsWithoutDefault = []string{"enable"}
-	permissionColumnsWithDefault    = []string{"default_system_role", "default_proj_role", "system_role_saml_attribute", "system_role_map", "proj_role_saml_attribute", "proj_role_map"}
-	permissionPrimaryKeyColumns     = []string{"enable"}
+	permissionAllColumns            = []string{"id", "default_system_role", "default_proj_role", "system_role_saml_attribute", "system_role_map", "proj_role_saml_attribute", "proj_role_map"}
+	permissionColumnsWithoutDefault = []string{}
+	permissionColumnsWithDefault    = []string{"id", "default_system_role", "default_proj_role", "system_role_saml_attribute", "system_role_map", "proj_role_saml_attribute", "proj_role_map"}
+	permissionPrimaryKeyColumns     = []string{"id"}
 	permissionGeneratedColumns      = []string{}
 )
 
@@ -449,10 +449,10 @@ func (q permissionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) 
 	return count > 0, nil
 }
 
-// EnableBasicConfig pointed to by the foreign key.
-func (o *Permission) EnableBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
+// IDBasicConfig pointed to by the foreign key.
+func (o *Permission) IDBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"enable\" = ?", o.Enable),
+		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -460,9 +460,9 @@ func (o *Permission) EnableBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
 	return BasicConfigs(queryMods...)
 }
 
-// LoadEnableBasicConfig allows an eager lookup of values, cached into the
+// LoadIDBasicConfig allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (permissionL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybePermission interface{}, mods queries.Applicator) error {
+func (permissionL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybePermission interface{}, mods queries.Applicator) error {
 	var slice []*Permission
 	var object *Permission
 
@@ -493,9 +493,7 @@ func (permissionL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExec
 		if object.R == nil {
 			object.R = &permissionR{}
 		}
-		if !queries.IsNil(object.Enable) {
-			args = append(args, object.Enable)
-		}
+		args = append(args, object.ID)
 
 	} else {
 	Outer:
@@ -505,14 +503,12 @@ func (permissionL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExec
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Enable) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.Enable) {
-				args = append(args, obj.Enable)
-			}
+			args = append(args, obj.ID)
 
 		}
 	}
@@ -523,7 +519,7 @@ func (permissionL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExec
 
 	query := NewQuery(
 		qm.From(`saml_sp.basic_config`),
-		qm.WhereIn(`saml_sp.basic_config.enable in ?`, args...),
+		qm.WhereIn(`saml_sp.basic_config.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -560,22 +556,22 @@ func (permissionL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExec
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.EnableBasicConfig = foreign
+		object.R.IDBasicConfig = foreign
 		if foreign.R == nil {
 			foreign.R = &basicConfigR{}
 		}
-		foreign.R.EnablePermission = object
+		foreign.R.IDPermission = object
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Enable, foreign.Enable) {
-				local.R.EnableBasicConfig = foreign
+			if local.ID == foreign.ID {
+				local.R.IDBasicConfig = foreign
 				if foreign.R == nil {
 					foreign.R = &basicConfigR{}
 				}
-				foreign.R.EnablePermission = local
+				foreign.R.IDPermission = local
 				break
 			}
 		}
@@ -584,18 +580,18 @@ func (permissionL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExec
 	return nil
 }
 
-// SetEnableBasicConfigG of the permission to the related item.
-// Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnablePermission.
+// SetIDBasicConfigG of the permission to the related item.
+// Sets o.R.IDBasicConfig to related.
+// Adds o to related.R.IDPermission.
 // Uses the global database handle.
-func (o *Permission) SetEnableBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
-	return o.SetEnableBasicConfig(ctx, boil.GetContextDB(), insert, related)
+func (o *Permission) SetIDBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
+	return o.SetIDBasicConfig(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetEnableBasicConfig of the permission to the related item.
-// Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnablePermission.
-func (o *Permission) SetEnableBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
+// SetIDBasicConfig of the permission to the related item.
+// Sets o.R.IDBasicConfig to related.
+// Adds o to related.R.IDPermission.
+func (o *Permission) SetIDBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -605,10 +601,10 @@ func (o *Permission) SetEnableBasicConfig(ctx context.Context, exec boil.Context
 
 	updateQuery := fmt.Sprintf(
 		"UPDATE \"saml_sp\".\"permissions\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
+		strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
 		strmangle.WhereClause("\"", "\"", 2, permissionPrimaryKeyColumns),
 	)
-	values := []interface{}{related.Enable, o.Enable}
+	values := []interface{}{related.ID, o.ID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -619,21 +615,21 @@ func (o *Permission) SetEnableBasicConfig(ctx context.Context, exec boil.Context
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.Enable, related.Enable)
+	o.ID = related.ID
 	if o.R == nil {
 		o.R = &permissionR{
-			EnableBasicConfig: related,
+			IDBasicConfig: related,
 		}
 	} else {
-		o.R.EnableBasicConfig = related
+		o.R.IDBasicConfig = related
 	}
 
 	if related.R == nil {
 		related.R = &basicConfigR{
-			EnablePermission: o,
+			IDPermission: o,
 		}
 	} else {
-		related.R.EnablePermission = o
+		related.R.IDPermission = o
 	}
 
 	return nil
@@ -651,13 +647,13 @@ func Permissions(mods ...qm.QueryMod) permissionQuery {
 }
 
 // FindPermissionG retrieves a single record by ID.
-func FindPermissionG(ctx context.Context, enable bool, selectCols ...string) (*Permission, error) {
-	return FindPermission(ctx, boil.GetContextDB(), enable, selectCols...)
+func FindPermissionG(ctx context.Context, iD int32, selectCols ...string) (*Permission, error) {
+	return FindPermission(ctx, boil.GetContextDB(), iD, selectCols...)
 }
 
 // FindPermission retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindPermission(ctx context.Context, exec boil.ContextExecutor, enable bool, selectCols ...string) (*Permission, error) {
+func FindPermission(ctx context.Context, exec boil.ContextExecutor, iD int32, selectCols ...string) (*Permission, error) {
 	permissionObj := &Permission{}
 
 	sel := "*"
@@ -665,10 +661,10 @@ func FindPermission(ctx context.Context, exec boil.ContextExecutor, enable bool,
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"saml_sp\".\"permissions\" where \"enable\"=$1", sel,
+		"select %s from \"saml_sp\".\"permissions\" where \"id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, enable)
+	q := queries.Raw(query, iD)
 
 	err := q.Bind(ctx, exec, permissionObj)
 	if err != nil {
@@ -1052,7 +1048,7 @@ func (o *Permission) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), permissionPrimaryKeyMapping)
-	sql := "DELETE FROM \"saml_sp\".\"permissions\" WHERE \"enable\"=$1"
+	sql := "DELETE FROM \"saml_sp\".\"permissions\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1167,7 +1163,7 @@ func (o *Permission) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *Permission) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindPermission(ctx, exec, o.Enable)
+	ret, err := FindPermission(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1216,21 +1212,21 @@ func (o *PermissionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 }
 
 // PermissionExistsG checks if the Permission row exists.
-func PermissionExistsG(ctx context.Context, enable bool) (bool, error) {
-	return PermissionExists(ctx, boil.GetContextDB(), enable)
+func PermissionExistsG(ctx context.Context, iD int32) (bool, error) {
+	return PermissionExists(ctx, boil.GetContextDB(), iD)
 }
 
 // PermissionExists checks if the Permission row exists.
-func PermissionExists(ctx context.Context, exec boil.ContextExecutor, enable bool) (bool, error) {
+func PermissionExists(ctx context.Context, exec boil.ContextExecutor, iD int32) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"saml_sp\".\"permissions\" where \"enable\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"saml_sp\".\"permissions\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, enable)
+		fmt.Fprintln(writer, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, enable)
+	row := exec.QueryRowContext(ctx, sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1242,5 +1238,5 @@ func PermissionExists(ctx context.Context, exec boil.ContextExecutor, enable boo
 
 // Exists checks if the Permission row exists.
 func (o *Permission) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return PermissionExists(ctx, exec, o.Enable)
+	return PermissionExists(ctx, exec, o.ID)
 }

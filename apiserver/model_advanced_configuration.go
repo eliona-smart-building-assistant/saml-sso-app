@@ -12,8 +12,8 @@ package apiserver
 // AdvancedConfiguration - Advanced options to fine tune this SAML Service Provider (SP)
 type AdvancedConfiguration struct {
 
-	// If the configuration is enabled or not (connected to the basic config)
-	Enable bool `json:"enable,omitempty"`
+	// Configuration Id refer to basic config's id. Can only be 1
+	Id int32 `json:"id,omitempty"`
 
 	// If the configuration is enabled or not
 	AllowInitializationByIdp bool `json:"allowInitializationByIdp,omitempty"`

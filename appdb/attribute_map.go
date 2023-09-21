@@ -24,7 +24,7 @@ import (
 
 // AttributeMap is an object representing the database table.
 type AttributeMap struct {
-	Enable    bool        `boil:"enable" json:"enable" toml:"enable" yaml:"enable"`
+	ID        int32       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Email     string      `boil:"email" json:"email" toml:"email" yaml:"email"`
 	FirstName null.String `boil:"first_name" json:"first_name,omitempty" toml:"first_name" yaml:"first_name,omitempty"`
 	LastName  null.String `boil:"last_name" json:"last_name,omitempty" toml:"last_name" yaml:"last_name,omitempty"`
@@ -35,13 +35,13 @@ type AttributeMap struct {
 }
 
 var AttributeMapColumns = struct {
-	Enable    string
+	ID        string
 	Email     string
 	FirstName string
 	LastName  string
 	Phone     string
 }{
-	Enable:    "enable",
+	ID:        "id",
 	Email:     "email",
 	FirstName: "first_name",
 	LastName:  "last_name",
@@ -49,13 +49,13 @@ var AttributeMapColumns = struct {
 }
 
 var AttributeMapTableColumns = struct {
-	Enable    string
+	ID        string
 	Email     string
 	FirstName string
 	LastName  string
 	Phone     string
 }{
-	Enable:    "attribute_map.enable",
+	ID:        "attribute_map.id",
 	Email:     "attribute_map.email",
 	FirstName: "attribute_map.first_name",
 	LastName:  "attribute_map.last_name",
@@ -115,13 +115,13 @@ func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereI
 func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var AttributeMapWhere = struct {
-	Enable    whereHelperbool
+	ID        whereHelperint32
 	Email     whereHelperstring
 	FirstName whereHelpernull_String
 	LastName  whereHelpernull_String
 	Phone     whereHelpernull_String
 }{
-	Enable:    whereHelperbool{field: "\"saml_sp\".\"attribute_map\".\"enable\""},
+	ID:        whereHelperint32{field: "\"saml_sp\".\"attribute_map\".\"id\""},
 	Email:     whereHelperstring{field: "\"saml_sp\".\"attribute_map\".\"email\""},
 	FirstName: whereHelpernull_String{field: "\"saml_sp\".\"attribute_map\".\"first_name\""},
 	LastName:  whereHelpernull_String{field: "\"saml_sp\".\"attribute_map\".\"last_name\""},
@@ -130,14 +130,14 @@ var AttributeMapWhere = struct {
 
 // AttributeMapRels is where relationship names are stored.
 var AttributeMapRels = struct {
-	EnableBasicConfig string
+	IDBasicConfig string
 }{
-	EnableBasicConfig: "EnableBasicConfig",
+	IDBasicConfig: "IDBasicConfig",
 }
 
 // attributeMapR is where relationships are stored.
 type attributeMapR struct {
-	EnableBasicConfig *BasicConfig `boil:"EnableBasicConfig" json:"EnableBasicConfig" toml:"EnableBasicConfig" yaml:"EnableBasicConfig"`
+	IDBasicConfig *BasicConfig `boil:"IDBasicConfig" json:"IDBasicConfig" toml:"IDBasicConfig" yaml:"IDBasicConfig"`
 }
 
 // NewStruct creates a new relationship struct
@@ -145,21 +145,21 @@ func (*attributeMapR) NewStruct() *attributeMapR {
 	return &attributeMapR{}
 }
 
-func (r *attributeMapR) GetEnableBasicConfig() *BasicConfig {
+func (r *attributeMapR) GetIDBasicConfig() *BasicConfig {
 	if r == nil {
 		return nil
 	}
-	return r.EnableBasicConfig
+	return r.IDBasicConfig
 }
 
 // attributeMapL is where Load methods for each relationship are stored.
 type attributeMapL struct{}
 
 var (
-	attributeMapAllColumns            = []string{"enable", "email", "first_name", "last_name", "phone"}
-	attributeMapColumnsWithoutDefault = []string{"enable"}
-	attributeMapColumnsWithDefault    = []string{"email", "first_name", "last_name", "phone"}
-	attributeMapPrimaryKeyColumns     = []string{"enable"}
+	attributeMapAllColumns            = []string{"id", "email", "first_name", "last_name", "phone"}
+	attributeMapColumnsWithoutDefault = []string{}
+	attributeMapColumnsWithDefault    = []string{"id", "email", "first_name", "last_name", "phone"}
+	attributeMapPrimaryKeyColumns     = []string{"id"}
 	attributeMapGeneratedColumns      = []string{}
 )
 
@@ -461,10 +461,10 @@ func (q attributeMapQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 	return count > 0, nil
 }
 
-// EnableBasicConfig pointed to by the foreign key.
-func (o *AttributeMap) EnableBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
+// IDBasicConfig pointed to by the foreign key.
+func (o *AttributeMap) IDBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"enable\" = ?", o.Enable),
+		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -472,9 +472,9 @@ func (o *AttributeMap) EnableBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
 	return BasicConfigs(queryMods...)
 }
 
-// LoadEnableBasicConfig allows an eager lookup of values, cached into the
+// LoadIDBasicConfig allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttributeMap interface{}, mods queries.Applicator) error {
+func (attributeMapL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttributeMap interface{}, mods queries.Applicator) error {
 	var slice []*AttributeMap
 	var object *AttributeMap
 
@@ -505,9 +505,7 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 		if object.R == nil {
 			object.R = &attributeMapR{}
 		}
-		if !queries.IsNil(object.Enable) {
-			args = append(args, object.Enable)
-		}
+		args = append(args, object.ID)
 
 	} else {
 	Outer:
@@ -517,14 +515,12 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Enable) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.Enable) {
-				args = append(args, obj.Enable)
-			}
+			args = append(args, obj.ID)
 
 		}
 	}
@@ -535,7 +531,7 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 
 	query := NewQuery(
 		qm.From(`saml_sp.basic_config`),
-		qm.WhereIn(`saml_sp.basic_config.enable in ?`, args...),
+		qm.WhereIn(`saml_sp.basic_config.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -572,22 +568,22 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.EnableBasicConfig = foreign
+		object.R.IDBasicConfig = foreign
 		if foreign.R == nil {
 			foreign.R = &basicConfigR{}
 		}
-		foreign.R.EnableAttributeMap = object
+		foreign.R.IDAttributeMap = object
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Enable, foreign.Enable) {
-				local.R.EnableBasicConfig = foreign
+			if local.ID == foreign.ID {
+				local.R.IDBasicConfig = foreign
 				if foreign.R == nil {
 					foreign.R = &basicConfigR{}
 				}
-				foreign.R.EnableAttributeMap = local
+				foreign.R.IDAttributeMap = local
 				break
 			}
 		}
@@ -596,18 +592,18 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 	return nil
 }
 
-// SetEnableBasicConfigG of the attributeMap to the related item.
-// Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnableAttributeMap.
+// SetIDBasicConfigG of the attributeMap to the related item.
+// Sets o.R.IDBasicConfig to related.
+// Adds o to related.R.IDAttributeMap.
 // Uses the global database handle.
-func (o *AttributeMap) SetEnableBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
-	return o.SetEnableBasicConfig(ctx, boil.GetContextDB(), insert, related)
+func (o *AttributeMap) SetIDBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
+	return o.SetIDBasicConfig(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetEnableBasicConfig of the attributeMap to the related item.
-// Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnableAttributeMap.
-func (o *AttributeMap) SetEnableBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
+// SetIDBasicConfig of the attributeMap to the related item.
+// Sets o.R.IDBasicConfig to related.
+// Adds o to related.R.IDAttributeMap.
+func (o *AttributeMap) SetIDBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -617,10 +613,10 @@ func (o *AttributeMap) SetEnableBasicConfig(ctx context.Context, exec boil.Conte
 
 	updateQuery := fmt.Sprintf(
 		"UPDATE \"saml_sp\".\"attribute_map\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
+		strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
 		strmangle.WhereClause("\"", "\"", 2, attributeMapPrimaryKeyColumns),
 	)
-	values := []interface{}{related.Enable, o.Enable}
+	values := []interface{}{related.ID, o.ID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -631,21 +627,21 @@ func (o *AttributeMap) SetEnableBasicConfig(ctx context.Context, exec boil.Conte
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.Enable, related.Enable)
+	o.ID = related.ID
 	if o.R == nil {
 		o.R = &attributeMapR{
-			EnableBasicConfig: related,
+			IDBasicConfig: related,
 		}
 	} else {
-		o.R.EnableBasicConfig = related
+		o.R.IDBasicConfig = related
 	}
 
 	if related.R == nil {
 		related.R = &basicConfigR{
-			EnableAttributeMap: o,
+			IDAttributeMap: o,
 		}
 	} else {
-		related.R.EnableAttributeMap = o
+		related.R.IDAttributeMap = o
 	}
 
 	return nil
@@ -663,13 +659,13 @@ func AttributeMaps(mods ...qm.QueryMod) attributeMapQuery {
 }
 
 // FindAttributeMapG retrieves a single record by ID.
-func FindAttributeMapG(ctx context.Context, enable bool, selectCols ...string) (*AttributeMap, error) {
-	return FindAttributeMap(ctx, boil.GetContextDB(), enable, selectCols...)
+func FindAttributeMapG(ctx context.Context, iD int32, selectCols ...string) (*AttributeMap, error) {
+	return FindAttributeMap(ctx, boil.GetContextDB(), iD, selectCols...)
 }
 
 // FindAttributeMap retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAttributeMap(ctx context.Context, exec boil.ContextExecutor, enable bool, selectCols ...string) (*AttributeMap, error) {
+func FindAttributeMap(ctx context.Context, exec boil.ContextExecutor, iD int32, selectCols ...string) (*AttributeMap, error) {
 	attributeMapObj := &AttributeMap{}
 
 	sel := "*"
@@ -677,10 +673,10 @@ func FindAttributeMap(ctx context.Context, exec boil.ContextExecutor, enable boo
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"saml_sp\".\"attribute_map\" where \"enable\"=$1", sel,
+		"select %s from \"saml_sp\".\"attribute_map\" where \"id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, enable)
+	q := queries.Raw(query, iD)
 
 	err := q.Bind(ctx, exec, attributeMapObj)
 	if err != nil {
@@ -1064,7 +1060,7 @@ func (o *AttributeMap) Delete(ctx context.Context, exec boil.ContextExecutor) (i
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), attributeMapPrimaryKeyMapping)
-	sql := "DELETE FROM \"saml_sp\".\"attribute_map\" WHERE \"enable\"=$1"
+	sql := "DELETE FROM \"saml_sp\".\"attribute_map\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1179,7 +1175,7 @@ func (o *AttributeMap) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *AttributeMap) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindAttributeMap(ctx, exec, o.Enable)
+	ret, err := FindAttributeMap(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1228,21 +1224,21 @@ func (o *AttributeMapSlice) ReloadAll(ctx context.Context, exec boil.ContextExec
 }
 
 // AttributeMapExistsG checks if the AttributeMap row exists.
-func AttributeMapExistsG(ctx context.Context, enable bool) (bool, error) {
-	return AttributeMapExists(ctx, boil.GetContextDB(), enable)
+func AttributeMapExistsG(ctx context.Context, iD int32) (bool, error) {
+	return AttributeMapExists(ctx, boil.GetContextDB(), iD)
 }
 
 // AttributeMapExists checks if the AttributeMap row exists.
-func AttributeMapExists(ctx context.Context, exec boil.ContextExecutor, enable bool) (bool, error) {
+func AttributeMapExists(ctx context.Context, exec boil.ContextExecutor, iD int32) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"saml_sp\".\"attribute_map\" where \"enable\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"saml_sp\".\"attribute_map\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, enable)
+		fmt.Fprintln(writer, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, enable)
+	row := exec.QueryRowContext(ctx, sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1254,5 +1250,5 @@ func AttributeMapExists(ctx context.Context, exec boil.ContextExecutor, enable b
 
 // Exists checks if the AttributeMap row exists.
 func (o *AttributeMap) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return AttributeMapExists(ctx, exec, o.Enable)
+	return AttributeMapExists(ctx, exec, o.ID)
 }

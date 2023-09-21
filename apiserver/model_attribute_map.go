@@ -12,8 +12,8 @@ package apiserver
 // AttributeMap - Maps SAML Attributes to the Eliona User Attributes
 type AttributeMap struct {
 
-	// If the attribute mapping is active or not. References to the basic config
-	Enable bool `json:"enable,omitempty"`
+	// Configuration Id refer to basic config's id. Can only be 1
+	Id int32 `json:"id,omitempty"`
 
 	// SAML attribute to map to the email (login) of a user
 	Email string `json:"email,omitempty"`

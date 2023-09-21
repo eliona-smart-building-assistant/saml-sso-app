@@ -262,6 +262,14 @@ components:
       type: object
       description: The Basic Configurations for running a SAML 2.0 Service Provider
       properties:
+        id:
+          type: integer
+          format: int32
+          description: Configuration Id. Can only be 1
+          nullable: false
+          readOnly: true
+          default: 1
+          example: 1
         enable:
           type: boolean
           description: If the configuration is enabled or not
@@ -376,11 +384,14 @@ components:
       type: object
       description: Advanced options to fine tune this SAML Service Provider (SP)
       properties:
-        enable:
-          description: If the configuration is enabled or not (connected to the basic config)
-          type: boolean
+        id:
+          type: integer
+          format: int32
+          description: Configuration Id refer to basic config's id. Can only be 1
           nullable: false
           readOnly: true
+          default: 1
+          example: 1
         allowInitializationByIdp:
           description: If the configuration is enabled or not
           type: boolean
@@ -428,11 +439,14 @@ components:
       type: object
       description: Maps SAML Attributes to the Eliona User Attributes
       properties:
-        enable:
-          description: If the attribute mapping is active or not. References to the basic config
-          type: boolean
+        id:
+          type: integer
+          format: int32
+          description: Configuration Id refer to basic config's id. Can only be 1
           nullable: false
           readOnly: true
+          default: 1
+          example: 1
         email:
           description: SAML attribute to map to the email (login) of a user
           type: string
@@ -466,12 +480,14 @@ components:
       type: object
       description: Sets default user permissions and optionaly maps SAML Attributes and Content to eliona's roles
       properties:
-        enable:
-          description: If the permisson settings is enabled. References to the basic config
-          type: boolean
+        id:
+          type: integer
+          format: int32
+          description: Configuration Id refer to basic config's id. Can only be 1
           nullable: false
           readOnly: true
-          example: true
+          default: 1
+          example: 1
         default_system_role:
           type: string
           readOnly: false

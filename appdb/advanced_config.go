@@ -23,7 +23,7 @@ import (
 
 // AdvancedConfig is an object representing the database table.
 type AdvancedConfig struct {
-	Enable                   bool   `boil:"enable" json:"enable" toml:"enable" yaml:"enable"`
+	ID                       int32  `boil:"id" json:"id" toml:"id" yaml:"id"`
 	AllowInitializationByIdp bool   `boil:"allow_initialization_by_idp" json:"allow_initialization_by_idp" toml:"allow_initialization_by_idp" yaml:"allow_initialization_by_idp"`
 	SignedRequest            bool   `boil:"signed_request" json:"signed_request" toml:"signed_request" yaml:"signed_request"`
 	ForceAuthn               bool   `boil:"force_authn" json:"force_authn" toml:"force_authn" yaml:"force_authn"`
@@ -36,7 +36,7 @@ type AdvancedConfig struct {
 }
 
 var AdvancedConfigColumns = struct {
-	Enable                   string
+	ID                       string
 	AllowInitializationByIdp string
 	SignedRequest            string
 	ForceAuthn               string
@@ -44,7 +44,7 @@ var AdvancedConfigColumns = struct {
 	CookieSecure             string
 	LoginFailedURL           string
 }{
-	Enable:                   "enable",
+	ID:                       "id",
 	AllowInitializationByIdp: "allow_initialization_by_idp",
 	SignedRequest:            "signed_request",
 	ForceAuthn:               "force_authn",
@@ -54,7 +54,7 @@ var AdvancedConfigColumns = struct {
 }
 
 var AdvancedConfigTableColumns = struct {
-	Enable                   string
+	ID                       string
 	AllowInitializationByIdp string
 	SignedRequest            string
 	ForceAuthn               string
@@ -62,7 +62,7 @@ var AdvancedConfigTableColumns = struct {
 	CookieSecure             string
 	LoginFailedURL           string
 }{
-	Enable:                   "advanced_config.enable",
+	ID:                       "advanced_config.id",
 	AllowInitializationByIdp: "advanced_config.allow_initialization_by_idp",
 	SignedRequest:            "advanced_config.signed_request",
 	ForceAuthn:               "advanced_config.force_authn",
@@ -72,6 +72,29 @@ var AdvancedConfigTableColumns = struct {
 }
 
 // Generated where
+
+type whereHelperint32 struct{ field string }
+
+func (w whereHelperint32) EQ(x int32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint32) NEQ(x int32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint32) LT(x int32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint32) LTE(x int32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint32) GT(x int32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint32) GTE(x int32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint32) IN(slice []int32) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint32) NIN(slice []int32) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
 type whereHelperbool struct{ field string }
 
@@ -110,7 +133,7 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 }
 
 var AdvancedConfigWhere = struct {
-	Enable                   whereHelperbool
+	ID                       whereHelperint32
 	AllowInitializationByIdp whereHelperbool
 	SignedRequest            whereHelperbool
 	ForceAuthn               whereHelperbool
@@ -118,7 +141,7 @@ var AdvancedConfigWhere = struct {
 	CookieSecure             whereHelperbool
 	LoginFailedURL           whereHelperstring
 }{
-	Enable:                   whereHelperbool{field: "\"saml_sp\".\"advanced_config\".\"enable\""},
+	ID:                       whereHelperint32{field: "\"saml_sp\".\"advanced_config\".\"id\""},
 	AllowInitializationByIdp: whereHelperbool{field: "\"saml_sp\".\"advanced_config\".\"allow_initialization_by_idp\""},
 	SignedRequest:            whereHelperbool{field: "\"saml_sp\".\"advanced_config\".\"signed_request\""},
 	ForceAuthn:               whereHelperbool{field: "\"saml_sp\".\"advanced_config\".\"force_authn\""},
@@ -129,14 +152,14 @@ var AdvancedConfigWhere = struct {
 
 // AdvancedConfigRels is where relationship names are stored.
 var AdvancedConfigRels = struct {
-	EnableBasicConfig string
+	IDBasicConfig string
 }{
-	EnableBasicConfig: "EnableBasicConfig",
+	IDBasicConfig: "IDBasicConfig",
 }
 
 // advancedConfigR is where relationships are stored.
 type advancedConfigR struct {
-	EnableBasicConfig *BasicConfig `boil:"EnableBasicConfig" json:"EnableBasicConfig" toml:"EnableBasicConfig" yaml:"EnableBasicConfig"`
+	IDBasicConfig *BasicConfig `boil:"IDBasicConfig" json:"IDBasicConfig" toml:"IDBasicConfig" yaml:"IDBasicConfig"`
 }
 
 // NewStruct creates a new relationship struct
@@ -144,21 +167,21 @@ func (*advancedConfigR) NewStruct() *advancedConfigR {
 	return &advancedConfigR{}
 }
 
-func (r *advancedConfigR) GetEnableBasicConfig() *BasicConfig {
+func (r *advancedConfigR) GetIDBasicConfig() *BasicConfig {
 	if r == nil {
 		return nil
 	}
-	return r.EnableBasicConfig
+	return r.IDBasicConfig
 }
 
 // advancedConfigL is where Load methods for each relationship are stored.
 type advancedConfigL struct{}
 
 var (
-	advancedConfigAllColumns            = []string{"enable", "allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "cookie_secure", "login_failed_url"}
-	advancedConfigColumnsWithoutDefault = []string{"enable"}
-	advancedConfigColumnsWithDefault    = []string{"allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "cookie_secure", "login_failed_url"}
-	advancedConfigPrimaryKeyColumns     = []string{"enable"}
+	advancedConfigAllColumns            = []string{"id", "allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "cookie_secure", "login_failed_url"}
+	advancedConfigColumnsWithoutDefault = []string{}
+	advancedConfigColumnsWithDefault    = []string{"id", "allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "cookie_secure", "login_failed_url"}
+	advancedConfigPrimaryKeyColumns     = []string{"id"}
 	advancedConfigGeneratedColumns      = []string{}
 )
 
@@ -460,10 +483,10 @@ func (q advancedConfigQuery) Exists(ctx context.Context, exec boil.ContextExecut
 	return count > 0, nil
 }
 
-// EnableBasicConfig pointed to by the foreign key.
-func (o *AdvancedConfig) EnableBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
+// IDBasicConfig pointed to by the foreign key.
+func (o *AdvancedConfig) IDBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"enable\" = ?", o.Enable),
+		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -471,9 +494,9 @@ func (o *AdvancedConfig) EnableBasicConfig(mods ...qm.QueryMod) basicConfigQuery
 	return BasicConfigs(queryMods...)
 }
 
-// LoadEnableBasicConfig allows an eager lookup of values, cached into the
+// LoadIDBasicConfig allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (advancedConfigL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAdvancedConfig interface{}, mods queries.Applicator) error {
+func (advancedConfigL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAdvancedConfig interface{}, mods queries.Applicator) error {
 	var slice []*AdvancedConfig
 	var object *AdvancedConfig
 
@@ -504,9 +527,7 @@ func (advancedConfigL) LoadEnableBasicConfig(ctx context.Context, e boil.Context
 		if object.R == nil {
 			object.R = &advancedConfigR{}
 		}
-		if !queries.IsNil(object.Enable) {
-			args = append(args, object.Enable)
-		}
+		args = append(args, object.ID)
 
 	} else {
 	Outer:
@@ -516,14 +537,12 @@ func (advancedConfigL) LoadEnableBasicConfig(ctx context.Context, e boil.Context
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Enable) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.Enable) {
-				args = append(args, obj.Enable)
-			}
+			args = append(args, obj.ID)
 
 		}
 	}
@@ -534,7 +553,7 @@ func (advancedConfigL) LoadEnableBasicConfig(ctx context.Context, e boil.Context
 
 	query := NewQuery(
 		qm.From(`saml_sp.basic_config`),
-		qm.WhereIn(`saml_sp.basic_config.enable in ?`, args...),
+		qm.WhereIn(`saml_sp.basic_config.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -571,22 +590,22 @@ func (advancedConfigL) LoadEnableBasicConfig(ctx context.Context, e boil.Context
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.EnableBasicConfig = foreign
+		object.R.IDBasicConfig = foreign
 		if foreign.R == nil {
 			foreign.R = &basicConfigR{}
 		}
-		foreign.R.EnableAdvancedConfig = object
+		foreign.R.IDAdvancedConfig = object
 		return nil
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Enable, foreign.Enable) {
-				local.R.EnableBasicConfig = foreign
+			if local.ID == foreign.ID {
+				local.R.IDBasicConfig = foreign
 				if foreign.R == nil {
 					foreign.R = &basicConfigR{}
 				}
-				foreign.R.EnableAdvancedConfig = local
+				foreign.R.IDAdvancedConfig = local
 				break
 			}
 		}
@@ -595,18 +614,18 @@ func (advancedConfigL) LoadEnableBasicConfig(ctx context.Context, e boil.Context
 	return nil
 }
 
-// SetEnableBasicConfigG of the advancedConfig to the related item.
-// Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnableAdvancedConfig.
+// SetIDBasicConfigG of the advancedConfig to the related item.
+// Sets o.R.IDBasicConfig to related.
+// Adds o to related.R.IDAdvancedConfig.
 // Uses the global database handle.
-func (o *AdvancedConfig) SetEnableBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
-	return o.SetEnableBasicConfig(ctx, boil.GetContextDB(), insert, related)
+func (o *AdvancedConfig) SetIDBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
+	return o.SetIDBasicConfig(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetEnableBasicConfig of the advancedConfig to the related item.
-// Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnableAdvancedConfig.
-func (o *AdvancedConfig) SetEnableBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
+// SetIDBasicConfig of the advancedConfig to the related item.
+// Sets o.R.IDBasicConfig to related.
+// Adds o to related.R.IDAdvancedConfig.
+func (o *AdvancedConfig) SetIDBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -616,10 +635,10 @@ func (o *AdvancedConfig) SetEnableBasicConfig(ctx context.Context, exec boil.Con
 
 	updateQuery := fmt.Sprintf(
 		"UPDATE \"saml_sp\".\"advanced_config\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
+		strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
 		strmangle.WhereClause("\"", "\"", 2, advancedConfigPrimaryKeyColumns),
 	)
-	values := []interface{}{related.Enable, o.Enable}
+	values := []interface{}{related.ID, o.ID}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -630,21 +649,21 @@ func (o *AdvancedConfig) SetEnableBasicConfig(ctx context.Context, exec boil.Con
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.Enable, related.Enable)
+	o.ID = related.ID
 	if o.R == nil {
 		o.R = &advancedConfigR{
-			EnableBasicConfig: related,
+			IDBasicConfig: related,
 		}
 	} else {
-		o.R.EnableBasicConfig = related
+		o.R.IDBasicConfig = related
 	}
 
 	if related.R == nil {
 		related.R = &basicConfigR{
-			EnableAdvancedConfig: o,
+			IDAdvancedConfig: o,
 		}
 	} else {
-		related.R.EnableAdvancedConfig = o
+		related.R.IDAdvancedConfig = o
 	}
 
 	return nil
@@ -662,13 +681,13 @@ func AdvancedConfigs(mods ...qm.QueryMod) advancedConfigQuery {
 }
 
 // FindAdvancedConfigG retrieves a single record by ID.
-func FindAdvancedConfigG(ctx context.Context, enable bool, selectCols ...string) (*AdvancedConfig, error) {
-	return FindAdvancedConfig(ctx, boil.GetContextDB(), enable, selectCols...)
+func FindAdvancedConfigG(ctx context.Context, iD int32, selectCols ...string) (*AdvancedConfig, error) {
+	return FindAdvancedConfig(ctx, boil.GetContextDB(), iD, selectCols...)
 }
 
 // FindAdvancedConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAdvancedConfig(ctx context.Context, exec boil.ContextExecutor, enable bool, selectCols ...string) (*AdvancedConfig, error) {
+func FindAdvancedConfig(ctx context.Context, exec boil.ContextExecutor, iD int32, selectCols ...string) (*AdvancedConfig, error) {
 	advancedConfigObj := &AdvancedConfig{}
 
 	sel := "*"
@@ -676,10 +695,10 @@ func FindAdvancedConfig(ctx context.Context, exec boil.ContextExecutor, enable b
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"saml_sp\".\"advanced_config\" where \"enable\"=$1", sel,
+		"select %s from \"saml_sp\".\"advanced_config\" where \"id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, enable)
+	q := queries.Raw(query, iD)
 
 	err := q.Bind(ctx, exec, advancedConfigObj)
 	if err != nil {
@@ -1063,7 +1082,7 @@ func (o *AdvancedConfig) Delete(ctx context.Context, exec boil.ContextExecutor) 
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), advancedConfigPrimaryKeyMapping)
-	sql := "DELETE FROM \"saml_sp\".\"advanced_config\" WHERE \"enable\"=$1"
+	sql := "DELETE FROM \"saml_sp\".\"advanced_config\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1178,7 +1197,7 @@ func (o *AdvancedConfig) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *AdvancedConfig) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindAdvancedConfig(ctx, exec, o.Enable)
+	ret, err := FindAdvancedConfig(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1227,21 +1246,21 @@ func (o *AdvancedConfigSlice) ReloadAll(ctx context.Context, exec boil.ContextEx
 }
 
 // AdvancedConfigExistsG checks if the AdvancedConfig row exists.
-func AdvancedConfigExistsG(ctx context.Context, enable bool) (bool, error) {
-	return AdvancedConfigExists(ctx, boil.GetContextDB(), enable)
+func AdvancedConfigExistsG(ctx context.Context, iD int32) (bool, error) {
+	return AdvancedConfigExists(ctx, boil.GetContextDB(), iD)
 }
 
 // AdvancedConfigExists checks if the AdvancedConfig row exists.
-func AdvancedConfigExists(ctx context.Context, exec boil.ContextExecutor, enable bool) (bool, error) {
+func AdvancedConfigExists(ctx context.Context, exec boil.ContextExecutor, iD int32) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"saml_sp\".\"advanced_config\" where \"enable\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"saml_sp\".\"advanced_config\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, enable)
+		fmt.Fprintln(writer, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, enable)
+	row := exec.QueryRowContext(ctx, sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1253,5 +1272,5 @@ func AdvancedConfigExists(ctx context.Context, exec boil.ContextExecutor, enable
 
 // Exists checks if the AdvancedConfig row exists.
 func (o *AdvancedConfig) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return AdvancedConfigExists(ctx, exec, o.Enable)
+	return AdvancedConfigExists(ctx, exec, o.ID)
 }

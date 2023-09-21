@@ -61,7 +61,6 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 			UserToArchive:  AUTO_CNF_DEFAULT_USER_TO_ARCHIVE,
 		}
 		advancedConfig appdb.AdvancedConfig = appdb.AdvancedConfig{
-			Enable:                   AUTO_CNF_DEFAULT_ENABLED,
 			AllowInitializationByIdp: AUTO_CNF_DEFAULT_ALLOW_INIT_BY_IDP,
 			SignedRequest:            AUTO_CNF_DEFAULT_SIGNING_REQ,
 			ForceAuthn:               AUTO_CNF_DEFAULT_FORCE_AUTHN,
@@ -70,14 +69,12 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 			LoginFailedURL:           AUTO_CNF_DEFAULT_LOGIN_FAIL_URL,
 		}
 		attributeMapping appdb.AttributeMap = appdb.AttributeMap{
-			Enable:    AUTO_CNF_DEFAULT_ENABLED,
 			Email:     AUTO_CNF_DEFAULT_USERNAME_ATTR,
 			FirstName: null.StringFromPtr(nil),
 			LastName:  null.StringFromPtr(nil),
 			Phone:     null.StringFromPtr(nil),
 		}
 		permissionCnf appdb.Permission = appdb.Permission{
-			Enable:                  AUTO_CNF_DEFAULT_ENABLED,
 			DefaultSystemRole:       AUTO_CNF_DEFAULT_SYSTEM_PERMISSION,
 			DefaultProjRole:         AUTO_CNF_DEFAULT_PROJ_PERMISSION,
 			SystemRoleSamlAttribute: null.StringFromPtr(nil),
@@ -88,9 +85,11 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 	)
 
 	basicConfig.OwnURL = "https://" + GetElionaHost()
-	certificate, privateKey, err := utils.CreateSelfsignedX509Certificate(AUTO_CNF_DEFAULT_CERT_VALID_DAYS, AUTO_CNF_DEFAULT_KEY_LENGTH, nil, nil)
+	certificate, privateKey, err := utils.CreateSelfsignedX509Certificate(
+		AUTO_CNF_DEFAULT_CERT_VALID_DAYS, AUTO_CNF_DEFAULT_KEY_LENGTH, nil, nil)
 	if err != nil {
-		log.Error(LOG_REGIO, "auto configuration generate x509 certificates: %v", err)
+		log.Error(LOG_REGIO, "auto configuration generate x509 certificates: %v",
+			err)
 	} else {
 		basicConfig.SPCertificate = certificate
 		basicConfig.SPPrivateKey = privateKey
@@ -144,7 +143,8 @@ func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) 
 	return basicConfigApi, err
 }
 
-func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (*apiserver.BasicConfiguration, error) {
+func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
+	*apiserver.BasicConfiguration, error) {
 
 	var (
 		err           error              = nil
@@ -156,9 +156,11 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 
 	if config == nil {
 		return nil, errors.New("basic config is nil")
+	} else {
+		config.Id = 1 // set id to 1, because it must
 	}
 
-	dbForm, err = ConvertDbToApiForm(config)
+	dbForm, err = ConvertApiToDbForm(config)
 	if err != nil {
 		return nil, err
 	} else {
@@ -170,10 +172,12 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 		return nil, err
 	}
 
+	log.Debug(LOG_REGIO, "basic config exists %v", exists)
+
 	if exists {
-		_, err = basicConfigDb.Update(ctx, getDb(), boil.Infer())
+		_, err = basicConfigDb.Update(ctx, getDb(), boil.Blacklist(appdb.BasicConfigColumns.ID))
 	} else {
-		err = basicConfigDb.Insert(ctx, getDb(), boil.Infer())
+		err = basicConfigDb.Insert(ctx, getDb(), boil.Greylist(appdb.BasicConfigColumns.Enable))
 	}
 
 	apiForm, err = ConvertDbToApiForm(basicConfigDb)
@@ -215,11 +219,49 @@ func GetAdvancedConfig(ctx context.Context) (*apiserver.AdvancedConfiguration, e
 	return advConfigApi, err
 }
 
-func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfiguration) (*apiserver.AdvancedConfiguration, error) {
-	if config != nil {
-		return nil, errors.New("advanced config to set is nil")
+func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfiguration) (
+	*apiserver.AdvancedConfiguration, error) {
+
+	var (
+		err              error                 = nil
+		advancedConfigDb *appdb.AdvancedConfig = nil
+
+		apiForm any = nil
+		dbForm  any = nil
+	)
+
+	if config == nil {
+		return nil, errors.New("advanced config is nil")
+	} else {
+		config.Id = 1 // set id to 1, because it must
 	}
-	return nil, errors.New("not implemented")
+
+	dbForm, err = ConvertApiToDbForm(config)
+	if err != nil {
+		return nil, err
+	} else {
+		advancedConfigDb = dbForm.(*appdb.AdvancedConfig)
+	}
+
+	exists, err := appdb.AdvancedConfigs().Exists(ctx, getDb())
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debug(LOG_REGIO, "advanced config exists %v", exists)
+
+	if exists {
+		_, err = advancedConfigDb.Update(ctx, getDb(), boil.Blacklist(appdb.AdvancedConfigColumns.ID))
+	} else {
+		err = advancedConfigDb.Insert(ctx, getDb(), boil.Blacklist(appdb.AdvancedConfigColumns.ID))
+	}
+
+	apiForm, err = ConvertDbToApiForm(advancedConfigDb)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiForm.(*apiserver.AdvancedConfiguration), err
 }
 
 func DeleteAdvancedConfig(ctx context.Context) (int, error) {
@@ -253,11 +295,49 @@ func GetAttributeMapping(ctx context.Context) (*apiserver.AttributeMap, error) {
 	return attrMapApi, err
 }
 
-func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (*apiserver.AttributeMap, error) {
-	if mapping != nil {
-		return nil, errors.New("attribute map settings to set is nil")
+func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
+	*apiserver.AttributeMap, error) {
+
+	var (
+		err                error               = nil
+		attributeMappingDb *appdb.AttributeMap = nil
+
+		apiForm any = nil
+		dbForm  any = nil
+	)
+
+	if mapping == nil {
+		return nil, errors.New("attribute mapping is nil")
+	} else {
+		mapping.Id = 1 // set id to 1, because it must
 	}
-	return nil, errors.New("not implemented")
+
+	dbForm, err = ConvertApiToDbForm(mapping)
+	if err != nil {
+		return nil, err
+	} else {
+		attributeMappingDb = dbForm.(*appdb.AttributeMap)
+	}
+
+	exists, err := appdb.AttributeMaps().Exists(ctx, getDb())
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debug(LOG_REGIO, "attribute map exists %v", exists)
+
+	if exists {
+		_, err = attributeMappingDb.Update(ctx, getDb(), boil.Blacklist(appdb.AttributeMapColumns.ID))
+	} else {
+		err = attributeMappingDb.Insert(ctx, getDb(), boil.Blacklist(appdb.AttributeMapColumns.ID))
+	}
+
+	apiForm, err = ConvertDbToApiForm(attributeMappingDb)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiForm.(*apiserver.AttributeMap), err
 }
 
 func DeleteAttributeMapping(ctx context.Context) (int, error) {
@@ -291,11 +371,49 @@ func GetPermissionSettings(ctx context.Context) (*apiserver.Permissions, error) 
 	return permApi, err
 }
 
-func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissions) (*apiserver.Permissions, error) {
-	if permissions != nil {
-		return nil, errors.New("permission settings to set is nil")
+func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissions) (
+	*apiserver.Permissions, error) {
+
+	var (
+		err           error             = nil
+		permissionsDb *appdb.Permission = nil
+
+		apiForm any = nil
+		dbForm  any = nil
+	)
+
+	if permissions == nil {
+		return nil, errors.New("permissions nil")
+	} else {
+		permissions.Id = 1 // set id to 1, because it must
 	}
-	return nil, errors.New("not implemented")
+
+	dbForm, err = ConvertApiToDbForm(permissions)
+	if err != nil {
+		return nil, err
+	} else {
+		permissionsDb = dbForm.(*appdb.Permission)
+	}
+
+	exists, err := appdb.Permissions().Exists(ctx, getDb())
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debug(LOG_REGIO, "permissions exists %v", exists)
+
+	if exists {
+		_, err = permissionsDb.Update(ctx, getDb(), boil.Blacklist(appdb.PermissionColumns.ID))
+	} else {
+		err = permissionsDb.Insert(ctx, getDb(), boil.Blacklist(appdb.PermissionColumns.ID))
+	}
+
+	apiForm, err = ConvertDbToApiForm(permissionsDb)
+	if err != nil {
+		return nil, err
+	}
+
+	return apiForm.(*apiserver.Permissions), err
 }
 
 func DeletePermissionSettings(ctx context.Context) (int, error) {

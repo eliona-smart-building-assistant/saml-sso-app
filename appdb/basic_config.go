@@ -24,6 +24,7 @@ import (
 
 // BasicConfig is an object representing the database table.
 type BasicConfig struct {
+	ID             int32       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Enable         bool        `boil:"enable" json:"enable" toml:"enable" yaml:"enable"`
 	SPCertificate  string      `boil:"sp_certificate" json:"sp_certificate" toml:"sp_certificate" yaml:"sp_certificate"`
 	SPPrivateKey   string      `boil:"sp_private_key" json:"sp_private_key" toml:"sp_private_key" yaml:"sp_private_key"`
@@ -37,6 +38,7 @@ type BasicConfig struct {
 }
 
 var BasicConfigColumns = struct {
+	ID             string
 	Enable         string
 	SPCertificate  string
 	SPPrivateKey   string
@@ -45,6 +47,7 @@ var BasicConfigColumns = struct {
 	OwnURL         string
 	UserToArchive  string
 }{
+	ID:             "id",
 	Enable:         "enable",
 	SPCertificate:  "sp_certificate",
 	SPPrivateKey:   "sp_private_key",
@@ -55,6 +58,7 @@ var BasicConfigColumns = struct {
 }
 
 var BasicConfigTableColumns = struct {
+	ID             string
 	Enable         string
 	SPCertificate  string
 	SPPrivateKey   string
@@ -63,6 +67,7 @@ var BasicConfigTableColumns = struct {
 	OwnURL         string
 	UserToArchive  string
 }{
+	ID:             "basic_config.id",
 	Enable:         "basic_config.enable",
 	SPCertificate:  "basic_config.sp_certificate",
 	SPPrivateKey:   "basic_config.sp_private_key",
@@ -75,6 +80,7 @@ var BasicConfigTableColumns = struct {
 // Generated where
 
 var BasicConfigWhere = struct {
+	ID             whereHelperint32
 	Enable         whereHelperbool
 	SPCertificate  whereHelperstring
 	SPPrivateKey   whereHelperstring
@@ -83,6 +89,7 @@ var BasicConfigWhere = struct {
 	OwnURL         whereHelperstring
 	UserToArchive  whereHelperbool
 }{
+	ID:             whereHelperint32{field: "\"saml_sp\".\"basic_config\".\"id\""},
 	Enable:         whereHelperbool{field: "\"saml_sp\".\"basic_config\".\"enable\""},
 	SPCertificate:  whereHelperstring{field: "\"saml_sp\".\"basic_config\".\"sp_certificate\""},
 	SPPrivateKey:   whereHelperstring{field: "\"saml_sp\".\"basic_config\".\"sp_private_key\""},
@@ -94,20 +101,20 @@ var BasicConfigWhere = struct {
 
 // BasicConfigRels is where relationship names are stored.
 var BasicConfigRels = struct {
-	EnableAdvancedConfig string
-	EnableAttributeMap   string
-	EnablePermission     string
+	IDAdvancedConfig string
+	IDAttributeMap   string
+	IDPermission     string
 }{
-	EnableAdvancedConfig: "EnableAdvancedConfig",
-	EnableAttributeMap:   "EnableAttributeMap",
-	EnablePermission:     "EnablePermission",
+	IDAdvancedConfig: "IDAdvancedConfig",
+	IDAttributeMap:   "IDAttributeMap",
+	IDPermission:     "IDPermission",
 }
 
 // basicConfigR is where relationships are stored.
 type basicConfigR struct {
-	EnableAdvancedConfig *AdvancedConfig `boil:"EnableAdvancedConfig" json:"EnableAdvancedConfig" toml:"EnableAdvancedConfig" yaml:"EnableAdvancedConfig"`
-	EnableAttributeMap   *AttributeMap   `boil:"EnableAttributeMap" json:"EnableAttributeMap" toml:"EnableAttributeMap" yaml:"EnableAttributeMap"`
-	EnablePermission     *Permission     `boil:"EnablePermission" json:"EnablePermission" toml:"EnablePermission" yaml:"EnablePermission"`
+	IDAdvancedConfig *AdvancedConfig `boil:"IDAdvancedConfig" json:"IDAdvancedConfig" toml:"IDAdvancedConfig" yaml:"IDAdvancedConfig"`
+	IDAttributeMap   *AttributeMap   `boil:"IDAttributeMap" json:"IDAttributeMap" toml:"IDAttributeMap" yaml:"IDAttributeMap"`
+	IDPermission     *Permission     `boil:"IDPermission" json:"IDPermission" toml:"IDPermission" yaml:"IDPermission"`
 }
 
 // NewStruct creates a new relationship struct
@@ -115,35 +122,35 @@ func (*basicConfigR) NewStruct() *basicConfigR {
 	return &basicConfigR{}
 }
 
-func (r *basicConfigR) GetEnableAdvancedConfig() *AdvancedConfig {
+func (r *basicConfigR) GetIDAdvancedConfig() *AdvancedConfig {
 	if r == nil {
 		return nil
 	}
-	return r.EnableAdvancedConfig
+	return r.IDAdvancedConfig
 }
 
-func (r *basicConfigR) GetEnableAttributeMap() *AttributeMap {
+func (r *basicConfigR) GetIDAttributeMap() *AttributeMap {
 	if r == nil {
 		return nil
 	}
-	return r.EnableAttributeMap
+	return r.IDAttributeMap
 }
 
-func (r *basicConfigR) GetEnablePermission() *Permission {
+func (r *basicConfigR) GetIDPermission() *Permission {
 	if r == nil {
 		return nil
 	}
-	return r.EnablePermission
+	return r.IDPermission
 }
 
 // basicConfigL is where Load methods for each relationship are stored.
 type basicConfigL struct{}
 
 var (
-	basicConfigAllColumns            = []string{"enable", "sp_certificate", "sp_private_key", "idp_metadata_url", "metadata_xml", "own_url", "user_to_archive"}
+	basicConfigAllColumns            = []string{"id", "enable", "sp_certificate", "sp_private_key", "idp_metadata_url", "metadata_xml", "own_url", "user_to_archive"}
 	basicConfigColumnsWithoutDefault = []string{"sp_certificate", "sp_private_key", "own_url"}
-	basicConfigColumnsWithDefault    = []string{"enable", "idp_metadata_url", "metadata_xml", "user_to_archive"}
-	basicConfigPrimaryKeyColumns     = []string{"enable"}
+	basicConfigColumnsWithDefault    = []string{"id", "enable", "idp_metadata_url", "metadata_xml", "user_to_archive"}
+	basicConfigPrimaryKeyColumns     = []string{"id"}
 	basicConfigGeneratedColumns      = []string{}
 )
 
@@ -445,10 +452,10 @@ func (q basicConfigQuery) Exists(ctx context.Context, exec boil.ContextExecutor)
 	return count > 0, nil
 }
 
-// EnableAdvancedConfig pointed to by the foreign key.
-func (o *BasicConfig) EnableAdvancedConfig(mods ...qm.QueryMod) advancedConfigQuery {
+// IDAdvancedConfig pointed to by the foreign key.
+func (o *BasicConfig) IDAdvancedConfig(mods ...qm.QueryMod) advancedConfigQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"enable\" = ?", o.Enable),
+		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -456,10 +463,10 @@ func (o *BasicConfig) EnableAdvancedConfig(mods ...qm.QueryMod) advancedConfigQu
 	return AdvancedConfigs(queryMods...)
 }
 
-// EnableAttributeMap pointed to by the foreign key.
-func (o *BasicConfig) EnableAttributeMap(mods ...qm.QueryMod) attributeMapQuery {
+// IDAttributeMap pointed to by the foreign key.
+func (o *BasicConfig) IDAttributeMap(mods ...qm.QueryMod) attributeMapQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"enable\" = ?", o.Enable),
+		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -467,10 +474,10 @@ func (o *BasicConfig) EnableAttributeMap(mods ...qm.QueryMod) attributeMapQuery 
 	return AttributeMaps(queryMods...)
 }
 
-// EnablePermission pointed to by the foreign key.
-func (o *BasicConfig) EnablePermission(mods ...qm.QueryMod) permissionQuery {
+// IDPermission pointed to by the foreign key.
+func (o *BasicConfig) IDPermission(mods ...qm.QueryMod) permissionQuery {
 	queryMods := []qm.QueryMod{
-		qm.Where("\"enable\" = ?", o.Enable),
+		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -478,9 +485,9 @@ func (o *BasicConfig) EnablePermission(mods ...qm.QueryMod) permissionQuery {
 	return Permissions(queryMods...)
 }
 
-// LoadEnableAdvancedConfig allows an eager lookup of values, cached into the
+// LoadIDAdvancedConfig allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-1 relationship.
-func (basicConfigL) LoadEnableAdvancedConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
+func (basicConfigL) LoadIDAdvancedConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
 	var slice []*BasicConfig
 	var object *BasicConfig
 
@@ -511,7 +518,7 @@ func (basicConfigL) LoadEnableAdvancedConfig(ctx context.Context, e boil.Context
 		if object.R == nil {
 			object.R = &basicConfigR{}
 		}
-		args = append(args, object.Enable)
+		args = append(args, object.ID)
 	} else {
 	Outer:
 		for _, obj := range slice {
@@ -520,12 +527,12 @@ func (basicConfigL) LoadEnableAdvancedConfig(ctx context.Context, e boil.Context
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Enable) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
 
-			args = append(args, obj.Enable)
+			args = append(args, obj.ID)
 		}
 	}
 
@@ -535,7 +542,7 @@ func (basicConfigL) LoadEnableAdvancedConfig(ctx context.Context, e boil.Context
 
 	query := NewQuery(
 		qm.From(`saml_sp.advanced_config`),
-		qm.WhereIn(`saml_sp.advanced_config.enable in ?`, args...),
+		qm.WhereIn(`saml_sp.advanced_config.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -572,21 +579,21 @@ func (basicConfigL) LoadEnableAdvancedConfig(ctx context.Context, e boil.Context
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.EnableAdvancedConfig = foreign
+		object.R.IDAdvancedConfig = foreign
 		if foreign.R == nil {
 			foreign.R = &advancedConfigR{}
 		}
-		foreign.R.EnableBasicConfig = object
+		foreign.R.IDBasicConfig = object
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Enable, foreign.Enable) {
-				local.R.EnableAdvancedConfig = foreign
+			if local.ID == foreign.ID {
+				local.R.IDAdvancedConfig = foreign
 				if foreign.R == nil {
 					foreign.R = &advancedConfigR{}
 				}
-				foreign.R.EnableBasicConfig = local
+				foreign.R.IDBasicConfig = local
 				break
 			}
 		}
@@ -595,9 +602,9 @@ func (basicConfigL) LoadEnableAdvancedConfig(ctx context.Context, e boil.Context
 	return nil
 }
 
-// LoadEnableAttributeMap allows an eager lookup of values, cached into the
+// LoadIDAttributeMap allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-1 relationship.
-func (basicConfigL) LoadEnableAttributeMap(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
+func (basicConfigL) LoadIDAttributeMap(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
 	var slice []*BasicConfig
 	var object *BasicConfig
 
@@ -628,7 +635,7 @@ func (basicConfigL) LoadEnableAttributeMap(ctx context.Context, e boil.ContextEx
 		if object.R == nil {
 			object.R = &basicConfigR{}
 		}
-		args = append(args, object.Enable)
+		args = append(args, object.ID)
 	} else {
 	Outer:
 		for _, obj := range slice {
@@ -637,12 +644,12 @@ func (basicConfigL) LoadEnableAttributeMap(ctx context.Context, e boil.ContextEx
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Enable) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
 
-			args = append(args, obj.Enable)
+			args = append(args, obj.ID)
 		}
 	}
 
@@ -652,7 +659,7 @@ func (basicConfigL) LoadEnableAttributeMap(ctx context.Context, e boil.ContextEx
 
 	query := NewQuery(
 		qm.From(`saml_sp.attribute_map`),
-		qm.WhereIn(`saml_sp.attribute_map.enable in ?`, args...),
+		qm.WhereIn(`saml_sp.attribute_map.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -689,21 +696,21 @@ func (basicConfigL) LoadEnableAttributeMap(ctx context.Context, e boil.ContextEx
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.EnableAttributeMap = foreign
+		object.R.IDAttributeMap = foreign
 		if foreign.R == nil {
 			foreign.R = &attributeMapR{}
 		}
-		foreign.R.EnableBasicConfig = object
+		foreign.R.IDBasicConfig = object
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Enable, foreign.Enable) {
-				local.R.EnableAttributeMap = foreign
+			if local.ID == foreign.ID {
+				local.R.IDAttributeMap = foreign
 				if foreign.R == nil {
 					foreign.R = &attributeMapR{}
 				}
-				foreign.R.EnableBasicConfig = local
+				foreign.R.IDBasicConfig = local
 				break
 			}
 		}
@@ -712,9 +719,9 @@ func (basicConfigL) LoadEnableAttributeMap(ctx context.Context, e boil.ContextEx
 	return nil
 }
 
-// LoadEnablePermission allows an eager lookup of values, cached into the
+// LoadIDPermission allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-1 relationship.
-func (basicConfigL) LoadEnablePermission(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
+func (basicConfigL) LoadIDPermission(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
 	var slice []*BasicConfig
 	var object *BasicConfig
 
@@ -745,7 +752,7 @@ func (basicConfigL) LoadEnablePermission(ctx context.Context, e boil.ContextExec
 		if object.R == nil {
 			object.R = &basicConfigR{}
 		}
-		args = append(args, object.Enable)
+		args = append(args, object.ID)
 	} else {
 	Outer:
 		for _, obj := range slice {
@@ -754,12 +761,12 @@ func (basicConfigL) LoadEnablePermission(ctx context.Context, e boil.ContextExec
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Enable) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
 
-			args = append(args, obj.Enable)
+			args = append(args, obj.ID)
 		}
 	}
 
@@ -769,7 +776,7 @@ func (basicConfigL) LoadEnablePermission(ctx context.Context, e boil.ContextExec
 
 	query := NewQuery(
 		qm.From(`saml_sp.permissions`),
-		qm.WhereIn(`saml_sp.permissions.enable in ?`, args...),
+		qm.WhereIn(`saml_sp.permissions.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -806,21 +813,21 @@ func (basicConfigL) LoadEnablePermission(ctx context.Context, e boil.ContextExec
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.EnablePermission = foreign
+		object.R.IDPermission = foreign
 		if foreign.R == nil {
 			foreign.R = &permissionR{}
 		}
-		foreign.R.EnableBasicConfig = object
+		foreign.R.IDBasicConfig = object
 	}
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Enable, foreign.Enable) {
-				local.R.EnablePermission = foreign
+			if local.ID == foreign.ID {
+				local.R.IDPermission = foreign
 				if foreign.R == nil {
 					foreign.R = &permissionR{}
 				}
-				foreign.R.EnableBasicConfig = local
+				foreign.R.IDBasicConfig = local
 				break
 			}
 		}
@@ -829,22 +836,22 @@ func (basicConfigL) LoadEnablePermission(ctx context.Context, e boil.ContextExec
 	return nil
 }
 
-// SetEnableAdvancedConfigG of the basicConfig to the related item.
-// Sets o.R.EnableAdvancedConfig to related.
-// Adds o to related.R.EnableBasicConfig.
+// SetIDAdvancedConfigG of the basicConfig to the related item.
+// Sets o.R.IDAdvancedConfig to related.
+// Adds o to related.R.IDBasicConfig.
 // Uses the global database handle.
-func (o *BasicConfig) SetEnableAdvancedConfigG(ctx context.Context, insert bool, related *AdvancedConfig) error {
-	return o.SetEnableAdvancedConfig(ctx, boil.GetContextDB(), insert, related)
+func (o *BasicConfig) SetIDAdvancedConfigG(ctx context.Context, insert bool, related *AdvancedConfig) error {
+	return o.SetIDAdvancedConfig(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetEnableAdvancedConfig of the basicConfig to the related item.
-// Sets o.R.EnableAdvancedConfig to related.
-// Adds o to related.R.EnableBasicConfig.
-func (o *BasicConfig) SetEnableAdvancedConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *AdvancedConfig) error {
+// SetIDAdvancedConfig of the basicConfig to the related item.
+// Sets o.R.IDAdvancedConfig to related.
+// Adds o to related.R.IDBasicConfig.
+func (o *BasicConfig) SetIDAdvancedConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *AdvancedConfig) error {
 	var err error
 
 	if insert {
-		queries.Assign(&related.Enable, o.Enable)
+		related.ID = o.ID
 
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
 			return errors.Wrap(err, "failed to insert into foreign table")
@@ -852,10 +859,10 @@ func (o *BasicConfig) SetEnableAdvancedConfig(ctx context.Context, exec boil.Con
 	} else {
 		updateQuery := fmt.Sprintf(
 			"UPDATE \"saml_sp\".\"advanced_config\" SET %s WHERE %s",
-			strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
+			strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
 			strmangle.WhereClause("\"", "\"", 2, advancedConfigPrimaryKeyColumns),
 		)
-		values := []interface{}{o.Enable, related.Enable}
+		values := []interface{}{o.ID, related.ID}
 
 		if boil.IsDebug(ctx) {
 			writer := boil.DebugWriterFrom(ctx)
@@ -866,43 +873,43 @@ func (o *BasicConfig) SetEnableAdvancedConfig(ctx context.Context, exec boil.Con
 			return errors.Wrap(err, "failed to update foreign table")
 		}
 
-		queries.Assign(&related.Enable, o.Enable)
+		related.ID = o.ID
 	}
 
 	if o.R == nil {
 		o.R = &basicConfigR{
-			EnableAdvancedConfig: related,
+			IDAdvancedConfig: related,
 		}
 	} else {
-		o.R.EnableAdvancedConfig = related
+		o.R.IDAdvancedConfig = related
 	}
 
 	if related.R == nil {
 		related.R = &advancedConfigR{
-			EnableBasicConfig: o,
+			IDBasicConfig: o,
 		}
 	} else {
-		related.R.EnableBasicConfig = o
+		related.R.IDBasicConfig = o
 	}
 	return nil
 }
 
-// SetEnableAttributeMapG of the basicConfig to the related item.
-// Sets o.R.EnableAttributeMap to related.
-// Adds o to related.R.EnableBasicConfig.
+// SetIDAttributeMapG of the basicConfig to the related item.
+// Sets o.R.IDAttributeMap to related.
+// Adds o to related.R.IDBasicConfig.
 // Uses the global database handle.
-func (o *BasicConfig) SetEnableAttributeMapG(ctx context.Context, insert bool, related *AttributeMap) error {
-	return o.SetEnableAttributeMap(ctx, boil.GetContextDB(), insert, related)
+func (o *BasicConfig) SetIDAttributeMapG(ctx context.Context, insert bool, related *AttributeMap) error {
+	return o.SetIDAttributeMap(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetEnableAttributeMap of the basicConfig to the related item.
-// Sets o.R.EnableAttributeMap to related.
-// Adds o to related.R.EnableBasicConfig.
-func (o *BasicConfig) SetEnableAttributeMap(ctx context.Context, exec boil.ContextExecutor, insert bool, related *AttributeMap) error {
+// SetIDAttributeMap of the basicConfig to the related item.
+// Sets o.R.IDAttributeMap to related.
+// Adds o to related.R.IDBasicConfig.
+func (o *BasicConfig) SetIDAttributeMap(ctx context.Context, exec boil.ContextExecutor, insert bool, related *AttributeMap) error {
 	var err error
 
 	if insert {
-		queries.Assign(&related.Enable, o.Enable)
+		related.ID = o.ID
 
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
 			return errors.Wrap(err, "failed to insert into foreign table")
@@ -910,10 +917,10 @@ func (o *BasicConfig) SetEnableAttributeMap(ctx context.Context, exec boil.Conte
 	} else {
 		updateQuery := fmt.Sprintf(
 			"UPDATE \"saml_sp\".\"attribute_map\" SET %s WHERE %s",
-			strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
+			strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
 			strmangle.WhereClause("\"", "\"", 2, attributeMapPrimaryKeyColumns),
 		)
-		values := []interface{}{o.Enable, related.Enable}
+		values := []interface{}{o.ID, related.ID}
 
 		if boil.IsDebug(ctx) {
 			writer := boil.DebugWriterFrom(ctx)
@@ -924,43 +931,43 @@ func (o *BasicConfig) SetEnableAttributeMap(ctx context.Context, exec boil.Conte
 			return errors.Wrap(err, "failed to update foreign table")
 		}
 
-		queries.Assign(&related.Enable, o.Enable)
+		related.ID = o.ID
 	}
 
 	if o.R == nil {
 		o.R = &basicConfigR{
-			EnableAttributeMap: related,
+			IDAttributeMap: related,
 		}
 	} else {
-		o.R.EnableAttributeMap = related
+		o.R.IDAttributeMap = related
 	}
 
 	if related.R == nil {
 		related.R = &attributeMapR{
-			EnableBasicConfig: o,
+			IDBasicConfig: o,
 		}
 	} else {
-		related.R.EnableBasicConfig = o
+		related.R.IDBasicConfig = o
 	}
 	return nil
 }
 
-// SetEnablePermissionG of the basicConfig to the related item.
-// Sets o.R.EnablePermission to related.
-// Adds o to related.R.EnableBasicConfig.
+// SetIDPermissionG of the basicConfig to the related item.
+// Sets o.R.IDPermission to related.
+// Adds o to related.R.IDBasicConfig.
 // Uses the global database handle.
-func (o *BasicConfig) SetEnablePermissionG(ctx context.Context, insert bool, related *Permission) error {
-	return o.SetEnablePermission(ctx, boil.GetContextDB(), insert, related)
+func (o *BasicConfig) SetIDPermissionG(ctx context.Context, insert bool, related *Permission) error {
+	return o.SetIDPermission(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetEnablePermission of the basicConfig to the related item.
-// Sets o.R.EnablePermission to related.
-// Adds o to related.R.EnableBasicConfig.
-func (o *BasicConfig) SetEnablePermission(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Permission) error {
+// SetIDPermission of the basicConfig to the related item.
+// Sets o.R.IDPermission to related.
+// Adds o to related.R.IDBasicConfig.
+func (o *BasicConfig) SetIDPermission(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Permission) error {
 	var err error
 
 	if insert {
-		queries.Assign(&related.Enable, o.Enable)
+		related.ID = o.ID
 
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
 			return errors.Wrap(err, "failed to insert into foreign table")
@@ -968,10 +975,10 @@ func (o *BasicConfig) SetEnablePermission(ctx context.Context, exec boil.Context
 	} else {
 		updateQuery := fmt.Sprintf(
 			"UPDATE \"saml_sp\".\"permissions\" SET %s WHERE %s",
-			strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
+			strmangle.SetParamNames("\"", "\"", 1, []string{"id"}),
 			strmangle.WhereClause("\"", "\"", 2, permissionPrimaryKeyColumns),
 		)
-		values := []interface{}{o.Enable, related.Enable}
+		values := []interface{}{o.ID, related.ID}
 
 		if boil.IsDebug(ctx) {
 			writer := boil.DebugWriterFrom(ctx)
@@ -982,23 +989,23 @@ func (o *BasicConfig) SetEnablePermission(ctx context.Context, exec boil.Context
 			return errors.Wrap(err, "failed to update foreign table")
 		}
 
-		queries.Assign(&related.Enable, o.Enable)
+		related.ID = o.ID
 	}
 
 	if o.R == nil {
 		o.R = &basicConfigR{
-			EnablePermission: related,
+			IDPermission: related,
 		}
 	} else {
-		o.R.EnablePermission = related
+		o.R.IDPermission = related
 	}
 
 	if related.R == nil {
 		related.R = &permissionR{
-			EnableBasicConfig: o,
+			IDBasicConfig: o,
 		}
 	} else {
-		related.R.EnableBasicConfig = o
+		related.R.IDBasicConfig = o
 	}
 	return nil
 }
@@ -1015,13 +1022,13 @@ func BasicConfigs(mods ...qm.QueryMod) basicConfigQuery {
 }
 
 // FindBasicConfigG retrieves a single record by ID.
-func FindBasicConfigG(ctx context.Context, enable bool, selectCols ...string) (*BasicConfig, error) {
-	return FindBasicConfig(ctx, boil.GetContextDB(), enable, selectCols...)
+func FindBasicConfigG(ctx context.Context, iD int32, selectCols ...string) (*BasicConfig, error) {
+	return FindBasicConfig(ctx, boil.GetContextDB(), iD, selectCols...)
 }
 
 // FindBasicConfig retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindBasicConfig(ctx context.Context, exec boil.ContextExecutor, enable bool, selectCols ...string) (*BasicConfig, error) {
+func FindBasicConfig(ctx context.Context, exec boil.ContextExecutor, iD int32, selectCols ...string) (*BasicConfig, error) {
 	basicConfigObj := &BasicConfig{}
 
 	sel := "*"
@@ -1029,10 +1036,10 @@ func FindBasicConfig(ctx context.Context, exec boil.ContextExecutor, enable bool
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"saml_sp\".\"basic_config\" where \"enable\"=$1", sel,
+		"select %s from \"saml_sp\".\"basic_config\" where \"id\"=$1", sel,
 	)
 
-	q := queries.Raw(query, enable)
+	q := queries.Raw(query, iD)
 
 	err := q.Bind(ctx, exec, basicConfigObj)
 	if err != nil {
@@ -1416,7 +1423,7 @@ func (o *BasicConfig) Delete(ctx context.Context, exec boil.ContextExecutor) (in
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), basicConfigPrimaryKeyMapping)
-	sql := "DELETE FROM \"saml_sp\".\"basic_config\" WHERE \"enable\"=$1"
+	sql := "DELETE FROM \"saml_sp\".\"basic_config\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1531,7 +1538,7 @@ func (o *BasicConfig) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *BasicConfig) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindBasicConfig(ctx, exec, o.Enable)
+	ret, err := FindBasicConfig(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1580,21 +1587,21 @@ func (o *BasicConfigSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 }
 
 // BasicConfigExistsG checks if the BasicConfig row exists.
-func BasicConfigExistsG(ctx context.Context, enable bool) (bool, error) {
-	return BasicConfigExists(ctx, boil.GetContextDB(), enable)
+func BasicConfigExistsG(ctx context.Context, iD int32) (bool, error) {
+	return BasicConfigExists(ctx, boil.GetContextDB(), iD)
 }
 
 // BasicConfigExists checks if the BasicConfig row exists.
-func BasicConfigExists(ctx context.Context, exec boil.ContextExecutor, enable bool) (bool, error) {
+func BasicConfigExists(ctx context.Context, exec boil.ContextExecutor, iD int32) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"saml_sp\".\"basic_config\" where \"enable\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"saml_sp\".\"basic_config\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, enable)
+		fmt.Fprintln(writer, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, enable)
+	row := exec.QueryRowContext(ctx, sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1606,5 +1613,5 @@ func BasicConfigExists(ctx context.Context, exec boil.ContextExecutor, enable bo
 
 // Exists checks if the BasicConfig row exists.
 func (o *BasicConfig) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return BasicConfigExists(ctx, exec, o.Enable)
+	return BasicConfigExists(ctx, exec, o.ID)
 }

@@ -120,6 +120,10 @@ func TestConverter_ConvertPermissionCnf(t *testing.T) {
 }
 
 func compareBasicConfig(db *appdb.BasicConfig, api *apiserver.BasicConfiguration) error {
+	if db.ID != api.Id {
+		return errors.New("id")
+	}
+
 	if db.Enable != api.Enable {
 		return errors.New("enable")
 	}
@@ -152,8 +156,8 @@ func compareBasicConfig(db *appdb.BasicConfig, api *apiserver.BasicConfiguration
 }
 
 func compareAdvancedConfig(db *appdb.AdvancedConfig, api *apiserver.AdvancedConfiguration) error {
-	if db.Enable != api.Enable {
-		return errors.New("enable")
+	if db.ID != api.Id {
+		return errors.New("id")
 	}
 
 	if db.AllowInitializationByIdp != api.AllowInitializationByIdp {
@@ -187,8 +191,8 @@ func compareAttributeMaps(db *appdb.AttributeMap, api *apiserver.AttributeMap) e
 	if db.Email != api.Email {
 		return errors.New("email")
 	}
-	if db.Enable != api.Enable {
-		return errors.New("enable")
+	if db.ID != api.Id {
+		return errors.New("id")
 	}
 	if deep.Equal(db.FirstName.Ptr(), api.FirstName) != nil {
 		return errors.New("first name")
@@ -212,8 +216,8 @@ func comparePermissions(db *appdb.Permission, api *apiserver.Permissions) error 
 		return errors.New("default system role")
 	}
 
-	if db.Enable != api.Enable {
-		return errors.New("enable")
+	if db.ID != api.Id {
+		return errors.New("id")
 	}
 
 	dbJson := []apiserver.RoleMap{}

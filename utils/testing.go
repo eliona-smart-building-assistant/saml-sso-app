@@ -25,6 +25,7 @@ import (
 
 func CreateRandomApiBasicConfig() apiserver.BasicConfiguration {
 	var basicCnf apiserver.BasicConfiguration = apiserver.BasicConfiguration{
+		Id:            1,
 		Enable:        RandomBoolean(),
 		OwnUrl:        RandomUrl(),
 		UserToArchive: RandomBoolean(),
@@ -50,7 +51,7 @@ func CreateRandomApiBasicConfig() apiserver.BasicConfiguration {
 
 func CreateRandomApiAdvancedConfig() apiserver.AdvancedConfiguration {
 	return apiserver.AdvancedConfiguration{
-		Enable:                   RandomBoolean(),
+		Id:                       1,
 		AllowInitializationByIdp: RandomBoolean(),
 		SignedRequest:            RandomBoolean(),
 		ForceAuthn:               RandomBoolean(),
@@ -62,8 +63,8 @@ func CreateRandomApiAdvancedConfig() apiserver.AdvancedConfiguration {
 
 func CreateRandomApiAttributeMap() apiserver.AttributeMap {
 	mapping := apiserver.AttributeMap{
-		Enable: RandomBoolean(),
-		Email:  RandomCharacter(RandomInt(1, 20), false) + "@" + RandomCharacter(RandomInt(5, 20), false) + ".net",
+		Id:    1,
+		Email: RandomCharacter(RandomInt(1, 33), false),
 	}
 	if RandomBoolean() {
 		firstName := RandomCharacter(RandomInt(1, 21), false)
@@ -78,7 +79,7 @@ func CreateRandomApiAttributeMap() apiserver.AttributeMap {
 
 func CreateRandomApiPermissions() apiserver.Permissions {
 	perm := apiserver.Permissions{
-		Enable:                  RandomBoolean(),
+		Id:                      1,
 		DefaultSystemRole:       "superadmin",
 		DefaultProjRole:         "admin",
 		SystemRoleSamlAttribute: nil, // ToDo

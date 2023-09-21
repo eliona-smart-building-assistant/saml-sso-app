@@ -73,6 +73,7 @@ func ConvertDbToApiForm(dbForm any) (any, error) {
 func BasicConfigApiToDbForm(config *apiserver.BasicConfiguration) (*appdb.BasicConfig, error) {
 
 	return &appdb.BasicConfig{
+		ID:             config.Id,
 		Enable:         config.Enable,
 		SPCertificate:  config.ServiceProviderCertificate,
 		SPPrivateKey:   config.ServiceProviderPrivateKey,
@@ -85,6 +86,7 @@ func BasicConfigApiToDbForm(config *apiserver.BasicConfiguration) (*appdb.BasicC
 func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfiguration, error) {
 
 	return &apiserver.BasicConfiguration{
+		Id:                         config.ID,
 		Enable:                     config.Enable,
 		ServiceProviderCertificate: config.SPCertificate,
 		ServiceProviderPrivateKey:  config.SPPrivateKey,
@@ -97,7 +99,7 @@ func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfigur
 
 func AdvancedConfigApiToDbForm(config *apiserver.AdvancedConfiguration) (*appdb.AdvancedConfig, error) {
 	return &appdb.AdvancedConfig{
-		Enable:                   config.Enable,
+		ID:                       config.Id,
 		AllowInitializationByIdp: config.AllowInitializationByIdp,
 		SignedRequest:            config.SignedRequest,
 		ForceAuthn:               config.ForceAuthn,
@@ -108,7 +110,7 @@ func AdvancedConfigApiToDbForm(config *apiserver.AdvancedConfiguration) (*appdb.
 }
 func AdvancedConfigDbToApiForm(config *appdb.AdvancedConfig) (*apiserver.AdvancedConfiguration, error) {
 	return &apiserver.AdvancedConfiguration{
-		Enable:                   config.Enable,
+		Id:                       config.ID,
 		AllowInitializationByIdp: config.AllowInitializationByIdp,
 		SignedRequest:            config.SignedRequest,
 		ForceAuthn:               config.ForceAuthn,
@@ -120,7 +122,7 @@ func AdvancedConfigDbToApiForm(config *appdb.AdvancedConfig) (*apiserver.Advance
 
 func AttributeMapApiToDbForm(config *apiserver.AttributeMap) (*appdb.AttributeMap, error) {
 	return &appdb.AttributeMap{
-		Enable:    config.Enable,
+		ID:        config.Id,
 		Email:     config.Email,
 		FirstName: null.StringFromPtr(config.FirstName),
 		LastName:  null.StringFromPtr(config.LastName),
@@ -129,7 +131,7 @@ func AttributeMapApiToDbForm(config *apiserver.AttributeMap) (*appdb.AttributeMa
 }
 func AttributeMapDbToApiForm(config *appdb.AttributeMap) (*apiserver.AttributeMap, error) {
 	return &apiserver.AttributeMap{
-		Enable:    config.Enable,
+		Id:        config.ID,
 		Email:     config.Email,
 		FirstName: config.FirstName.Ptr(),
 		LastName:  config.LastName.Ptr(),
@@ -150,7 +152,7 @@ func PermissionApiToDbForm(permissions *apiserver.Permissions) (*appdb.Permissio
 	}
 
 	return &appdb.Permission{
-		Enable:                  permissions.Enable,
+		ID:                      permissions.Id,
 		DefaultSystemRole:       permissions.DefaultSystemRole,
 		DefaultProjRole:         permissions.DefaultProjRole,
 		SystemRoleSamlAttribute: null.StringFromPtr(permissions.SystemRoleSamlAttribute),
@@ -179,7 +181,7 @@ func PermissionDbToApiForm(permission *appdb.Permission) (*apiserver.Permissions
 	}
 
 	return &apiserver.Permissions{
-		Enable:                  permission.Enable,
+		Id:                      permission.ID,
 		DefaultSystemRole:       permission.DefaultSystemRole,
 		DefaultProjRole:         permission.DefaultProjRole,
 		SystemRoleSamlAttribute: permission.SystemRoleSamlAttribute.Ptr(),

@@ -19,42 +19,40 @@ GRANT USAGE ON SCHEMA saml_sp TO leicom ;
 GRANT ALL   ON SCHEMA saml_sp TO leicom ;
 
 CREATE TABLE IF NOT EXISTS saml_sp.basic_config (
-    enable           BOOLEAN PRIMARY KEY NOT NULL DEFAULT true ,
-    sp_certificate   TEXT                NOT NULL              ,
-    sp_private_key   TEXT                NOT NULL              ,
-    idp_metadata_url TEXT                                      ,
-    metadata_xml     TEXT                         DEFAULT NULL ,
-    own_url          TEXT                NOT NULL              ,
-    user_to_archive  BOOLEAN             NOT NULL DEFAULT false
+    id               INT PRIMARY KEY NOT NULL DEFAULT 1    CHECK (id = 1), -- due to the architecture of eliona only one configuration (1 sso per instance) is possible
+    enable           BOOLEAN         NOT NULL DEFAULT true               ,
+    sp_certificate   TEXT            NOT NULL                            ,
+    sp_private_key   TEXT            NOT NULL                            ,
+    idp_metadata_url TEXT                                                ,
+    metadata_xml     TEXT                     DEFAULT NULL               ,
+    own_url          TEXT            NOT NULL                            ,
+    user_to_archive  BOOLEAN         NOT NULL DEFAULT false
 ) ;
 
 CREATE TABLE IF NOT EXISTS saml_sp.attribute_map (
-    enable          BOOLEAN PRIMARY KEY NOT NULL REFERENCES saml_sp.basic_config(enable) ON UPDATE CASCADE          ,
-    email           TEXT    UNIQUE      NOT NULL DEFAULT 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn',
-    first_name      TEXT                         DEFAULT NULL                                                       ,
-    last_name       TEXT                         DEFAULT NULL                                                       ,
-    phone           TEXT                         DEFAULT NULL
+    id              INT PRIMARY KEY NOT NULL DEFAULT 1 REFERENCES saml_sp.basic_config(id) ON UPDATE CASCADE    ,
+    email           TEXT            NOT NULL DEFAULT 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn',
+    first_name      TEXT                     DEFAULT NULL                                                       ,
+    last_name       TEXT                     DEFAULT NULL                                                       ,
+    phone           TEXT                     DEFAULT NULL
 ) ;
 
 CREATE TABLE IF NOT EXISTS saml_sp.advanced_config (
-    enable                      BOOLEAN PRIMARY KEY NOT NULL REFERENCES saml_sp.basic_config(enable) ON UPDATE CASCADE,
-    allow_initialization_by_idp BOOLEAN             NOT NULL DEFAULT false                                            ,
-    signed_request              BOOLEAN             NOT NULL DEFAULT true                                             ,
-    force_authn                 BOOLEAN             NOT NULL DEFAULT false                                            ,
-    entity_id                   TEXT                NOT NULL DEFAULT '{ownUrl}/saml/metadata'                         ,
-    cookie_secure               BOOLEAN             NOT NULL DEFAULT false                                            ,
-    login_failed_url            TEXT                NOT NULL DEFAULT '{ownUrl}/noLogin'
+    id                          INT PRIMARY KEY NOT NULL DEFAULT 1 REFERENCES saml_sp.basic_config(id) ON UPDATE CASCADE,
+    allow_initialization_by_idp BOOLEAN         NOT NULL DEFAULT false                                                  ,
+    signed_request              BOOLEAN         NOT NULL DEFAULT true                                                   ,
+    force_authn                 BOOLEAN         NOT NULL DEFAULT false                                                  ,
+    entity_id                   TEXT            NOT NULL DEFAULT '{ownUrl}/saml/metadata'                               ,
+    cookie_secure               BOOLEAN         NOT NULL DEFAULT false                                                  ,
+    login_failed_url            TEXT            NOT NULL DEFAULT '{ownUrl}/noLogin'
 ) ;
 
 CREATE TABLE IF NOT EXISTS saml_sp.permissions (
-    enable                     BOOLEAN PRIMARY KEY NOT NULL REFERENCES saml_sp.basic_config(enable) ON UPDATE CASCADE,
-    default_system_role        TEXT                NOT NULL DEFAULT 'regular'                                        , -- reference to is maybe a bad idea (new ACL)
-    default_proj_role          TEXT                NOT NULL DEFAULT 'operator'                                       ,
-    system_role_saml_attribute TEXT                                                                                  ,
-    system_role_map            JSON                                                                                  ,
-    proj_role_saml_attribute   TEXT                                                                                  ,
-    proj_role_map              JSON
+    id                          INT PRIMARY KEY NOT NULL DEFAULT 1 REFERENCES saml_sp.basic_config(id) ON UPDATE CASCADE,
+    default_system_role         TEXT            NOT NULL DEFAULT 'regular'                                              , -- reference to is maybe a bad idea (due to the new ACL)
+    default_proj_role           TEXT            NOT NULL DEFAULT 'operator'                                             ,
+    system_role_saml_attribute  TEXT                                                                                    ,
+    system_role_map             JSON                                                                                    ,
+    proj_role_saml_attribute    TEXT                                                                                    ,
+    proj_role_map               JSON
 ) ;
-
--- To INIT
--- INSERT INTO saml_sp.attribute_map (enable, username, username_cut_email_sufix) VALUES (true, 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn', false) ON CONFLICT(username) DO NOTHING;
