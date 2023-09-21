@@ -364,6 +364,13 @@ components:
           nullable: false
           example: "https://my.eliona-instance.example"
           description: "The own URL of this Eliona instance"
+        userToArchive:
+          description: If enabled, the new created user is archived and cannot login until a admin has activated it.
+          type: boolean
+          nullable: false
+          readOnly: false
+          default: false
+          example: false
 
     AdvancedConfiguration:
       type: object
@@ -433,14 +440,14 @@ components:
           readOnly: false
           default: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"
           example: "email"
-        first_name:
+        firstName:
           description: SAML attribute to map to the first name of a user
           type: string
           nullable: true
           readOnly: false
           default: null
           example: "name"
-        last_name:
+        lastName:
           description: SAML attribute to map to the last name of a user
           type: string
           nullable: true

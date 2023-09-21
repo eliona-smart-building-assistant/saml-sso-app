@@ -127,7 +127,7 @@ func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) 
 		apiForm any = nil
 	)
 
-	basicConfigDb, err = appdb.FindBasicConfigG(ctx, true)
+	basicConfigDb, err = appdb.BasicConfigs().One(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 		basicConfigDb = dbForm.(*appdb.BasicConfig)
 	}
 
-	exists, err := basicConfigDb.Exists(ctx, getDb())
+	exists, err := appdb.BasicConfigs().Exists(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
@@ -182,8 +182,35 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 	return apiForm.(*apiserver.BasicConfiguration), err
 }
 
+func DeleteBasicConfig(ctx context.Context) (int, error) {
+	ans, err := appdb.BasicConfigs().DeleteAll(ctx, getDb())
+
+	return int(ans), err
+}
+
 func GetAdvancedConfig(ctx context.Context) (*apiserver.AdvancedConfiguration, error) {
-	return nil, errors.New("not implemented")
+
+	var (
+		err          error                            = nil
+		advConfigDb  *appdb.AdvancedConfig            = nil
+		advConfigApi *apiserver.AdvancedConfiguration = nil
+
+		apiForm any = nil
+	)
+
+	advConfigDb, err = appdb.AdvancedConfigs().One(ctx, getDb())
+	if err != nil {
+		return nil, err
+	}
+
+	apiForm, err = ConvertDbToApiForm(advConfigDb)
+	if err != nil {
+		return nil, err
+	} else {
+		advConfigApi = apiForm.(*apiserver.AdvancedConfiguration)
+	}
+
+	return advConfigApi, err
 }
 
 func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfiguration) (*apiserver.AdvancedConfiguration, error) {
@@ -193,8 +220,35 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 	return nil, errors.New("not implemented")
 }
 
+func DeleteAdvancedConfig(ctx context.Context) (int, error) {
+	ans, err := appdb.AdvancedConfigs().DeleteAll(ctx, getDb())
+
+	return int(ans), err
+}
+
 func GetAttributeMapping(ctx context.Context) (*apiserver.AttributeMap, error) {
-	return nil, errors.New("not implemented")
+
+	var (
+		err        error                   = nil
+		attrMapDb  *appdb.AttributeMap     = nil
+		attrMapApi *apiserver.AttributeMap = nil
+
+		apiForm any = nil
+	)
+
+	attrMapDb, err = appdb.AttributeMaps().One(ctx, getDb())
+	if err != nil {
+		return nil, err
+	}
+
+	apiForm, err = ConvertDbToApiForm(attrMapDb)
+	if err != nil {
+		return nil, err
+	} else {
+		attrMapApi = apiForm.(*apiserver.AttributeMap)
+	}
+
+	return attrMapApi, err
 }
 
 func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (*apiserver.AttributeMap, error) {
@@ -204,8 +258,35 @@ func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
 	return nil, errors.New("not implemented")
 }
 
-func GetPermissionSettings(ctx context.Context) (*apiserver.AttributeMap, error) {
-	return nil, errors.New("not implemented")
+func DeleteAttributeMapping(ctx context.Context) (int, error) {
+	ans, err := appdb.AttributeMaps().DeleteAll(ctx, getDb())
+
+	return int(ans), err
+}
+
+func GetPermissionSettings(ctx context.Context) (*apiserver.Permissions, error) {
+
+	var (
+		err     error                  = nil
+		permDb  *appdb.Permission      = nil
+		permApi *apiserver.Permissions = nil
+
+		apiForm any = nil
+	)
+
+	permDb, err = appdb.Permissions().One(ctx, getDb())
+	if err != nil {
+		return nil, err
+	}
+
+	apiForm, err = ConvertDbToApiForm(permDb)
+	if err != nil {
+		return nil, err
+	} else {
+		permApi = apiForm.(*apiserver.Permissions)
+	}
+
+	return permApi, err
 }
 
 func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissions) (*apiserver.Permissions, error) {
@@ -213,6 +294,30 @@ func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissio
 		return nil, errors.New("permission settings to set is nil")
 	}
 	return nil, errors.New("not implemented")
+}
+
+func DeletePermissionSettings(ctx context.Context) (int, error) {
+	ans, err := appdb.Permissions().DeleteAll(ctx, getDb())
+
+	return int(ans), err
+}
+
+func DeleteAllConfigurations(ctx context.Context) error {
+	_, err := DeletePermissionSettings(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = DeleteAttributeMapping(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = DeleteAdvancedConfig(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = DeleteBasicConfig(ctx)
+
+	return err
 }
 
 func GetElionaHost() string {

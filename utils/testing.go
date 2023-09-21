@@ -80,10 +80,10 @@ func CreateRandomApiPermissions() apiserver.Permissions {
 		Enable:                  RandomBoolean(),
 		DefaultSystemRole:       "superadmin",
 		DefaultProjRole:         "admin",
-		SystemRoleSamlAttribute: nil, // DoTo
-		SystemRoleMap:           nil, // DoTo
-		ProjRoleSamlAttribute:   nil, // DoTo
-		ProjRoleMap:             nil, // DoTo
+		SystemRoleSamlAttribute: nil, // ToDo
+		SystemRoleMap:           nil, // ToDo
+		ProjRoleSamlAttribute:   nil, // ToDo
+		ProjRoleMap:             nil, // ToDo
 	}
 
 	if RandomBoolean() {
