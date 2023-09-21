@@ -159,7 +159,7 @@ var (
 	attributeMapAllColumns            = []string{"enable", "email", "first_name", "last_name", "phone"}
 	attributeMapColumnsWithoutDefault = []string{"enable"}
 	attributeMapColumnsWithDefault    = []string{"email", "first_name", "last_name", "phone"}
-	attributeMapPrimaryKeyColumns     = []string{"email"}
+	attributeMapPrimaryKeyColumns     = []string{"enable"}
 	attributeMapGeneratedColumns      = []string{}
 )
 
@@ -576,7 +576,7 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 		if foreign.R == nil {
 			foreign.R = &basicConfigR{}
 		}
-		foreign.R.EnableAttributeMaps = append(foreign.R.EnableAttributeMaps, object)
+		foreign.R.EnableAttributeMap = object
 		return nil
 	}
 
@@ -587,7 +587,7 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 				if foreign.R == nil {
 					foreign.R = &basicConfigR{}
 				}
-				foreign.R.EnableAttributeMaps = append(foreign.R.EnableAttributeMaps, local)
+				foreign.R.EnableAttributeMap = local
 				break
 			}
 		}
@@ -598,7 +598,7 @@ func (attributeMapL) LoadEnableBasicConfig(ctx context.Context, e boil.ContextEx
 
 // SetEnableBasicConfigG of the attributeMap to the related item.
 // Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnableAttributeMaps.
+// Adds o to related.R.EnableAttributeMap.
 // Uses the global database handle.
 func (o *AttributeMap) SetEnableBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
 	return o.SetEnableBasicConfig(ctx, boil.GetContextDB(), insert, related)
@@ -606,7 +606,7 @@ func (o *AttributeMap) SetEnableBasicConfigG(ctx context.Context, insert bool, r
 
 // SetEnableBasicConfig of the attributeMap to the related item.
 // Sets o.R.EnableBasicConfig to related.
-// Adds o to related.R.EnableAttributeMaps.
+// Adds o to related.R.EnableAttributeMap.
 func (o *AttributeMap) SetEnableBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
 	var err error
 	if insert {
@@ -620,7 +620,7 @@ func (o *AttributeMap) SetEnableBasicConfig(ctx context.Context, exec boil.Conte
 		strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
 		strmangle.WhereClause("\"", "\"", 2, attributeMapPrimaryKeyColumns),
 	)
-	values := []interface{}{related.Enable, o.Email}
+	values := []interface{}{related.Enable, o.Enable}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -642,10 +642,10 @@ func (o *AttributeMap) SetEnableBasicConfig(ctx context.Context, exec boil.Conte
 
 	if related.R == nil {
 		related.R = &basicConfigR{
-			EnableAttributeMaps: AttributeMapSlice{o},
+			EnableAttributeMap: o,
 		}
 	} else {
-		related.R.EnableAttributeMaps = append(related.R.EnableAttributeMaps, o)
+		related.R.EnableAttributeMap = o
 	}
 
 	return nil
@@ -663,13 +663,13 @@ func AttributeMaps(mods ...qm.QueryMod) attributeMapQuery {
 }
 
 // FindAttributeMapG retrieves a single record by ID.
-func FindAttributeMapG(ctx context.Context, email string, selectCols ...string) (*AttributeMap, error) {
-	return FindAttributeMap(ctx, boil.GetContextDB(), email, selectCols...)
+func FindAttributeMapG(ctx context.Context, enable bool, selectCols ...string) (*AttributeMap, error) {
+	return FindAttributeMap(ctx, boil.GetContextDB(), enable, selectCols...)
 }
 
 // FindAttributeMap retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAttributeMap(ctx context.Context, exec boil.ContextExecutor, email string, selectCols ...string) (*AttributeMap, error) {
+func FindAttributeMap(ctx context.Context, exec boil.ContextExecutor, enable bool, selectCols ...string) (*AttributeMap, error) {
 	attributeMapObj := &AttributeMap{}
 
 	sel := "*"
@@ -677,10 +677,10 @@ func FindAttributeMap(ctx context.Context, exec boil.ContextExecutor, email stri
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"saml_sp\".\"attribute_map\" where \"email\"=$1", sel,
+		"select %s from \"saml_sp\".\"attribute_map\" where \"enable\"=$1", sel,
 	)
 
-	q := queries.Raw(query, email)
+	q := queries.Raw(query, enable)
 
 	err := q.Bind(ctx, exec, attributeMapObj)
 	if err != nil {
@@ -1064,7 +1064,7 @@ func (o *AttributeMap) Delete(ctx context.Context, exec boil.ContextExecutor) (i
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), attributeMapPrimaryKeyMapping)
-	sql := "DELETE FROM \"saml_sp\".\"attribute_map\" WHERE \"email\"=$1"
+	sql := "DELETE FROM \"saml_sp\".\"attribute_map\" WHERE \"enable\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1179,7 +1179,7 @@ func (o *AttributeMap) ReloadG(ctx context.Context) error {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *AttributeMap) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindAttributeMap(ctx, exec, o.Email)
+	ret, err := FindAttributeMap(ctx, exec, o.Enable)
 	if err != nil {
 		return err
 	}
@@ -1228,21 +1228,21 @@ func (o *AttributeMapSlice) ReloadAll(ctx context.Context, exec boil.ContextExec
 }
 
 // AttributeMapExistsG checks if the AttributeMap row exists.
-func AttributeMapExistsG(ctx context.Context, email string) (bool, error) {
-	return AttributeMapExists(ctx, boil.GetContextDB(), email)
+func AttributeMapExistsG(ctx context.Context, enable bool) (bool, error) {
+	return AttributeMapExists(ctx, boil.GetContextDB(), enable)
 }
 
 // AttributeMapExists checks if the AttributeMap row exists.
-func AttributeMapExists(ctx context.Context, exec boil.ContextExecutor, email string) (bool, error) {
+func AttributeMapExists(ctx context.Context, exec boil.ContextExecutor, enable bool) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"saml_sp\".\"attribute_map\" where \"email\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"saml_sp\".\"attribute_map\" where \"enable\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
 		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, email)
+		fmt.Fprintln(writer, enable)
 	}
-	row := exec.QueryRowContext(ctx, sql, email)
+	row := exec.QueryRowContext(ctx, sql, enable)
 
 	err := row.Scan(&exists)
 	if err != nil {
@@ -1254,5 +1254,5 @@ func AttributeMapExists(ctx context.Context, exec boil.ContextExecutor, email st
 
 // Exists checks if the AttributeMap row exists.
 func (o *AttributeMap) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return AttributeMapExists(ctx, exec, o.Email)
+	return AttributeMapExists(ctx, exec, o.Enable)
 }

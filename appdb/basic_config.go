@@ -30,6 +30,7 @@ type BasicConfig struct {
 	IdpMetadataURL null.String `boil:"idp_metadata_url" json:"idp_metadata_url,omitempty" toml:"idp_metadata_url" yaml:"idp_metadata_url,omitempty"`
 	MetadataXML    null.String `boil:"metadata_xml" json:"metadata_xml,omitempty" toml:"metadata_xml" yaml:"metadata_xml,omitempty"`
 	OwnURL         string      `boil:"own_url" json:"own_url" toml:"own_url" yaml:"own_url"`
+	UserToArchive  bool        `boil:"user_to_archive" json:"user_to_archive" toml:"user_to_archive" yaml:"user_to_archive"`
 
 	R *basicConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L basicConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,6 +43,7 @@ var BasicConfigColumns = struct {
 	IdpMetadataURL string
 	MetadataXML    string
 	OwnURL         string
+	UserToArchive  string
 }{
 	Enable:         "enable",
 	SPCertificate:  "sp_certificate",
@@ -49,6 +51,7 @@ var BasicConfigColumns = struct {
 	IdpMetadataURL: "idp_metadata_url",
 	MetadataXML:    "metadata_xml",
 	OwnURL:         "own_url",
+	UserToArchive:  "user_to_archive",
 }
 
 var BasicConfigTableColumns = struct {
@@ -58,6 +61,7 @@ var BasicConfigTableColumns = struct {
 	IdpMetadataURL string
 	MetadataXML    string
 	OwnURL         string
+	UserToArchive  string
 }{
 	Enable:         "basic_config.enable",
 	SPCertificate:  "basic_config.sp_certificate",
@@ -65,6 +69,7 @@ var BasicConfigTableColumns = struct {
 	IdpMetadataURL: "basic_config.idp_metadata_url",
 	MetadataXML:    "basic_config.metadata_xml",
 	OwnURL:         "basic_config.own_url",
+	UserToArchive:  "basic_config.user_to_archive",
 }
 
 // Generated where
@@ -76,6 +81,7 @@ var BasicConfigWhere = struct {
 	IdpMetadataURL whereHelpernull_String
 	MetadataXML    whereHelpernull_String
 	OwnURL         whereHelperstring
+	UserToArchive  whereHelperbool
 }{
 	Enable:         whereHelperbool{field: "\"saml_sp\".\"basic_config\".\"enable\""},
 	SPCertificate:  whereHelperstring{field: "\"saml_sp\".\"basic_config\".\"sp_certificate\""},
@@ -83,24 +89,25 @@ var BasicConfigWhere = struct {
 	IdpMetadataURL: whereHelpernull_String{field: "\"saml_sp\".\"basic_config\".\"idp_metadata_url\""},
 	MetadataXML:    whereHelpernull_String{field: "\"saml_sp\".\"basic_config\".\"metadata_xml\""},
 	OwnURL:         whereHelperstring{field: "\"saml_sp\".\"basic_config\".\"own_url\""},
+	UserToArchive:  whereHelperbool{field: "\"saml_sp\".\"basic_config\".\"user_to_archive\""},
 }
 
 // BasicConfigRels is where relationship names are stored.
 var BasicConfigRels = struct {
 	EnableAdvancedConfig string
+	EnableAttributeMap   string
 	EnablePermission     string
-	EnableAttributeMaps  string
 }{
 	EnableAdvancedConfig: "EnableAdvancedConfig",
+	EnableAttributeMap:   "EnableAttributeMap",
 	EnablePermission:     "EnablePermission",
-	EnableAttributeMaps:  "EnableAttributeMaps",
 }
 
 // basicConfigR is where relationships are stored.
 type basicConfigR struct {
-	EnableAdvancedConfig *AdvancedConfig   `boil:"EnableAdvancedConfig" json:"EnableAdvancedConfig" toml:"EnableAdvancedConfig" yaml:"EnableAdvancedConfig"`
-	EnablePermission     *Permission       `boil:"EnablePermission" json:"EnablePermission" toml:"EnablePermission" yaml:"EnablePermission"`
-	EnableAttributeMaps  AttributeMapSlice `boil:"EnableAttributeMaps" json:"EnableAttributeMaps" toml:"EnableAttributeMaps" yaml:"EnableAttributeMaps"`
+	EnableAdvancedConfig *AdvancedConfig `boil:"EnableAdvancedConfig" json:"EnableAdvancedConfig" toml:"EnableAdvancedConfig" yaml:"EnableAdvancedConfig"`
+	EnableAttributeMap   *AttributeMap   `boil:"EnableAttributeMap" json:"EnableAttributeMap" toml:"EnableAttributeMap" yaml:"EnableAttributeMap"`
+	EnablePermission     *Permission     `boil:"EnablePermission" json:"EnablePermission" toml:"EnablePermission" yaml:"EnablePermission"`
 }
 
 // NewStruct creates a new relationship struct
@@ -115,6 +122,13 @@ func (r *basicConfigR) GetEnableAdvancedConfig() *AdvancedConfig {
 	return r.EnableAdvancedConfig
 }
 
+func (r *basicConfigR) GetEnableAttributeMap() *AttributeMap {
+	if r == nil {
+		return nil
+	}
+	return r.EnableAttributeMap
+}
+
 func (r *basicConfigR) GetEnablePermission() *Permission {
 	if r == nil {
 		return nil
@@ -122,20 +136,13 @@ func (r *basicConfigR) GetEnablePermission() *Permission {
 	return r.EnablePermission
 }
 
-func (r *basicConfigR) GetEnableAttributeMaps() AttributeMapSlice {
-	if r == nil {
-		return nil
-	}
-	return r.EnableAttributeMaps
-}
-
 // basicConfigL is where Load methods for each relationship are stored.
 type basicConfigL struct{}
 
 var (
-	basicConfigAllColumns            = []string{"enable", "sp_certificate", "sp_private_key", "idp_metadata_url", "metadata_xml", "own_url"}
+	basicConfigAllColumns            = []string{"enable", "sp_certificate", "sp_private_key", "idp_metadata_url", "metadata_xml", "own_url", "user_to_archive"}
 	basicConfigColumnsWithoutDefault = []string{"sp_certificate", "sp_private_key", "own_url"}
-	basicConfigColumnsWithDefault    = []string{"enable", "idp_metadata_url", "metadata_xml"}
+	basicConfigColumnsWithDefault    = []string{"enable", "idp_metadata_url", "metadata_xml", "user_to_archive"}
 	basicConfigPrimaryKeyColumns     = []string{"enable"}
 	basicConfigGeneratedColumns      = []string{}
 )
@@ -449,6 +456,17 @@ func (o *BasicConfig) EnableAdvancedConfig(mods ...qm.QueryMod) advancedConfigQu
 	return AdvancedConfigs(queryMods...)
 }
 
+// EnableAttributeMap pointed to by the foreign key.
+func (o *BasicConfig) EnableAttributeMap(mods ...qm.QueryMod) attributeMapQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"enable\" = ?", o.Enable),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return AttributeMaps(queryMods...)
+}
+
 // EnablePermission pointed to by the foreign key.
 func (o *BasicConfig) EnablePermission(mods ...qm.QueryMod) permissionQuery {
 	queryMods := []qm.QueryMod{
@@ -458,20 +476,6 @@ func (o *BasicConfig) EnablePermission(mods ...qm.QueryMod) permissionQuery {
 	queryMods = append(queryMods, mods...)
 
 	return Permissions(queryMods...)
-}
-
-// EnableAttributeMaps retrieves all the attribute_map's AttributeMaps with an executor via enable column.
-func (o *BasicConfig) EnableAttributeMaps(mods ...qm.QueryMod) attributeMapQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"saml_sp\".\"attribute_map\".\"enable\"=?", o.Enable),
-	)
-
-	return AttributeMaps(queryMods...)
 }
 
 // LoadEnableAdvancedConfig allows an eager lookup of values, cached into the
@@ -581,6 +585,123 @@ func (basicConfigL) LoadEnableAdvancedConfig(ctx context.Context, e boil.Context
 				local.R.EnableAdvancedConfig = foreign
 				if foreign.R == nil {
 					foreign.R = &advancedConfigR{}
+				}
+				foreign.R.EnableBasicConfig = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadEnableAttributeMap allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (basicConfigL) LoadEnableAttributeMap(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
+	var slice []*BasicConfig
+	var object *BasicConfig
+
+	if singular {
+		var ok bool
+		object, ok = maybeBasicConfig.(*BasicConfig)
+		if !ok {
+			object = new(BasicConfig)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeBasicConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeBasicConfig))
+			}
+		}
+	} else {
+		s, ok := maybeBasicConfig.(*[]*BasicConfig)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeBasicConfig)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeBasicConfig))
+			}
+		}
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &basicConfigR{}
+		}
+		args = append(args, object.Enable)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &basicConfigR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.Enable) {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.Enable)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(
+		qm.From(`saml_sp.attribute_map`),
+		qm.WhereIn(`saml_sp.attribute_map.enable in ?`, args...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load AttributeMap")
+	}
+
+	var resultSlice []*AttributeMap
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice AttributeMap")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for attribute_map")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for attribute_map")
+	}
+
+	if len(attributeMapAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.EnableAttributeMap = foreign
+		if foreign.R == nil {
+			foreign.R = &attributeMapR{}
+		}
+		foreign.R.EnableBasicConfig = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.Enable, foreign.Enable) {
+				local.R.EnableAttributeMap = foreign
+				if foreign.R == nil {
+					foreign.R = &attributeMapR{}
 				}
 				foreign.R.EnableBasicConfig = local
 				break
@@ -708,120 +829,6 @@ func (basicConfigL) LoadEnablePermission(ctx context.Context, e boil.ContextExec
 	return nil
 }
 
-// LoadEnableAttributeMaps allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (basicConfigL) LoadEnableAttributeMaps(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBasicConfig interface{}, mods queries.Applicator) error {
-	var slice []*BasicConfig
-	var object *BasicConfig
-
-	if singular {
-		var ok bool
-		object, ok = maybeBasicConfig.(*BasicConfig)
-		if !ok {
-			object = new(BasicConfig)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeBasicConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeBasicConfig))
-			}
-		}
-	} else {
-		s, ok := maybeBasicConfig.(*[]*BasicConfig)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeBasicConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeBasicConfig))
-			}
-		}
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &basicConfigR{}
-		}
-		args = append(args, object.Enable)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &basicConfigR{}
-			}
-
-			for _, a := range args {
-				if queries.Equal(a, obj.Enable) {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.Enable)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`saml_sp.attribute_map`),
-		qm.WhereIn(`saml_sp.attribute_map.enable in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load attribute_map")
-	}
-
-	var resultSlice []*AttributeMap
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice attribute_map")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on attribute_map")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for attribute_map")
-	}
-
-	if len(attributeMapAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.EnableAttributeMaps = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &attributeMapR{}
-			}
-			foreign.R.EnableBasicConfig = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if queries.Equal(local.Enable, foreign.Enable) {
-				local.R.EnableAttributeMaps = append(local.R.EnableAttributeMaps, foreign)
-				if foreign.R == nil {
-					foreign.R = &attributeMapR{}
-				}
-				foreign.R.EnableBasicConfig = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // SetEnableAdvancedConfigG of the basicConfig to the related item.
 // Sets o.R.EnableAdvancedConfig to related.
 // Adds o to related.R.EnableBasicConfig.
@@ -872,6 +879,64 @@ func (o *BasicConfig) SetEnableAdvancedConfig(ctx context.Context, exec boil.Con
 
 	if related.R == nil {
 		related.R = &advancedConfigR{
+			EnableBasicConfig: o,
+		}
+	} else {
+		related.R.EnableBasicConfig = o
+	}
+	return nil
+}
+
+// SetEnableAttributeMapG of the basicConfig to the related item.
+// Sets o.R.EnableAttributeMap to related.
+// Adds o to related.R.EnableBasicConfig.
+// Uses the global database handle.
+func (o *BasicConfig) SetEnableAttributeMapG(ctx context.Context, insert bool, related *AttributeMap) error {
+	return o.SetEnableAttributeMap(ctx, boil.GetContextDB(), insert, related)
+}
+
+// SetEnableAttributeMap of the basicConfig to the related item.
+// Sets o.R.EnableAttributeMap to related.
+// Adds o to related.R.EnableBasicConfig.
+func (o *BasicConfig) SetEnableAttributeMap(ctx context.Context, exec boil.ContextExecutor, insert bool, related *AttributeMap) error {
+	var err error
+
+	if insert {
+		queries.Assign(&related.Enable, o.Enable)
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"saml_sp\".\"attribute_map\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
+			strmangle.WhereClause("\"", "\"", 2, attributeMapPrimaryKeyColumns),
+		)
+		values := []interface{}{o.Enable, related.Enable}
+
+		if boil.IsDebug(ctx) {
+			writer := boil.DebugWriterFrom(ctx)
+			fmt.Fprintln(writer, updateQuery)
+			fmt.Fprintln(writer, values)
+		}
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		queries.Assign(&related.Enable, o.Enable)
+	}
+
+	if o.R == nil {
+		o.R = &basicConfigR{
+			EnableAttributeMap: related,
+		}
+	} else {
+		o.R.EnableAttributeMap = related
+	}
+
+	if related.R == nil {
+		related.R = &attributeMapR{
 			EnableBasicConfig: o,
 		}
 	} else {
@@ -934,68 +999,6 @@ func (o *BasicConfig) SetEnablePermission(ctx context.Context, exec boil.Context
 		}
 	} else {
 		related.R.EnableBasicConfig = o
-	}
-	return nil
-}
-
-// AddEnableAttributeMapsG adds the given related objects to the existing relationships
-// of the basic_config, optionally inserting them as new records.
-// Appends related to o.R.EnableAttributeMaps.
-// Sets related.R.EnableBasicConfig appropriately.
-// Uses the global database handle.
-func (o *BasicConfig) AddEnableAttributeMapsG(ctx context.Context, insert bool, related ...*AttributeMap) error {
-	return o.AddEnableAttributeMaps(ctx, boil.GetContextDB(), insert, related...)
-}
-
-// AddEnableAttributeMaps adds the given related objects to the existing relationships
-// of the basic_config, optionally inserting them as new records.
-// Appends related to o.R.EnableAttributeMaps.
-// Sets related.R.EnableBasicConfig appropriately.
-func (o *BasicConfig) AddEnableAttributeMaps(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*AttributeMap) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			queries.Assign(&rel.Enable, o.Enable)
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"saml_sp\".\"attribute_map\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"enable"}),
-				strmangle.WhereClause("\"", "\"", 2, attributeMapPrimaryKeyColumns),
-			)
-			values := []interface{}{o.Enable, rel.Email}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			queries.Assign(&rel.Enable, o.Enable)
-		}
-	}
-
-	if o.R == nil {
-		o.R = &basicConfigR{
-			EnableAttributeMaps: related,
-		}
-	} else {
-		o.R.EnableAttributeMaps = append(o.R.EnableAttributeMaps, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &attributeMapR{
-				EnableBasicConfig: o,
-			}
-		} else {
-			rel.R.EnableBasicConfig = o
-		}
 	}
 	return nil
 }

@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS saml_sp.attribute_map (
     email           TEXT    UNIQUE      NOT NULL DEFAULT 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn',
     first_name      TEXT                         DEFAULT NULL                                                       ,
     last_name       TEXT                         DEFAULT NULL                                                       ,
-    phone           TEXT                         DEFAULT NULL                                                       ,
+    phone           TEXT                         DEFAULT NULL
 ) ;
 
 CREATE TABLE IF NOT EXISTS saml_sp.advanced_config (
