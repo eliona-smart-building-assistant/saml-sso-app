@@ -29,6 +29,9 @@ type BasicConfiguration struct {
 
 	// The own URL of this Eliona instance
 	OwnUrl string `json:"ownUrl,omitempty"`
+
+	// If enabled, the new created user is archived and cannot login until a admin has activated it.
+	UserToArchive bool `json:"userToArchive,omitempty"`
 }
 
 // AssertBasicConfigurationRequired checks if the required fields are not zero-ed

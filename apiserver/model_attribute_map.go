@@ -19,10 +19,10 @@ type AttributeMap struct {
 	Email string `json:"email,omitempty"`
 
 	// SAML attribute to map to the first name of a user
-	FirstName *string `json:"first_name,omitempty"`
+	FirstName *string `json:"firstName,omitempty"`
 
 	// SAML attribute to map to the last name of a user
-	LastName *string `json:"last_name,omitempty"`
+	LastName *string `json:"lastName,omitempty"`
 
 	// SAML attribute to map to the phone number of a user
 	Phone *string `json:"phone,omitempty"`
