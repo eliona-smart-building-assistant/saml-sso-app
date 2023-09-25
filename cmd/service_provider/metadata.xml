@@ -1,0 +1,8 @@
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" validUntil="2023-09-27T11:26:42.169Z" entityID="http://localhost:8080/saml/metadata">
+  <SPSSODescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" validUntil="2023-09-27T11:26:42.168787944Z" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="false" WantAssertionsSigned="true">
+    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8080/saml/slo" ResponseLocation="http://localhost:8080/saml/slo"></SingleLogoutService>
+    <NameIDFormat></NameIDFormat>
+    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://localhost:8080/saml/acs" index="1"></AssertionConsumerService>
+    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="http://localhost:8080/saml/acs" index="2"></AssertionConsumerService>
+  </SPSSODescriptor>
+</EntityDescriptor>

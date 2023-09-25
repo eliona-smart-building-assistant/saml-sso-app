@@ -16,9 +16,13 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"saml-sso/apiserver"
 	"saml-sso/apiservices"
+	"saml-sso/conf"
+	"saml-sso/eliona"
+	"saml-sso/saml"
 	"strconv"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
@@ -30,15 +34,33 @@ const (
 	API_SERVER_PORT = 3000
 )
 
-func start() {
+func run() {
+	basicConfig, err := conf.GetBasicConfig(context.Background())
+	if err != nil {
+		log.Fatal(LOG_REGIO, "cannot load basic config")
+	}
 
-	log.Debug(LOG_REGIO, "start")
+	advancedConfig, err := conf.GetAdvancedConfig(context.Background())
+	if err != nil {
+		log.Fatal(LOG_REGIO, "cannot load advanced config")
+	}
 
-}
+	sp, err := saml.NewServiceProviderAdvanced(basicConfig.ServiceProviderCertificate,
+		basicConfig.ServiceProviderPrivateKey, basicConfig.OwnUrl,
+		[]byte(*basicConfig.IdpMetadataUrl), &advancedConfig.EntityId,
+		&advancedConfig.AllowInitializationByIdp, &advancedConfig.SignedRequest,
+		&advancedConfig.ForceAuthn, &advancedConfig.CookieSecure)
+	if err != nil {
+		log.Fatal(LOG_REGIO, "cannot initialize saml service provider")
+	}
 
-// listenApi starts the API server and listen for requests
-func listenApi() {
-	err := http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT)), apiserver.NewRouter(
+	elionaAuth := eliona.NewAuthorization()
+
+	app := http.HandlerFunc(elionaAuth.Authorize)
+	http.Handle("/adfs/auth/", sp.GetMiddleWare().RequireAccount(app))
+	http.Handle("/saml/", sp.GetMiddleWare())
+
+	err = http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT)), apiserver.NewRouter(
 		apiserver.NewConfigurationApiController(apiservices.NewConfigurationApiService()),
 		apiserver.NewVersionApiController(apiservices.NewVersionApiService()),
 		apiserver.NewGenericSingleSignOnApiController(apiservices.NewGenericSingleSignOnApiService()),

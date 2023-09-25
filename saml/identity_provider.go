@@ -50,13 +50,22 @@ const (
 	IDENTITY_PROVIDER_PORT          = 8000
 )
 
-func NewIdentityProvider(baseUrl string) (*IdentityProvider, error) {
+func NewIdentityProvider(baseUrl string, certificate *string, privKey *string) (*IdentityProvider, error) {
+	var err error
+
 	cn := "localhost"
 	ip := "127.0.0.1"
+	sCert := ""
+	pKey := ""
 
-	sCert, pKey, err := utils.CreateSelfsignedX509Certificate(10, 4096, &cn, &ip)
-	if err != nil {
-		return nil, err
+	if certificate == nil || privKey == nil {
+		sCert, pKey, err = utils.CreateSelfsignedX509Certificate(10, 4096, &cn, &ip)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		sCert = *certificate
+		pKey = *privKey
 	}
 
 	certB, _ := pem.Decode([]byte(sCert))

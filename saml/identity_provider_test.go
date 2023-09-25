@@ -46,8 +46,8 @@ const (
 
 func TestIdentityProvider(t *testing.T) {
 
-	idp, err := saml.NewIdentityProvider(TEST_IDP_SCHEME + TEST_IDP_HOST + ":" +
-		strconv.Itoa(saml.IDENTITY_PROVIDER_PORT))
+	idp, err := saml.NewIdentityProvider(TEST_IDP_SCHEME+TEST_IDP_HOST+":"+
+		strconv.Itoa(saml.IDENTITY_PROVIDER_PORT), nil, nil)
 	if err != nil {
 		t.Log(err)
 	}

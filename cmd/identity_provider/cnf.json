@@ -1,0 +1,20 @@
+{
+    "baseUrl": "http://localhost:8000",
+    "idpCertificate": "./cmd/identity_provider/certificate.pem",
+    "idpPrivateKey": "./cmd/identity_provider/privatekey.pem",
+    "serviceProviders": [
+        {
+            "entityId": "http://localhost:8080/saml/metadata",
+            "metadata": "./cmd/service_provider/metadata.xml"
+        }
+    ],
+    "users": [
+        {
+            "login": "eliona@eliona.test",
+            "email": "eliona@eliona.test",
+            "firstName": "Eliona",
+            "lastName": "Test",
+            "password": "myPassword"
+        }
+    ]
+}

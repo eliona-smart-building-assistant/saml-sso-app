@@ -27,7 +27,16 @@ type ServiceProvider struct {
 	sp *samlsp.Middleware
 }
 
-func NewServiceProvider(certificate string, privateKey string, baseUrl string, idpMetadata []byte) (*ServiceProvider, error) {
+func NewServiceProvider(certificate string, privateKey string, baseUrl string,
+	idpMetadata []byte) (*ServiceProvider, error) {
+
+	return NewServiceProviderAdvanced(certificate, privateKey, baseUrl, idpMetadata, nil, nil,
+		nil, nil, nil)
+}
+
+func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl string, idpMetadata []byte,
+	entityId *string, allowInitByIdp *bool, signedRequest *bool, forceAuthn *bool,
+	cookieSecure *bool) (*ServiceProvider, error) {
 	var serviceProvider ServiceProvider = ServiceProvider{}
 
 	rootUrl, err := url.Parse(baseUrl)
@@ -45,12 +54,30 @@ func NewServiceProvider(certificate string, privateKey string, baseUrl string, i
 		return nil, err
 	}
 
-	serviceProvider.sp, err = samlsp.New(samlsp.Options{
+	opts := samlsp.Options{
 		URL:         *rootUrl,
 		Key:         keyPair.PrivateKey.(*rsa.PrivateKey),
 		Certificate: keyPair.Leaf,
 		IDPMetadata: idpMeta,
-	})
+	}
+
+	if entityId != nil {
+		opts.EntityID = *entityId
+	}
+	if allowInitByIdp != nil {
+		opts.AllowIDPInitiated = *allowInitByIdp
+	}
+	if signedRequest != nil {
+		opts.SignRequest = *signedRequest
+	}
+	if forceAuthn != nil {
+		opts.ForceAuthn = *forceAuthn
+	}
+	if cookieSecure != nil {
+		// opts.CookieSecure: true // option not available any more
+	}
+
+	serviceProvider.sp, err = samlsp.New(opts)
 
 	return &serviceProvider, err
 }

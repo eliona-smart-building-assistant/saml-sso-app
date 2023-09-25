@@ -29,9 +29,12 @@ RUN DATE=$(date) && \
 
 FROM eliona/base-alpine:latest-3.17 AS target
 
+RUN apk update
+RUN apk upgrade
+
 COPY --from=build /app ./
 COPY conf/*.sql ./conf/
-# COPY eliona/*.json ./eliona/
+
 COPY openapi.yaml ./
 
 ENV APPNAME=saml-sso

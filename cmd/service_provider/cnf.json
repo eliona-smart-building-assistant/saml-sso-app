@@ -1,0 +1,6 @@
+{
+    "baseUrl": "http://localhost:8080",
+    "idpMetadata": "./cmd/identity_provider/metadata.xml",
+    "certificate": "./cmd/service_provider/certificate.pem",
+    "privateKey": "./cmd/service_provider/privatekey.pem"
+}
