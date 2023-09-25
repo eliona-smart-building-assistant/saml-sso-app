@@ -15,9 +15,46 @@
 
 package saml
 
+import (
+	"crypto/rsa"
+	"net/url"
+	"saml-sso/utils"
+
+	"github.com/crewjam/saml/samlsp"
+)
+
 type ServiceProvider struct {
+	sp *samlsp.Middleware
 }
 
-func NewServiceProvider() *ServiceProvider {
-	return &ServiceProvider{}
+func NewServiceProvider(certificate string, privateKey string, baseUrl string, idpMetadata []byte) (*ServiceProvider, error) {
+	var serviceProvider ServiceProvider = ServiceProvider{}
+
+	rootUrl, err := url.Parse(baseUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	keyPair, err := utils.GetCombinedX509Certificate(certificate, privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	idpMeta, err := samlsp.ParseMetadata(idpMetadata)
+	if err != nil {
+		return nil, err
+	}
+
+	serviceProvider.sp, err = samlsp.New(samlsp.Options{
+		URL:         *rootUrl,
+		Key:         keyPair.PrivateKey.(*rsa.PrivateKey),
+		Certificate: keyPair.Leaf,
+		IDPMetadata: idpMeta,
+	})
+
+	return &serviceProvider, err
+}
+
+func (s *ServiceProvider) GetMiddleWare() *samlsp.Middleware {
+	return s.sp
 }

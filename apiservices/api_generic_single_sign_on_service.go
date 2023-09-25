@@ -44,13 +44,10 @@ func (s *GenericSingleSignOnApiService) GetAuthorizationProcedure(ctx context.Co
 	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetAuthorizationProcedure method not implemented")
 }
 
-// GetSSOActive - Check, if a SSO service is available and configured
 func (s *GenericSingleSignOnApiService) GetSSOActive(ctx context.Context) (apiserver.ImplResponse, error) {
-	// TODO - update GetSSOActive with the required logic for this service method.
-	// Add api_generic_single_sign_on_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	active := apiserver.Active{
+		Active: true,
+	}
 
-	//TODO: Uncomment the next line to return response Response(200, Active{}) or use other options such as http.Ok ...
-	//return Response(200, Active{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetSSOActive method not implemented")
+	return apiserver.Response(http.StatusOK, active), nil
 }
