@@ -13,17 +13,14 @@
 //  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package conf
+package utils
 
-import (
-	"context"
+import "strings"
 
-	"github.com/eliona-smart-building-assistant/go-utils/db"
+const (
+	UTILS_OWN_URL_PLACEHOLDER = "{ownUrl}"
 )
 
-// InitConfiguration initialize the configuration of the app
-func InitConfiguration(connection db.Connection) error {
-
-	return InsertAutoSamlConfiguration(context.Background())
-	// return nil
+func SubstituteOwnUrlUrlString(url string, ownUrl string) string {
+	return strings.ReplaceAll(url, UTILS_OWN_URL_PLACEHOLDER, ownUrl)
 }

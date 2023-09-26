@@ -1,5 +1,5 @@
 //  This file is part of the eliona project.
-//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
 //  ______ _ _
 // |  ____| (_)
 // | |__  | |_  ___  _ __   __ _
@@ -21,6 +21,11 @@ import (
 	"saml-sso/utils"
 
 	"github.com/crewjam/saml/samlsp"
+	"github.com/eliona-smart-building-assistant/go-utils/log"
+)
+
+const (
+	LOG_REGIO = "service provider"
 )
 
 type ServiceProvider struct {
@@ -51,7 +56,9 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 
 	idpMeta, err := samlsp.ParseMetadata(idpMetadata)
 	if err != nil {
-		return nil, err
+		log.Warn(LOG_REGIO, "cannot parse metadata. "+
+			"continiue without, but cannot operate with a IdP in current state! ... %v", err)
+		// return nil, err
 	}
 
 	opts := samlsp.Options{
@@ -62,7 +69,7 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 	}
 
 	if entityId != nil {
-		opts.EntityID = *entityId
+		opts.EntityID = utils.SubstituteOwnUrlUrlString(*entityId, baseUrl)
 	}
 	if allowInitByIdp != nil {
 		opts.AllowIDPInitiated = *allowInitByIdp

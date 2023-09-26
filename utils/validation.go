@@ -13,17 +13,24 @@
 //  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package conf
+package utils
 
 import (
-	"context"
-
-	"github.com/eliona-smart-building-assistant/go-utils/db"
+	"errors"
+	"net/url"
 )
 
-// InitConfiguration initialize the configuration of the app
-func InitConfiguration(connection db.Connection) error {
+func ValidateUrl(in string) error {
 
-	return InsertAutoSamlConfiguration(context.Background())
-	// return nil
+	_, err := url.ParseRequestURI(in)
+	if err != nil {
+		return errors.New("parse url failed: " + err.Error())
+	}
+
+	u, err := url.Parse(in)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return errors.New("uncomplete url. missing scheme or host: " + err.Error())
+	}
+
+	return nil
 }

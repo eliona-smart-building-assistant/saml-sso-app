@@ -1,5 +1,5 @@
 //  This file is part of the eliona project.
-//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
 //  ______ _ _
 // |  ____| (_)
 // | |__  | |_  ___  _ __   __ _
@@ -17,27 +17,26 @@ package conf_test
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"os/exec"
 	"saml-sso/apiserver"
 	"saml-sso/conf"
 	"saml-sso/utils"
 	"strings"
 	"testing"
 
+	"github.com/eliona-smart-building-assistant/go-eliona/app"
+	"github.com/eliona-smart-building-assistant/go-utils/db"
 	"github.com/go-test/deep"
 )
 
 // Needs a DB with exported CONNECTION_STRING
 func TestConf_InitDB(t *testing.T) {
 	conf.DropOwnSchema()
-	cmd := exec.Command("psql", os.Getenv("CONNECTION_STRING"), "-f", "init.sql")
-	out, err := cmd.Output()
+
+	execFunc := app.ExecSqlFile("init.sql")
+	err := execFunc(db.NewConnection())
 	if err != nil {
-		t.Error("cannot initialize db with own shema: ", err)
+		t.Error("asdasdas", err)
 	}
-	fmt.Println(string(out))
 }
 
 func TestConf_LoadAutoConfig(t *testing.T) {

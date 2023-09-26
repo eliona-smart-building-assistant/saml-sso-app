@@ -1,5 +1,5 @@
 //  This file is part of the eliona project.
-//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
 //  ______ _ _
 // |  ____| (_)
 // | |__  | |_  ___  _ __   __ _
@@ -20,8 +20,8 @@ package eliona
 import (
 	"database/sql"
 	"errors"
-	"os"
 
+	"github.com/eliona-smart-building-assistant/go-eliona/app"
 	"github.com/eliona-smart-building-assistant/go-utils/db"
 )
 
@@ -49,6 +49,14 @@ func GetElionaJsonWebToken(email string) (*string, error) {
 	return &jwt.Jwt, err
 }
 
+func UpdateElionaUserArchivedPhone(email string, phone *string, archived bool) error {
+
+	_, err := getDb().Exec("UPDATE eliona_user SET archived = $1, phone = $2 WHERE email = $3",
+		archived, phone, email)
+
+	return err
+}
+
 func getDb() *sql.DB {
-	return db.Database(os.Getenv("APPNAME"))
+	return db.Database(app.AppName())
 }

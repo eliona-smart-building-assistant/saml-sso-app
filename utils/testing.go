@@ -1,5 +1,5 @@
 //  This file is part of the eliona project.
-//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
 //  ______ _ _
 // |  ____| (_)
 // | |__  | |_  ___  _ __   __ _
@@ -16,8 +16,6 @@
 package utils
 
 import (
-	"errors"
-	"net/url"
 	"saml-sso/apiserver"
 
 	"github.com/eliona-smart-building-assistant/go-utils/log"
@@ -94,19 +92,4 @@ func CreateRandomApiPermissions() apiserver.Permissions {
 	}
 
 	return perm
-}
-
-func ValidateUrl(in string) error {
-
-	_, err := url.ParseRequestURI(in)
-	if err != nil {
-		return errors.New("parse url failed: " + err.Error())
-	}
-
-	u, err := url.Parse(in)
-	if err != nil || u.Scheme == "" || u.Host == "" {
-		return errors.New("uncomplete url. missing scheme or host: " + err.Error())
-	}
-
-	return nil
 }

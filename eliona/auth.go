@@ -1,5 +1,5 @@
 //  This file is part of the eliona project.
-//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
 //  ______ _ _
 // |  ____| (_)
 // | |__  | |_  ___  _ __   __ _
@@ -17,9 +17,11 @@ package eliona
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"saml-sso/apiserver"
 	"saml-sso/conf"
+	"saml-sso/utils"
 
 	"github.com/crewjam/saml/samlsp"
 	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
@@ -41,9 +43,10 @@ func NewAuthorization(baseUrl string, userToArchive bool,
 	redirectNoLogin string) *Authorization {
 
 	return &Authorization{
-		baseUrl:       baseUrl,
-		userToArchive: userToArchive,
-		eliApi:        NewEliApiV2(),
+		baseUrl:         baseUrl,
+		userToArchive:   userToArchive,
+		eliApi:          NewEliApiV2(),
+		redirectNoLogin: utils.SubstituteOwnUrlUrlString(redirectNoLogin, baseUrl),
 	}
 }
 
@@ -103,14 +106,26 @@ func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
 			Email:     loginEmail,
 			Firstname: *api.NewNullableString(&firstname),
 			Lastname:  *api.NewNullableString(&lastname),
-			// Phone: *api.NewNullableString(&phone), // not possible over APIv2, Maybe set over DB?
-			// Archived: a.userToArchive,             // not possible over APIv2, Maybe set over DB?
+			// Phone: *api.NewNullableString(&phone), 	// not possible over APIv2
+			// Archived: a.userToArchive,				// not possible over APIv2
 		})
 		if err != nil {
 			log.Error(LOG_REGIO, "creating user: %v", err)
 			errorMessage = []byte(err.Error())
 			goto internalServerError
 		}
+	}
+
+	err = UpdateElionaUserArchivedPhone(user.Email, &phone, a.userToArchive)
+	if err != nil {
+		log.Error(LOG_REGIO, "cannot set phone and archive flag: %v", err)
+		errorMessage = []byte(err.Error())
+		goto internalServerError
+	}
+
+	err = a.SetUserPermissions(user.Email)
+	if err != nil {
+		log.Error(LOG_REGIO, "cannot set user permissions")
 	}
 
 	// obtain a jwt to login via cookies
@@ -146,4 +161,24 @@ internalServerError:
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write(errorMessage)
 	return
+}
+
+func (a *Authorization) SetUserPermissions(email string) error {
+
+	var (
+		err         error
+		permissions *apiserver.Permissions
+	)
+
+	permissions, err = conf.GetPermissionSettings(context.Background())
+	if err != nil {
+		return err
+	}
+
+	log.Info(LOG_REGIO,
+		"ToDo: add user to a project and set permissions according the configurations. %v",
+		permissions)
+
+	err = errors.New("not implemented")
+	return err
 }

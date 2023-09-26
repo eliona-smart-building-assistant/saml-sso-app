@@ -1,5 +1,5 @@
 //  This file is part of the eliona project.
-//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
 //  ______ _ _
 // |  ____| (_)
 // | |__  | |_  ___  _ __   __ _
@@ -19,12 +19,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"os"
 
 	"saml-sso/apiserver"
 	"saml-sso/appdb"
 	"saml-sso/utils"
 
+	"github.com/eliona-smart-building-assistant/go-eliona/app"
 	"github.com/eliona-smart-building-assistant/go-utils/db"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 	"github.com/volatiletech/null/v8"
@@ -42,8 +42,8 @@ const (
 	AUTO_CNF_DEFAULT_SIGNING_REQ       = true
 	AUTO_CNF_DEFAULT_FORCE_AUTHN       = false
 	AUTO_CNF_DEFAULT_COOKIE_SECURE     = false
-	AUTO_CNF_DEFAULT_ENTITY_ID         = "{ownUrl}/saml/metadata"
-	AUTO_CNF_DEFAULT_LOGIN_FAIL_URL    = "{ownUrl}/noLogin"
+	AUTO_CNF_DEFAULT_ENTITY_ID         = utils.UTILS_OWN_URL_PLACEHOLDER + "/saml/metadata"
+	AUTO_CNF_DEFAULT_LOGIN_FAIL_URL    = utils.UTILS_OWN_URL_PLACEHOLDER + "/noLogin"
 	AUTO_CNF_DEFAULT_USERNAME_ATTR     = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"
 	AUTO_CNF_DEFAULT_SYSTEM_PERMISSION = "regular"
 	AUTO_CNF_DEFAULT_PROJ_PERMISSION   = "operator"
@@ -52,6 +52,12 @@ const (
 )
 
 func InsertAutoSamlConfiguration(ctx context.Context) error {
+
+	bs, err := GetBasicConfig(context.Background())
+	if err == nil && bs != nil {
+		log.Info(LOG_REGIO, "config already exists. skip insert default config.")
+		return nil
+	}
 
 	var (
 		basicConfig appdb.BasicConfig = appdb.BasicConfig{
@@ -453,7 +459,7 @@ func GetElionaHost() string {
 
 	db := getDb()
 	row := db.QueryRow("SELECT domain_name FROM eliona_config ;")
-	row.Scan()
+	row.Scan(&eliDomain)
 
 	return eliDomain
 }
@@ -465,5 +471,5 @@ func DropOwnSchema() error {
 }
 
 func getDb() *sql.DB {
-	return db.Database(os.Getenv("APPNAME"))
+	return db.Database(app.AppName())
 }

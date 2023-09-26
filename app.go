@@ -1,5 +1,5 @@
 //  This file is part of the eliona project.
-//  Copyright © 2023 LEICOM iTEC AG. All Rights Reserved.
+//  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
 //  ______ _ _
 // |  ____| (_)
 // | |__  | |_  ___  _ __   __ _
@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"saml-sso/apiserver"
@@ -28,11 +29,15 @@ import (
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
+	"github.com/gorilla/mux"
 )
 
 const (
 	LOG_REGIO       = "app"
 	API_SERVER_PORT = 3000
+
+	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
+	EVALUATION_ENDPOINT         = "/sso/evaluate"
 )
 
 func run() {
@@ -41,6 +46,8 @@ func run() {
 		err      error
 		metadata []byte
 	)
+
+	conf.InsertAutoSamlConfiguration(context.Background())
 
 	basicConfig, err := conf.GetBasicConfig(context.Background())
 	if err != nil {
@@ -70,26 +77,37 @@ func run() {
 		log.Error(LOG_REGIO, "not able to set IdP Metadata")
 	}
 
+	apiPort := common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT))
+
+	fmt.Println(basicConfig.OwnUrl + ":" + apiPort)
 	sp, err := saml.NewServiceProviderAdvanced(basicConfig.ServiceProviderCertificate,
 		basicConfig.ServiceProviderPrivateKey, basicConfig.OwnUrl,
 		[]byte(metadata), &advancedConfig.EntityId,
 		&advancedConfig.AllowInitializationByIdp, &advancedConfig.SignedRequest,
 		&advancedConfig.ForceAuthn, &advancedConfig.CookieSecure)
 	if err != nil {
-		log.Fatal(LOG_REGIO, "cannot initialize saml service provider")
+		log.Fatal(LOG_REGIO, "cannot initialize saml service provider: %v", err)
 	}
 
-	elionaAuth := eliona.NewAuthorization(basicConfig.OwnUrl, basicConfig.UserToArchive, advancedConfig.LoginFailedUrl)
+	elionaAuth := eliona.NewAuthorization(basicConfig.OwnUrl,
+		basicConfig.UserToArchive, advancedConfig.LoginFailedUrl)
 
-	app := http.HandlerFunc(elionaAuth.Authorize)
-	http.Handle("/sso/evaluate", sp.GetMiddleWare().RequireAccount(app))
-	http.Handle("/saml/", sp.GetMiddleWare())
-
-	err = http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT)), apiserver.NewRouter(
+	// app api handle to router
+	router := mux.NewRouter()
+	router = apiserver.NewRouter(
 		apiserver.NewConfigurationApiController(apiservices.NewConfigurationApiService()),
 		apiserver.NewVersionApiController(apiservices.NewVersionApiService()),
 		apiserver.NewGenericSingleSignOnApiController(apiservices.NewGenericSingleSignOnApiService()),
 		// apiserver.NewSAML20ApiController(apiservices.NewSAML20ApiService()), // managed over thirdparty lib crewjam/saml
-	))
+	)
+
+	// saml specific handle to router
+	app := router.HandleFunc(EVALUATION_ENDPOINT, elionaAuth.Authorize)
+
+	router.Handle(EVALUATION_ENDPOINT, sp.GetMiddleWare().RequireAccount(app.GetHandler()))
+	router.Handle(SAML_SPECIFIC_ENDPOINT_PATH, sp.GetMiddleWare())
+
+	err = http.ListenAndServe(":"+apiPort, router)
+
 	log.Fatal(LOG_REGIO, "API server: %v", err)
 }

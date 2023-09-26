@@ -13,17 +13,23 @@
 //  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package conf
+package utils_test
 
 import (
-	"context"
-
-	"github.com/eliona-smart-building-assistant/go-utils/db"
+	"saml-sso/utils"
+	"testing"
 )
 
-// InitConfiguration initialize the configuration of the app
-func InitConfiguration(connection db.Connection) error {
+func TestUtils_ConfigSubstitution(t *testing.T) {
 
-	return InsertAutoSamlConfiguration(context.Background())
-	// return nil
+	var (
+		ownUrl   string = "https://example.org"
+		test     string = "{ownUrl}/metadata"
+		expected string = "https://example.org/metadata"
+	)
+
+	is := utils.SubstituteOwnUrlUrlString(test, ownUrl)
+	if is != expected {
+		t.Error("subistitution of {ownUrl}")
+	}
 }
