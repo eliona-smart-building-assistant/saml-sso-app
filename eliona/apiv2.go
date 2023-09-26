@@ -14,3 +14,69 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package eliona
+
+import (
+	"context"
+	"errors"
+	"io"
+
+	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
+	"github.com/eliona-smart-building-assistant/go-eliona/client"
+	"github.com/eliona-smart-building-assistant/go-utils/log"
+)
+
+type eliApiV2 struct {
+	authCtx context.Context
+	client  *api.APIClient
+}
+
+func NewEliApiV2() *eliApiV2 {
+	return &eliApiV2{
+		authCtx: client.AuthenticationContext(),
+		client:  client.NewClient(),
+	}
+}
+
+func (e *eliApiV2) GetUserIfExists(email string) (*api.User, error) {
+	users, resp, err := e.client.UsersAPI.GetUsers(e.authCtx).Execute()
+	if err != nil {
+		msg := err.Error()
+
+		if resp != nil {
+			defer resp.Body.Close()
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				msg += string(body)
+			}
+		}
+		log.Error(LOG_REGIO, msg)
+		return nil, err
+	}
+
+	for _, user := range users {
+		if user.Email == email {
+			return &user, err
+		}
+	}
+
+	return nil, errors.New("user not exist")
+}
+
+func (e *eliApiV2) AddUser(user *api.User) (*api.User, error) {
+	if user == nil {
+		return nil, errors.New("user to add is nil")
+	}
+	userRet, resp, err := e.client.UsersAPI.PutUser(e.authCtx).User(*user).Execute()
+	if err != nil {
+		msg := err.Error()
+		if resp != nil {
+			defer resp.Body.Close()
+			respBody, err := io.ReadAll(resp.Body)
+			if err != nil {
+				msg += string(respBody)
+			}
+		}
+		log.Error(LOG_REGIO, msg)
+	}
+	return userRet, err
+}

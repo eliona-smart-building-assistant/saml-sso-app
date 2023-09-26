@@ -20,6 +20,10 @@ import (
 	"net/http"
 )
 
+const (
+	LOG_REGIO = "eliona"
+)
+
 type Authorization struct {
 }
 
