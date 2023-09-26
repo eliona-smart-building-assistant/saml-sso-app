@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/url"
 	"saml-sso/utils"
+	"strings"
 
 	"github.com/crewjam/saml"
 	"github.com/crewjam/saml/logger"
@@ -50,7 +51,9 @@ const (
 	IDENTITY_PROVIDER_PORT          = 8000
 )
 
-func NewIdentityProvider(baseUrl string, certificate *string, privKey *string) (*IdentityProvider, error) {
+func NewIdentityProvider(baseUrl string, certificate *string,
+	privKey *string) (*IdentityProvider, error) {
+
 	var err error
 
 	cn := "localhost"
@@ -59,13 +62,14 @@ func NewIdentityProvider(baseUrl string, certificate *string, privKey *string) (
 	pKey := ""
 
 	if certificate == nil || privKey == nil {
-		sCert, pKey, err = utils.CreateSelfsignedX509Certificate(10, 4096, &cn, &ip)
+		sCert, pKey, err = utils.CreateSelfsignedX509Certificate(10, 4096,
+			&cn, &ip)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		sCert = *certificate
-		pKey = *privKey
+		sCert = strings.Clone(*certificate)
+		pKey = strings.Clone(*privKey)
 	}
 
 	certB, _ := pem.Decode([]byte(sCert))
@@ -74,10 +78,15 @@ func NewIdentityProvider(baseUrl string, certificate *string, privKey *string) (
 		return nil, err
 	}
 
+	var key any
+
 	keyB, _ := pem.Decode([]byte(pKey))
-	key, _ := x509.ParsePKCS1PrivateKey(keyB.Bytes)
+	key, err = x509.ParsePKCS1PrivateKey(keyB.Bytes)
 	if err != nil {
-		return nil, err
+		key, err = x509.ParsePKCS8PrivateKey(keyB.Bytes)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	baseURLstr := flag.String("idp", baseUrl, "IdP Server IP or URL")
@@ -101,7 +110,8 @@ func NewIdentityProvider(baseUrl string, certificate *string, privKey *string) (
 	}, err
 }
 
-func (i *IdentityProvider) AddUser(user string, password string, email string, name string, lastname string) error {
+func (i *IdentityProvider) AddUser(user string, password string, email string,
+	name string, lastname string) error {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
@@ -132,7 +142,8 @@ func (i *IdentityProvider) ServeForever() {
 	goji.Serve()
 }
 
-func (i *IdentityProvider) GetServiceProvider(r *http.Request, serviceProviderID string) (*saml.EntityDescriptor, error) {
+func (i *IdentityProvider) GetServiceProvider(r *http.Request,
+	serviceProviderID string) (*saml.EntityDescriptor, error) {
 
 	for _, sp := range i.allowedServiceProviders {
 		if serviceProviderID == sp.EntityID {

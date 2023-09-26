@@ -91,5 +91,5 @@ func main() {
 
 func test(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "hello world! "+", %s!",
-		samlsp.AttributeFromContext(r.Context(), "displayName"))
+		samlsp.AttributeFromContext(r.Context(), "Name"))
 }

@@ -69,6 +69,9 @@ func main() {
 	}
 	idpKeyStr := string(idpKey)
 
+	log.Debug("idp app", "with base url: %v", cnf.BaseURL)
+	log.Debug("idp app", "with cert: %v", idpCertStr)
+
 	idp, err := saml.NewIdentityProvider(cnf.BaseURL, &idpCertStr, &idpKeyStr)
 	if err != nil {
 		log.Fatal("idp app", "creating idp: %v", err)
@@ -83,6 +86,8 @@ func main() {
 		if err != nil {
 			log.Fatal("idp app", "read sp meta")
 		}
+		log.Debug("idp app", "with sp entity id: %v", sp.EntityID)
+		log.Debug("idp app", "and metadata: %v", string(metaSp))
 		err = idp.AddServiceProvider(sp.EntityID, string(metaSp))
 		if err != nil {
 			log.Fatal("idp app", "adding service providers: %v", err)
@@ -94,6 +99,7 @@ func main() {
 		if err != nil {
 			log.Fatal("idp app", "adding user: %v", err)
 		}
+		log.Debug("idp app", "with user: %v", user.Login)
 	}
 
 	log.Info("idp app", "starting and serve identity provider @ :8000")

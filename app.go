@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"saml-sso/apiserver"
 	"saml-sso/apiservices"
@@ -35,6 +36,12 @@ const (
 )
 
 func run() {
+
+	var (
+		err      error
+		metadata []byte
+	)
+
 	basicConfig, err := conf.GetBasicConfig(context.Background())
 	if err != nil {
 		log.Fatal(LOG_REGIO, "cannot load basic config")
@@ -45,9 +52,27 @@ func run() {
 		log.Fatal(LOG_REGIO, "cannot load advanced config")
 	}
 
+	if basicConfig.IdpMetadataUrl != nil && *basicConfig.IdpMetadataUrl != "" {
+		// fetch metadata
+		metadataResp, err := http.Get(*basicConfig.IdpMetadataUrl)
+		if err != nil {
+			log.Error(LOG_REGIO, "cannot fetch IdP metadata from url: %v", err)
+		}
+		defer metadataResp.Body.Close()
+		metaB, err := io.ReadAll(metadataResp.Body)
+		if err != nil {
+			log.Error(LOG_REGIO, "cannot read metadata response from IdP: %v", err)
+		}
+		metadata = metaB
+	} else if basicConfig.IdpMetadataXml != nil {
+		metadata = []byte(*basicConfig.IdpMetadataXml)
+	} else {
+		log.Error(LOG_REGIO, "not able to set IdP Metadata")
+	}
+
 	sp, err := saml.NewServiceProviderAdvanced(basicConfig.ServiceProviderCertificate,
 		basicConfig.ServiceProviderPrivateKey, basicConfig.OwnUrl,
-		[]byte(*basicConfig.IdpMetadataUrl), &advancedConfig.EntityId,
+		[]byte(metadata), &advancedConfig.EntityId,
 		&advancedConfig.AllowInitializationByIdp, &advancedConfig.SignedRequest,
 		&advancedConfig.ForceAuthn, &advancedConfig.CookieSecure)
 	if err != nil {
@@ -57,7 +82,7 @@ func run() {
 	elionaAuth := eliona.NewAuthorization()
 
 	app := http.HandlerFunc(elionaAuth.Authorize)
-	http.Handle("/adfs/auth/", sp.GetMiddleWare().RequireAccount(app))
+	http.Handle("/sso/evaluate", sp.GetMiddleWare().RequireAccount(app))
 	http.Handle("/saml/", sp.GetMiddleWare())
 
 	err = http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT)), apiserver.NewRouter(
