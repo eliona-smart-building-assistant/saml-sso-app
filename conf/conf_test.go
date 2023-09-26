@@ -17,6 +17,9 @@ package conf_test
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"os/exec"
 	"saml-sso/apiserver"
 	"saml-sso/conf"
 	"saml-sso/utils"
@@ -26,7 +29,17 @@ import (
 	"github.com/go-test/deep"
 )
 
-// Needs a DB with schema and exported CONNECTION_STRING
+// Needs a DB with exported CONNECTION_STRING
+func TestConf_InitDB(t *testing.T) {
+	conf.DropOwnSchema()
+	cmd := exec.Command("psql", os.Getenv("CONNECTION_STRING"), "-f", "init.sql")
+	out, err := cmd.Output()
+	if err != nil {
+		t.Error("cannot initialize db with own shema: ", err)
+	}
+	fmt.Println(string(out))
+}
+
 func TestConf_LoadAutoConfig(t *testing.T) {
 
 	err := conf.DeleteAllConfigurations(context.Background())

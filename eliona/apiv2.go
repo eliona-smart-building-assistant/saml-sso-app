@@ -25,19 +25,19 @@ import (
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
-type eliApiV2 struct {
+type EliApiV2 struct {
 	authCtx context.Context
 	client  *api.APIClient
 }
 
-func NewEliApiV2() *eliApiV2 {
-	return &eliApiV2{
+func NewEliApiV2() *EliApiV2 {
+	return &EliApiV2{
 		authCtx: client.AuthenticationContext(),
 		client:  client.NewClient(),
 	}
 }
 
-func (e *eliApiV2) GetUserIfExists(email string) (*api.User, error) {
+func (e *EliApiV2) GetUserIfExists(email string) (*api.User, error) {
 	users, resp, err := e.client.UsersAPI.GetUsers(e.authCtx).Execute()
 	if err != nil {
 		msg := err.Error()
@@ -62,7 +62,7 @@ func (e *eliApiV2) GetUserIfExists(email string) (*api.User, error) {
 	return nil, errors.New("user not exist")
 }
 
-func (e *eliApiV2) AddUser(user *api.User) (*api.User, error) {
+func (e *EliApiV2) AddUser(user *api.User) (*api.User, error) {
 	if user == nil {
 		return nil, errors.New("user to add is nil")
 	}

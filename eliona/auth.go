@@ -16,8 +16,14 @@
 package eliona
 
 import (
-	"log"
+	"context"
 	"net/http"
+	"saml-sso/apiserver"
+	"saml-sso/conf"
+
+	"github.com/crewjam/saml/samlsp"
+	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
+	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
 const (
@@ -25,118 +31,119 @@ const (
 )
 
 type Authorization struct {
+	baseUrl         string
+	redirectNoLogin string
+	userToArchive   bool
+	eliApi          *EliApiV2
 }
 
-func NewAuthorization() *Authorization {
-	return &Authorization{}
+func NewAuthorization(baseUrl string, userToArchive bool,
+	redirectNoLogin string) *Authorization {
+
+	return &Authorization{
+		baseUrl:       baseUrl,
+		userToArchive: userToArchive,
+		eliApi:        NewEliApiV2(),
+	}
 }
 
 // redirected from the generic sso endpoint sso/auth (handled by app api)
 func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
-	log.Printf("ADFS Auth, aufgerufen mit %s", r.Method)
+	log.Info(LOG_REGIO, "SAML Auth [%s]", r.Method)
 
-	// login := ""
-	// var firstname, lastname, phone interface{}
+	var (
+		err error
 
-	// if s.Map.UserName != nil && s.Map.UserName != "" {
-	// 	login = samlsp.AttributeFromContext(r.Context(), s.Map.UserName.(string))
-	// } else {
-	// 	// default without config
-	// 	login = samlsp.AttributeFromContext(r.Context(), "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn")
-	// }
-	// if s.Map.CutMail != nil && s.Map.CutMail.(bool) == true {
-	// 	split := strings.Split(login, "@")
-	// 	if len(split) >= 1 {
-	// 		login = split[0]
-	// 	}
-	// 	log.Printf("cut, user: %s\r\n", login)
-	// }
+		mapping *apiserver.AttributeMap
 
-	// if s.Map.FirstName != nil {
-	// 	firstname = samlsp.AttributeFromContext(r.Context(), s.Map.FirstName.(string))
-	// }
-	// if s.Map.LastName != nil {
-	// 	lastname = samlsp.AttributeFromContext(r.Context(), s.Map.LastName.(string))
-	// }
-	// if s.Map.Email != nil {
-	// 	login = samlsp.AttributeFromContext(r.Context(), s.Map.Email.(string))
-	// }
-	// if s.Map.Phone != nil {
-	// 	phone = samlsp.AttributeFromContext(r.Context(), s.Map.Phone.(string))
-	// }
+		loginEmail                 string = ""
+		firstname, lastname, phone string
 
-	// log.Printf("firstname: %v, lastname: %v, email/login: %v, phone: %v want to login",
-	// 	firstname, lastname, login, phone)
+		user       *api.User
+		jwt        *string
+		setCookies http.Cookie
 
-	// jwt := s.DB.CheckUser(firstname, lastname, login, phone)
+		errorMessage []byte
+	)
 
-	// log.Printf("Auth: User %s and token %s", login, jwt)
-	// if jwt == "" {
+	mapping, err = conf.GetAttributeMapping(context.Background())
+	if err != nil {
+		log.Error(LOG_REGIO, "cannot get attribute mapping. skip auth. %v", err)
+		errorMessage = []byte(err.Error())
+		goto internalServerError
+	}
 
-	// 	http.Redirect(w, r, s.Config.OwnURL+"/noLogin/", http.StatusFound)
-	// } else {
-	// 	var myCookie http.Cookie
-	// 	myCookie = http.Cookie{
-	// 		Name:  "elionaAuthorization",
-	// 		Value: jwt,
-	// 		Path:  "/"}
+	if mapping.Email != "" {
+		loginEmail = samlsp.AttributeFromContext(r.Context(), mapping.Email)
+	} else {
+		// default without config (fallback)
+		loginEmail = samlsp.AttributeFromContext(r.Context(),
+			"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn")
+	}
 
-	// 	http.SetCookie(w, &myCookie)
-	// 	http.Redirect(w, r, s.Config.OwnURL, http.StatusFound)
-	// }
-}
+	if mapping.FirstName != nil && *mapping.FirstName != "" {
+		firstname = samlsp.AttributeFromContext(r.Context(), *mapping.FirstName)
+	}
+	if mapping.LastName != nil && *mapping.LastName != "" {
+		lastname = samlsp.AttributeFromContext(r.Context(), *mapping.LastName)
+	}
+	if mapping.Phone != nil && *mapping.Phone != "" {
+		phone = samlsp.AttributeFromContext(r.Context(), *mapping.Phone)
+	}
 
-func (a *Authorization) ADFSAttributeMap(w http.ResponseWriter, r *http.Request) {
-	log.Printf("ADFS Attribute Map, aufgerufen mit %s", r.Method)
-	// if r.Method == http.MethodGet {
-	// 	w.Header().Set("Content-Type", "application/json")
-	// 	response := myService.DB.GetAttributeMap()
-	// 	payload, _ := json.Marshal(response)
-	// 	w.Write(payload)
-	// }
+	log.Info(LOG_REGIO, "User with firstname: %v, lastname: %v, email/login: "+
+		"%v, phone: %v want to login",
+		firstname, lastname, loginEmail, phone)
 
-	// if r.Method == http.MethodPatch || r.Method == http.MethodPost {
-	// 	w.Header().Set("Content-Type", "application/json")
+	// get or create user
+	user, err = a.eliApi.GetUserIfExists(loginEmail)
+	if err != nil {
+		log.Info(LOG_REGIO, "user doesn't exist. creating now user...")
+		user, err = a.eliApi.AddUser(&api.User{
+			Email:     loginEmail,
+			Firstname: *api.NewNullableString(&firstname),
+			Lastname:  *api.NewNullableString(&lastname),
+			// Phone: *api.NewNullableString(&phone), // not possible over APIv2, Maybe set over DB?
+			// Archived: a.userToArchive,             // not possible over APIv2, Maybe set over DB?
+		})
+		if err != nil {
+			log.Error(LOG_REGIO, "creating user: %v", err)
+			errorMessage = []byte(err.Error())
+			goto internalServerError
+		}
+	}
 
-	// 	old := a.DB.GetAttributeMap()
-	// 	new := AttributeMap{}
+	// obtain a jwt to login via cookies
+	jwt, err = GetElionaJsonWebToken(user.Email)
+	if err != nil {
+		log.Error(LOG_REGIO, "cannot obtain a JWT")
+		errorMessage = []byte("cannot obtain a JWT")
+		goto internalServerError
+	}
 
-	// 	byteBody, err := ioutil.ReadAll(r.Body)
-	// 	if err != nil {
-	// 		http.Error(w, "couldn't read request body", http.StatusBadRequest)
-	// 	}
+	log.Debug(LOG_REGIO, "User %s with token %v", user.Email, jwt)
+	if jwt == nil || *jwt == "" {
+		goto notAuthorized
+	}
 
-	// 	err = json.Unmarshal(byteBody, &new)
-	// 	if err != nil {
-	// 		http.Error(w, "couldn't parse json", http.StatusBadRequest)
-	// 	}
+	goto authorized
 
-	// 	if new.UserName != nil {
-	// 		old.UserName = new.UserName
-	// 	}
-	// 	if new.FirstName != nil {
-	// 		old.FirstName = new.FirstName
-	// 	}
-	// 	if new.LastName != nil {
-	// 		old.LastName = new.LastName
-	// 	}
-	// 	if new.Email != nil {
-	// 		old.Email = new.Email
-	// 	}
-	// 	if new.Phone != nil {
-	// 		old.Phone = new.Phone
-	// 	}
-	// 	if new.CutMail != nil {
-	// 		old.CutMail = new.CutMail
-	// 	}
+authorized:
+	setCookies = http.Cookie{
+		Name:  "elionaAuthorization",
+		Value: *jwt,
+		Path:  "/"}
 
-	// 	err = myService.DB.SetAttributeMap(old)
-	// 	if err != nil {
-	// 		http.Error(w, "couldn't set new config", http.StatusBadRequest)
-	// 	}
+	http.SetCookie(w, &setCookies)
+	http.Redirect(w, r, a.baseUrl, http.StatusFound)
+	return
 
-	// 	response, _ := json.Marshal(old)
+notAuthorized:
+	http.Redirect(w, r, a.redirectNoLogin, http.StatusFound)
+	return
 
-	// 	w.Write(response)
-	// }
+internalServerError:
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write(errorMessage)
+	return
 }

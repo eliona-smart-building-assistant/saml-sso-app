@@ -458,6 +458,12 @@ func GetElionaHost() string {
 	return eliDomain
 }
 
+func DropOwnSchema() error {
+	db := getDb()
+	_, err := db.Exec("DROP SCHEMA IF EXISTS saml_sp CASCADE")
+	return err
+}
+
 func getDb() *sql.DB {
 	return db.Database(os.Getenv("APPNAME"))
 }

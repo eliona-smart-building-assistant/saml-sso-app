@@ -79,7 +79,7 @@ func run() {
 		log.Fatal(LOG_REGIO, "cannot initialize saml service provider")
 	}
 
-	elionaAuth := eliona.NewAuthorization()
+	elionaAuth := eliona.NewAuthorization(basicConfig.OwnUrl, basicConfig.UserToArchive, advancedConfig.LoginFailedUrl)
 
 	app := http.HandlerFunc(elionaAuth.Authorize)
 	http.Handle("/sso/evaluate", sp.GetMiddleWare().RequireAccount(app))
