@@ -1,0 +1,11 @@
+linters-settings:
+  disable:
+    - govet
+    - megacheck
+    - ineffassign
+    - structcheck
+    - deadcode
+
+run:
+  skip-dirs:
+    - apiserver/*

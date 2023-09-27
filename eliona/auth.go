@@ -59,7 +59,7 @@ func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
 
 		mapping *apiserver.AttributeMap
 
-		loginEmail                 string = ""
+		loginEmail                 string
 		firstname, lastname, phone string
 
 		user       *api.User
@@ -159,8 +159,10 @@ notAuthorized:
 
 internalServerError:
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Write(errorMessage)
-	return
+	_, err = w.Write(errorMessage)
+	if err != nil {
+		log.Error(LOG_REGIO, "write internal server error: %v", err)
+	}
 }
 
 func (a *Authorization) SetUserPermissions(email string) error {

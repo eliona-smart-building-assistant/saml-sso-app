@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
+	"github.com/go-test/deep"
 )
 
 // need a running apiv2 and exported API_TOKEN / API_ENDPOINT
@@ -30,11 +31,22 @@ func TestEliApi_AddUser(t *testing.T) {
 	email := "my@email.net"
 
 	eApi := eliona.NewEliApiV2()
-	eApi.AddUser(&api.User{
+	userToAdd := api.User{
 		Firstname: *api.NewNullableString(&fistName),
 		Lastname:  *api.NewNullableString(&lastName),
 		Email:     email,
-	})
+	}
+	addedUser, err := eApi.AddUser(&userToAdd)
+
+	userToAdd.Id = addedUser.Id
+
+	if diff := deep.Equal(*addedUser, userToAdd); diff != nil {
+		t.Error("added user has diff to returned one: ", diff)
+	}
+
+	if err != nil {
+		t.Error("add user, ", err)
+	}
 }
 
 func TestEliApi_CheckUserExists(t *testing.T) {

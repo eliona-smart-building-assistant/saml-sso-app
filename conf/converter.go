@@ -27,8 +27,8 @@ import (
 func ConvertApiToDbForm(apiForm any) (any, error) {
 
 	var (
-		err    error = nil
-		dbForm any   = nil
+		err    error
+		dbForm any
 	)
 
 	switch a := apiForm.(type) {
@@ -50,8 +50,8 @@ func ConvertApiToDbForm(apiForm any) (any, error) {
 func ConvertDbToApiForm(dbForm any) (any, error) {
 
 	var (
-		err     error = nil
-		apiForm any   = nil
+		err     error
+		apiForm any
 	)
 
 	switch d := dbForm.(type) {

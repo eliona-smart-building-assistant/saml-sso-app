@@ -17,7 +17,7 @@ package saml_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -66,7 +66,7 @@ func TestIdentityProvider(t *testing.T) {
 		t.Error(err)
 	}
 
-	bodyIdpMeta, err := ioutil.ReadAll(responseIdpMeta.Body)
+	bodyIdpMeta, err := io.ReadAll(responseIdpMeta.Body)
 	responseIdpMeta.Body.Close()
 
 	if !strings.Contains(string(bodyIdpMeta), "<EntityDescriptor") || err != nil {
@@ -98,17 +98,23 @@ func TestIdentityProvider(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bodySpMeta, err := ioutil.ReadAll(responseSpMeta.Body)
+	bodySpMeta, err := io.ReadAll(responseSpMeta.Body)
 	if err != nil {
 		t.Error(err)
 	}
 	responseSpMeta.Body.Close()
 	err = idp.AddServiceProvider("http://localhost:8080/saml/metadata", string(bodySpMeta))
+	if err != nil {
+		t.Error(err)
+	}
 
 	// call resource
 	jar, err := cookiejar.New(nil)
 	client := &http.Client{
 		Jar: jar,
+	}
+	if err != nil {
+		t.Error(err)
 	}
 	req, err := http.NewRequest("GET", TEST_IDP_SCHEME+TEST_IDP_HOST+":"+
 		strconv.Itoa(TEST_IDP_PORT_SP)+TEST_SP_RESOURCE_EP, nil)
@@ -119,7 +125,7 @@ func TestIdentityProvider(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		t.Error(err)
 	}
@@ -148,7 +154,7 @@ func TestIdentityProvider(t *testing.T) {
 	if response.StatusCode != http.StatusOK {
 		t.Error("login @ ", actionLoginUrl)
 	}
-	body, err = ioutil.ReadAll(response.Body)
+	body, err = io.ReadAll(response.Body)
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,6 +162,9 @@ func TestIdentityProvider(t *testing.T) {
 
 	// send the saml response from the IdP to the ACS of SP to login
 	actionURL, samlResponse, err := extextractFormSamlResponse(string(body))
+	if err != nil {
+		t.Error("extractFormSamlResponse err, ", err)
+	}
 	formData = url.Values{
 		"SAMLResponse": {samlResponse},
 	}
@@ -178,7 +187,7 @@ func TestIdentityProvider(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	body, err = ioutil.ReadAll(response.Body)
+	body, err = io.ReadAll(response.Body)
 	if err != nil {
 		t.Error(err)
 	}

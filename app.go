@@ -47,7 +47,10 @@ func run() {
 		metadata []byte
 	)
 
-	conf.InsertAutoSamlConfiguration(context.Background())
+	err = conf.InsertAutoSamlConfiguration(context.Background())
+	if err != nil {
+		log.Debug(LOG_REGIO, "insert default config: %v", err)
+	}
 
 	basicConfig, err := conf.GetBasicConfig(context.Background())
 	if err != nil {

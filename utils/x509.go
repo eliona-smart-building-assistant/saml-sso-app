@@ -98,23 +98,30 @@ func CreateSelfsignedX509Certificate(validityDays int,
 		return "", "", err
 	}
 
-	return PEMEncodeCertificate(signCert), PEMEncodeRsaKey(privateKey), nil
+	cert, err := PEMEncodeCertificate(signCert)
+	if err != nil {
+		key, err := PEMEncodeRsaKey(privateKey)
+		return cert, key, err
+	}
+
+	return cert, "", err
 }
 
-func PEMEncodeCertificate(certificate []byte) string {
+func PEMEncodeCertificate(certificate []byte) (string, error) {
 	pemForm := new(bytes.Buffer)
-	pem.Encode(pemForm, &pem.Block{
+	err := pem.Encode(pemForm, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: certificate,
 	})
-	return pemForm.String()
+	return pemForm.String(), err
 }
 
-func PEMEncodeRsaKey(privateKey *rsa.PrivateKey) string {
+func PEMEncodeRsaKey(privateKey *rsa.PrivateKey) (string, error) {
 	pemForm := new(bytes.Buffer)
-	pem.Encode(pemForm, &pem.Block{
+	err := pem.Encode(pemForm, &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	})
-	return pemForm.String()
+
+	return pemForm.String(), err
 }

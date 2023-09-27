@@ -82,6 +82,7 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 	}
 	if cookieSecure != nil {
 		// opts.CookieSecure: true // option not available any more
+		log.Debug(LOG_REGIO, "not implemented")
 	}
 
 	serviceProvider.sp, err = samlsp.New(opts)

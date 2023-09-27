@@ -21,8 +21,8 @@ import (
 )
 
 func RandomBoolean() bool {
-	rand.Seed(time.Now().UnixNano())
-	randomInt := rand.Intn(2)
+	r := getRandom()
+	randomInt := r.Intn(2)
 	return randomInt == 1
 }
 
@@ -49,7 +49,11 @@ func RandomCharacter(length int, capital bool) string {
 }
 
 func RandomInt(min int, max int) int {
-	rand.Seed(time.Now().UnixNano())
+	r := getRandom()
 
-	return min + rand.Intn(max-min+1)
+	return min + r.Intn(max-min+1)
+}
+
+func getRandom() *rand.Rand {
+	return rand.New(rand.NewSource(time.Now().UnixNano()))
 }

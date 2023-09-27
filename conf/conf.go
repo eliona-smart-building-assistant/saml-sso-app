@@ -127,11 +127,11 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) {
 
 	var (
-		err            error                         = nil
-		basicConfigDb  *appdb.BasicConfig            = nil
-		basicConfigApi *apiserver.BasicConfiguration = nil
+		err            error
+		basicConfigDb  *appdb.BasicConfig
+		basicConfigApi *apiserver.BasicConfiguration
 
-		apiForm any = nil
+		apiForm any
 	)
 
 	basicConfigDb, err = appdb.BasicConfigs().One(ctx, getDb())
@@ -153,11 +153,11 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 	*apiserver.BasicConfiguration, error) {
 
 	var (
-		err           error              = nil
-		basicConfigDb *appdb.BasicConfig = nil
+		err           error
+		basicConfigDb *appdb.BasicConfig
 
-		apiForm any = nil
-		dbForm  any = nil
+		apiForm any
+		dbForm  any
 	)
 
 	if config == nil {
@@ -188,6 +188,10 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 			boil.Greylist(appdb.BasicConfigColumns.Enable))
 	}
 
+	if err != nil {
+		return nil, err
+	}
+
 	apiForm, err = ConvertDbToApiForm(basicConfigDb)
 	if err != nil {
 		return nil, err
@@ -205,11 +209,11 @@ func DeleteBasicConfig(ctx context.Context) (int, error) {
 func GetAdvancedConfig(ctx context.Context) (*apiserver.AdvancedConfiguration, error) {
 
 	var (
-		err          error                            = nil
-		advConfigDb  *appdb.AdvancedConfig            = nil
-		advConfigApi *apiserver.AdvancedConfiguration = nil
+		err          error
+		advConfigDb  *appdb.AdvancedConfig
+		advConfigApi *apiserver.AdvancedConfiguration
 
-		apiForm any = nil
+		apiForm any
 	)
 
 	advConfigDb, err = appdb.AdvancedConfigs().One(ctx, getDb())
@@ -231,11 +235,11 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 	*apiserver.AdvancedConfiguration, error) {
 
 	var (
-		err              error                 = nil
-		advancedConfigDb *appdb.AdvancedConfig = nil
+		err              error
+		advancedConfigDb *appdb.AdvancedConfig
 
-		apiForm any = nil
-		dbForm  any = nil
+		apiForm any
+		dbForm  any
 	)
 
 	if config == nil {
@@ -266,6 +270,10 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 			boil.Greylist(appdb.AdvancedConfigColumns.SignedRequest))
 	}
 
+	if err != nil {
+		return nil, err
+	}
+
 	apiForm, err = ConvertDbToApiForm(advancedConfigDb)
 	if err != nil {
 		return nil, err
@@ -283,11 +291,11 @@ func DeleteAdvancedConfig(ctx context.Context) (int, error) {
 func GetAttributeMapping(ctx context.Context) (*apiserver.AttributeMap, error) {
 
 	var (
-		err        error                   = nil
-		attrMapDb  *appdb.AttributeMap     = nil
-		attrMapApi *apiserver.AttributeMap = nil
+		err        error
+		attrMapDb  *appdb.AttributeMap
+		attrMapApi *apiserver.AttributeMap
 
-		apiForm any = nil
+		apiForm any
 	)
 
 	attrMapDb, err = appdb.AttributeMaps().One(ctx, getDb())
@@ -309,11 +317,11 @@ func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
 	*apiserver.AttributeMap, error) {
 
 	var (
-		err                error               = nil
-		attributeMappingDb *appdb.AttributeMap = nil
+		err                error
+		attributeMappingDb *appdb.AttributeMap
 
-		apiForm any = nil
-		dbForm  any = nil
+		apiForm any
+		dbForm  any
 	)
 
 	if mapping == nil {
@@ -344,6 +352,10 @@ func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
 			boil.Blacklist(appdb.AttributeMapColumns.ID))
 	}
 
+	if err != nil {
+		return nil, err
+	}
+
 	apiForm, err = ConvertDbToApiForm(attributeMappingDb)
 	if err != nil {
 		return nil, err
@@ -361,11 +373,11 @@ func DeleteAttributeMapping(ctx context.Context) (int, error) {
 func GetPermissionSettings(ctx context.Context) (*apiserver.Permissions, error) {
 
 	var (
-		err     error                  = nil
-		permDb  *appdb.Permission      = nil
-		permApi *apiserver.Permissions = nil
+		err     error
+		permDb  *appdb.Permission
+		permApi *apiserver.Permissions
 
-		apiForm any = nil
+		apiForm any
 	)
 
 	permDb, err = appdb.Permissions().One(ctx, getDb())
@@ -387,11 +399,11 @@ func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissio
 	*apiserver.Permissions, error) {
 
 	var (
-		err           error             = nil
-		permissionsDb *appdb.Permission = nil
+		err           error
+		permissionsDb *appdb.Permission
 
-		apiForm any = nil
-		dbForm  any = nil
+		apiForm any
+		dbForm  any
 	)
 
 	if permissions == nil {
@@ -420,6 +432,10 @@ func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissio
 	} else {
 		err = permissionsDb.Insert(ctx, getDb(),
 			boil.Blacklist(appdb.PermissionColumns.ID))
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	apiForm, err = ConvertDbToApiForm(permissionsDb)
@@ -459,7 +475,10 @@ func GetElionaHost() string {
 
 	db := getDb()
 	row := db.QueryRow("SELECT domain_name FROM eliona_config ;")
-	row.Scan(&eliDomain)
+	err := row.Scan(&eliDomain)
+	if err != nil {
+		log.Error(LOG_REGIO, "scan getElionaHost: %v", err)
+	}
 
 	return eliDomain
 }

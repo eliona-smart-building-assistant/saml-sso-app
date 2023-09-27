@@ -30,10 +30,14 @@ import (
 
 // Needs a DB with exported CONNECTION_STRING
 func TestConf_InitDB(t *testing.T) {
-	conf.DropOwnSchema()
+	err := conf.DropOwnSchema()
+	if err != nil {
+		// no error, if schema not exist
+		t.Log("drop schema, ", err)
+	}
 
 	execFunc := app.ExecSqlFile("init.sql")
-	err := execFunc(db.NewConnection())
+	err = execFunc(db.NewConnection())
 	if err != nil {
 		t.Error("asdasdas", err)
 	}
@@ -189,7 +193,7 @@ func TestConf_InsertUpdateConfig(t *testing.T) {
 		if diff := deep.Equal(&advConfig2, advRet2); diff != nil {
 			t.Error("missmatch advanced config 2: ", diff)
 		}
-		basicRet2, err = conf.GetBasicConfig(context.Background())
+		advRet2, err = conf.GetAdvancedConfig(context.Background())
 		if err != nil {
 			t.Error(err)
 		}
@@ -205,7 +209,7 @@ func TestConf_InsertUpdateConfig(t *testing.T) {
 		if diff := deep.Equal(&attrMapping1, attrMapRet1); diff != nil {
 			t.Error("missmatch attribute mapping 1: ", diff)
 		}
-		advRet1, err = conf.GetAdvancedConfig(context.Background())
+		attrMapRet1, err = conf.GetAttributeMapping(context.Background())
 		if err != nil {
 			t.Error(err)
 		}
