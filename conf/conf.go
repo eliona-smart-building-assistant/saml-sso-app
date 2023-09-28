@@ -516,7 +516,7 @@ func UserLeicomInit() error {
 
 	if err != nil || userRet != userLeicom {
 		// user not exist
-		_, err := db.Exec("CREATE USER $1 NOLOGIN", userLeicom)
+		_, err = db.Exec("CREATE USER $1 NOLOGIN", userLeicom)
 	}
 
 	return err
