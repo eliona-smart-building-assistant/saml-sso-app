@@ -25,7 +25,7 @@ import (
 
 // need a running apiv2 and exported API_TOKEN / API_ENDPOINT
 
-func TestEliApi_AddUser(t *testing.T) {
+func TestApp_EliApi_AddUser(t *testing.T) {
 	fistName := "myFirstName"
 	lastName := "myLastName"
 	email := "my@email.net"
@@ -49,7 +49,7 @@ func TestEliApi_AddUser(t *testing.T) {
 	}
 }
 
-func TestEliApi_CheckUserExists(t *testing.T) {
+func TestApp_EliApi_CheckUserExists(t *testing.T) {
 
 	eApi := eliona.NewEliApiV2()
 	myUser, err := eApi.GetUserIfExists("my@email.net")

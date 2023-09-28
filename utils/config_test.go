@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-func TestUtils_ConfigSubstitution(t *testing.T) {
+func TestApp_Utils_ConfigSubstitution(t *testing.T) {
 
 	var (
 		ownUrl   string = "https://example.org"

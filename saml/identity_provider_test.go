@@ -44,7 +44,7 @@ const (
 	TEST_RESOURCE_CONTENT  = "Hello SAML user!"
 )
 
-func TestIdentityProvider(t *testing.T) {
+func TestApp_IdentityProvider(t *testing.T) {
 
 	idp, err := saml.NewIdentityProvider(TEST_IDP_SCHEME+TEST_IDP_HOST+":"+
 		strconv.Itoa(saml.IDENTITY_PROVIDER_PORT), nil, nil)

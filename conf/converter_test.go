@@ -27,7 +27,7 @@ import (
 	"github.com/go-test/deep"
 )
 
-func TestConverter_ConvertBasicConfig(t *testing.T) {
+func TestApp_Converter_ConvertBasicConfig(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		apiBasicCnf := utils.CreateRandomApiBasicConfig()
 		dbBasicCnf, err := conf.ConvertApiToDbForm(&apiBasicCnf)
@@ -50,7 +50,7 @@ func TestConverter_ConvertBasicConfig(t *testing.T) {
 	}
 }
 
-func TestConverter_ConvertAdvancedConfig(t *testing.T) {
+func TestApp_Converter_ConvertAdvancedConfig(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		apiAdvCnf := utils.CreateRandomApiAdvancedConfig()
 		dbAdvCnf, err := conf.ConvertApiToDbForm(&apiAdvCnf)
@@ -73,7 +73,7 @@ func TestConverter_ConvertAdvancedConfig(t *testing.T) {
 	}
 }
 
-func TestConverter_ConvertAttributeMapping(t *testing.T) {
+func TestApp_Converter_ConvertAttributeMapping(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		apiAttrMap := utils.CreateRandomApiAttributeMap()
 		dbAttrMap, err := conf.ConvertApiToDbForm(&apiAttrMap)
@@ -96,7 +96,7 @@ func TestConverter_ConvertAttributeMapping(t *testing.T) {
 	}
 }
 
-func TestConverter_ConvertPermissionCnf(t *testing.T) {
+func TestApp_Converter_ConvertPermissionCnf(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		apiPerm := utils.CreateRandomApiPermissions()
 		dbPerm, err := conf.ConvertApiToDbForm(&apiPerm)

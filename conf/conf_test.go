@@ -30,7 +30,7 @@ import (
 )
 
 // Needs a DB with exported CONNECTION_STRING
-func TestConf_InitDB(t *testing.T) {
+func TestApp_Conf_InitDB(t *testing.T) {
 	err := conf.DropOwnSchema()
 	if err != nil {
 		// no error, if schema not exist
@@ -44,7 +44,7 @@ func TestConf_InitDB(t *testing.T) {
 	}
 }
 
-func TestConf_LoadAutoConfig(t *testing.T) {
+func TestApp_Conf_LoadAutoConfig(t *testing.T) {
 
 	err := conf.DeleteAllConfigurations(context.Background())
 	if err != nil {
@@ -119,7 +119,7 @@ func TestConf_LoadAutoConfig(t *testing.T) {
 	}
 }
 
-func TestConf_InsertUpdateConfig(t *testing.T) {
+func TestApp_Conf_InsertUpdateConfig(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 

@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-func TestX509_Certificate(t *testing.T) {
+func TestApp_Utils_X509_Certificate(t *testing.T) {
 
 	var (
 		cn *string

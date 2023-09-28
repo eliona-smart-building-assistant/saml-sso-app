@@ -22,7 +22,7 @@ import (
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
-func TestEliona_Others(t *testing.T) {
+func TestApp_Others(t *testing.T) {
 	token, err := eliona.GetElionaJsonWebToken("sv#@eliona.io")
 	if err != nil {
 		t.Error(err)

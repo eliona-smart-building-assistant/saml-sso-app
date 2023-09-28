@@ -21,7 +21,7 @@ import (
 	"unicode"
 )
 
-func TestRandom_URL(t *testing.T) {
+func TestApp_Utils_Random_URL(t *testing.T) {
 	oldUrl := ""
 
 	for i := 0; i < 5; i++ {
@@ -37,7 +37,7 @@ func TestRandom_URL(t *testing.T) {
 	}
 }
 
-func TestRandom_Characters(t *testing.T) {
+func TestApp_Utils_Characters(t *testing.T) {
 	cap10_1 := utils.RandomCharacter(10, true)
 	if !checkCapitalCharacters(cap10_1) {
 		t.Error("non capital letters in capital random string")
@@ -64,7 +64,7 @@ func TestRandom_Characters(t *testing.T) {
 	}
 }
 
-func TestRandom_Bolean(t *testing.T) {
+func TestApp_Utils_Random_Bolean(t *testing.T) {
 	hasTrue := false
 	hasFalse := false
 
@@ -84,7 +84,7 @@ func TestRandom_Bolean(t *testing.T) {
 	}
 }
 
-func TestRandom_Integer(t *testing.T) {
+func TestApp_Utils_Random_Integer(t *testing.T) {
 	int1 := utils.RandomInt(0, 10000)
 	int2 := utils.RandomInt(0, 10000)
 
