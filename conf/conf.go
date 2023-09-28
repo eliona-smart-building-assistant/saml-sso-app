@@ -514,8 +514,9 @@ func UserLeicomInit() error {
 	}
 	err := row.Scan(&userRet)
 
-	if userRet != userLeicom {
-		err = errors.New("username dont match")
+	if err != nil || userRet != userLeicom {
+		// user not exist
+		_, err := db.Exec("CREATE USER $1 NOLOGIN", userLeicom)
 	}
 
 	return err
