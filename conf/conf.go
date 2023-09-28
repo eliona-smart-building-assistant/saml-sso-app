@@ -483,12 +483,40 @@ func GetElionaHost() string {
 	return eliDomain
 }
 
+func getDb() *sql.DB {
+	return db.Database(app.AppName())
+}
+
+//
+// functions for test purposes only!
+
 func DropOwnSchema() error {
+	log.Warn(LOG_REGIO, "Do not use function DropOwnSchema() in the Application. "+
+		"Only for test purposes!")
 	db := getDb()
 	_, err := db.Exec("DROP SCHEMA IF EXISTS saml_sp CASCADE")
 	return err
 }
+func UserLeicomInit() error {
+	log.Warn(LOG_REGIO, "Do not use function UserLeicomInit() in the Application. "+
+		"Only for test purposes!")
 
-func getDb() *sql.DB {
-	return db.Database(app.AppName())
+	var (
+		userLeicom string = "leicom"
+		userRet    string
+	)
+
+	db := getDb()
+	// check, if user exists (do not exist only on in the mock db)
+	row := db.QueryRow("SELECT usename FROM pg_user WHERE usename = $1", userLeicom)
+	if err := row.Err(); err != nil {
+		return err
+	}
+	err := row.Scan(&userRet)
+
+	if userRet != userLeicom {
+		err = errors.New("username dont match")
+	}
+
+	return err
 }

@@ -313,32 +313,14 @@ components:
           readOnly: false
           example:
             "-----BEGIN PRIVATE KEY-----
-            MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDE/9wPc5xhJ/Cf
-            VjSnySKzwwbazILd1FMFs2LDTgQR+ZfwPDQUTj9mLIEKVAPdN2f76Q39bD88IKcA
-            tOuXuSDbZjwvD1jpNcTy/JioBV1R2SiMcXckIbO9RRnpVpBf2O8r96F3+67sQc3V
-            2KptZ5pM/pSEjjI9aPyrC9zvFbgGjR5gTHeTvzepNyhyvZMg3NsOngPe4DJP0G/A
-            NbU/cTw5AritOPI5hraS5yKRRUDl+eMLpmOhEY2pSPOwnqLgA1NkqiYyjY3ydNvN
-            M2hojurjDgaWAEqA30iXssewNGo/cmBdOLrwqao5wAHHA3xY8MgwhDbl52a58MY3
-            9X6Iv1xrAgMBAAECggEATI2u+vQuy1SFfa22xZL0YM3Dbqg1nLWDU75LfWDmVQPc
-            ptcGV/O2UGKv/I78d20uA+cjcB0uD5QSwcQMn0eqPIgkkBcTMoEaGWDOg9Cd3I4a
-            Y0U+irRsD/t338SrUwvOmZPf0+vipF3H+rd5Nw2hGRV/KmnFnTacpW11PBWBD039
-            we2hGkPDXpS/B3XyTOhVu6tiuHpzODyVLrCdaVtrj019zccX33tyuimG3RYN9QPS
-            3eEJMb+t1gGvE0Ut4PAd9MWwu0FlTn2NL5COhQchzjdy5vdrqKSXBXACMRlKgH/9
-            jp7wCO126H9AcgUpHCspo/aHIE0mLQlpd6N/IpPfGQKBgQDVbbwaCzRhsktEBAjy
-            9GivRTG7dbe3y3OEeXblLMtoL5oOjdbeLmtjTkb8LFzFnU0CgRYLR+plevHZWYdI
-            6O+lydUHacYda1PIU27FRLwTO73eSLWTH7xbSLS/HMkRTe0wvC+rNPi5ZiGlV3qq
-            ImzRt5rB4byeTEQCLu84AzoR6QKBgQDsSzQu1SzgzqWXpJb27JJhiPK1sA7xxwZk
-            WvT+ADbLXqJq2jifSdAmKdwI4BD+70EyKq200vRjam5aN11NTveA3UZhpVlzHMPd
-            7BzNgNvOMjWfuInpg2a7NYAFHevd2nsomLZd7Jls+DTUmEoR7zlIfZWeBSyxat6V
-            ZLHAEJ2TMwKBgQCWj0ratHzHTpd5677EZVZUDmP+8hQgPA3JrkYJdYgofywWiEjD
-            g8uNynKZAlKPtV/WHGoImzrnS8vAoD+nV2t3cOIu0JdJuaTo9LJ3xv1GNCbE4FX2
-            67RcUPXwu8W7x1VDw/18sWmkoD+r/AI0cwSBDRzHGQ+OPA7d2241/VDBwQKBgQCg
-            QeECYlItpflo/5fjoE8nF1qFHwMDt5f+ODIwkrSW+XfuQFJmtgkV2Q4CdvUP8fSl
-            sYxeNzTIuEZfqWz+IbB7FZfGYf5os/mjaZ+fQOXS0vrLeL0QQq5KCd7pmYF+1c7x
-            maEV0oG8BhrOlPqnbzfKkmIG6juFmJWdfM2RFbPJQQKBgF0zqBS1L8JZGgm1IZxR
-            yjoW0a7HfA3FVzF9mzge5QMyiTwg/Uz6nTrSlee3WcP4fBsZQEqgXyvL0xZ8g8bv
-            dCyLlTdlz1H1x5tilyojDurBKoHL17sEo9rduSNH8a9XyjKfHl38OitjP4sVZfe7
-            JCo61PNOxqzTBd7Jpyg8bCsr
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            *********************************
             -----END PRIVATE KEY-----"
           description: The Private Key matching the Certificate of this SAML Service Provider (SP). Can be the Private Key of a self-signed x509 certificate. DO NOT use rsa key length lower than 2048
         idpMetadataUrl:

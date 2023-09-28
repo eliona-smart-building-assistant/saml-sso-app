@@ -3,23 +3,6 @@ name: Build
 on: [push]
 
 jobs:
-  native:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.20
-
-      - name: Build Native App
-        run: go build -o saml-sso-app .
-      - name: Build Native IdP
-        run: go build -o idp-app cmd/identity_provider/main.go
-      - name: Build Native SP
-        run: go build -o sp-app cmd/service_provider/main.go
-  
   docker:
     runs-on: ubuntu-latest
     steps:
@@ -37,3 +20,4 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+          # skip-files: 'openapi.yaml'

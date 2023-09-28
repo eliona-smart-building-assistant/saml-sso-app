@@ -31,7 +31,11 @@ import (
 
 // Needs a DB with exported CONNECTION_STRING
 func TestApp_Conf_InitDB(t *testing.T) {
-	err := conf.DropOwnSchema()
+	err := conf.UserLeicomInit()
+	if err != nil {
+		t.Log("user leicom, ", err)
+	}
+	err = conf.DropOwnSchema()
 	if err != nil {
 		// no error, if schema not exist
 		t.Log("drop schema, ", err)
