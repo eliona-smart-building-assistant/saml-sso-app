@@ -20,23 +20,62 @@ package eliona
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/eliona-smart-building-assistant/go-eliona/app"
 	"github.com/eliona-smart-building-assistant/go-utils/db"
+	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
 type ElionaJwt struct {
 	Jwt string
 }
 
+const (
+	OTHERS_GET_JWT_QUERY_V10 = "(SELECT public.make_jwt(jwt,secret) " +
+		"FROM  public.eliona_user u JOIN public.eliona_secret " +
+		"USING (schema), public.claim_jwt(role, now() + validity,user_id,null) jwt " +
+		"WHERE lower(u.email) = lower($1) AND NOT u.archived)"
+
+	OTHERS_GET_JWT_QUERY_V11 = "(SELECT public.make_jwt(jwt,secret) " +
+		"FROM  public.eliona_user u " +
+		"JOIN public.acl_role r ON (u.role_id = r.role_id) " +
+		"JOIN public.eliona_secret " +
+		"USING (schema), public.claim_jwt(role, now() + validity,user_id,null) jwt " +
+		"WHERE lower(u.email) = lower($1) AND NOT u.archived)"
+)
+
 func GetElionaJsonWebToken(email string) (*string, error) {
 
-	var jwt ElionaJwt = ElionaJwt{}
+	var (
+		err      error
+		version  string
+		jwt      ElionaJwt = ElionaJwt{}
+		jwtQuery string
+	)
 
-	row := getDb().QueryRow("(SELECT public.make_jwt(jwt,secret) "+
-		"FROM  public.eliona_user u JOIN public.eliona_secret "+
-		"USING (schema), public.claim_jwt(role, now() + validity,user_id,null) jwt "+
-		"WHERE lower(u.email) = lower($1) AND NOT u.archived)", email)
+	db := getDb()
+
+	// find version
+	row := db.QueryRow("SELECT version FROM versioning.latest_version WHERE app_name = 'public'")
+	if row == nil {
+		return nil, row.Err()
+	}
+	err = row.Scan(&version)
+	if row == nil {
+		return nil, err
+	}
+
+	// before v10 docker matching images are available.
+	if strings.Contains(version, "v10.") {
+		log.Debug(LOG_REGIO, "eliona v10")
+		jwtQuery = OTHERS_GET_JWT_QUERY_V10
+	} else {
+		// assume, that the version is newer (with ACL)
+		jwtQuery = OTHERS_GET_JWT_QUERY_V11
+	}
+
+	row = db.QueryRow(jwtQuery, email)
 
 	if row == nil {
 		return nil, errors.New("returned row is nil")
@@ -44,7 +83,7 @@ func GetElionaJsonWebToken(email string) (*string, error) {
 		return nil, row.Err()
 	}
 
-	err := row.Scan(&jwt.Jwt)
+	err = row.Scan(&jwt.Jwt)
 
 	return &jwt.Jwt, err
 }

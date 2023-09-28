@@ -23,7 +23,7 @@ import (
 )
 
 func TestApp_Others(t *testing.T) {
-	token, err := eliona.GetElionaJsonWebToken("sv#@eliona.io")
+	token, err := eliona.GetElionaJsonWebToken("su#@eliona.io")
 	if err != nil {
 		t.Error(err)
 	}

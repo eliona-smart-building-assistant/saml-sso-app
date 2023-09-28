@@ -29,7 +29,7 @@ func TestApp_EliApi_Version(t *testing.T) {
 	eApi := eliona.NewEliApiV2()
 	ver, err := eApi.GetApiVersion()
 	if err != nil {
-		t.Error("get version, ", err)
+		t.Error("get version,  ", err)
 	}
 	t.Log("APIv2 Version: ", ver)
 }
