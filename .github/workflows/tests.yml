@@ -1,0 +1,30 @@
+name: Unit & Integration Tests
+
+on: [push]
+    
+jobs:
+  app-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Start Eliona mock
+        run: |
+          git clone https://github.com/eliona-smart-building-assistant/eliona-mock.git
+          cd eliona-mock
+          docker-compose up -d
+
+      - name: Wait for Eliona mock to be up
+        run: |
+          until nc -z localhost 3000; do sleep 1; done
+
+      - name: Run application tests
+        id: run_app_test
+        run: go test -v ./...
+        env:
+          CONNECTION_STRING: postgres://postgres:secret@172.17.0.1:5432?sslmode=disable
+          API_ENDPOINT: http://172.17.0.1:3000/v2
+          API_TOKEN: secret
+          START_MODE: docker
