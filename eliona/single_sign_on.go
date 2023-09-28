@@ -17,6 +17,7 @@ package eliona
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"saml-sso/apiserver"
@@ -32,17 +33,22 @@ const (
 	LOG_REGIO = "eliona"
 )
 
-type Authorization struct {
+const (
+	ENDPOINT_SSO_GENERIC_VERIFICATION = "/sso/auth"
+	ENDPOINT_SSO_GENERIC_ACTIVE       = "/sso/active"
+)
+
+type SingleSignOn struct {
 	baseUrl         string
 	redirectNoLogin string
 	userToArchive   bool
 	eliApi          *EliApiV2
 }
 
-func NewAuthorization(baseUrl string, userToArchive bool,
-	redirectNoLogin string) *Authorization {
+func NewSingleSignOn(baseUrl string, userToArchive bool,
+	redirectNoLogin string) *SingleSignOn {
 
-	return &Authorization{
+	return &SingleSignOn{
 		baseUrl:         baseUrl,
 		userToArchive:   userToArchive,
 		eliApi:          NewEliApiV2(),
@@ -50,16 +56,45 @@ func NewAuthorization(baseUrl string, userToArchive bool,
 	}
 }
 
-// redirected from the generic sso endpoint sso/auth (handled by app api)
-func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
-	log.Info(LOG_REGIO, "SAML Auth [%s]", r.Method)
+func (s *SingleSignOn) ActiveHandle(w http.ResponseWriter, r *http.Request) {
+
+	var (
+		err          error
+		responseCode int    = http.StatusMethodNotAllowed
+		responseMsg  []byte = []byte("not allowed")
+	)
+
+	log.Debug(LOG_REGIO, "active handle called")
+
+	if r.Method == http.MethodGet {
+		active := apiserver.Active{
+			Active: true,
+		}
+		responseMsg, err = json.Marshal(active)
+		if err == nil {
+			responseCode = http.StatusOK
+		} else {
+			responseCode = http.StatusInternalServerError
+			responseMsg = []byte(err.Error())
+		}
+	}
+
+	w.WriteHeader(responseCode)
+	_, err = w.Write(responseMsg)
+	if err != nil {
+		log.Error(LOG_REGIO, "write internal server error: %v", err)
+	}
+}
+
+func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
+	log.Info(LOG_REGIO, "authentication handle called [%s]", r.Method)
 
 	var (
 		err error
 
 		mapping *apiserver.AttributeMap
 
-		loginEmail                 string
+		loginEmail, userIp         string
 		firstname, lastname, phone string
 
 		user       *api.User
@@ -68,6 +103,13 @@ func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
 
 		errorMessage []byte
 	)
+
+	// try to optain real user ip
+	userIp = r.Header.Get("X-Forwarded-For")
+	if userIp == "" {
+		userIp = r.Header.Get("X-Real-Ip")
+	}
+	log.Debug(LOG_REGIO, "user from %s called authentication ep", userIp)
 
 	mapping, err = conf.GetAttributeMapping(context.Background())
 	if err != nil {
@@ -99,10 +141,10 @@ func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
 		firstname, lastname, loginEmail, phone)
 
 	// get or create user
-	user, err = a.eliApi.GetUserIfExists(loginEmail)
+	user, err = s.eliApi.GetUserIfExists(loginEmail)
 	if err != nil {
 		log.Info(LOG_REGIO, "user doesn't exist. creating now user...")
-		user, err = a.eliApi.AddUser(&api.User{
+		user, err = s.eliApi.AddUser(&api.User{
 			Email:     loginEmail,
 			Firstname: *api.NewNullableString(&firstname),
 			Lastname:  *api.NewNullableString(&lastname),
@@ -116,14 +158,14 @@ func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = UpdateElionaUserArchivedPhone(user.Email, &phone, a.userToArchive)
+	err = UpdateElionaUserArchivedPhone(user.Email, &phone, s.userToArchive)
 	if err != nil {
 		log.Error(LOG_REGIO, "cannot set phone and archive flag: %v", err)
 		errorMessage = []byte(err.Error())
 		goto internalServerError
 	}
 
-	err = a.SetUserPermissions(user.Email)
+	err = s.setUserPermissions(user.Email)
 	if err != nil {
 		log.Error(LOG_REGIO, "cannot set user permissions")
 	}
@@ -138,26 +180,37 @@ func (a *Authorization) Authorize(w http.ResponseWriter, r *http.Request) {
 
 	log.Debug(LOG_REGIO, "User %s with token %v", user.Email, jwt)
 	if jwt == nil || *jwt == "" {
-		goto notAuthorized
+		goto notAuthenticated
 	}
 
-	goto authorized
+	goto authenticated
 
-authorized:
+authenticated:
+	log.Info(LOG_REGIO, "authenticated user login: %s", loginEmail)
 	setCookies = http.Cookie{
 		Name:  "elionaAuthorization",
 		Value: *jwt,
 		Path:  "/"}
 
 	http.SetCookie(w, &setCookies)
-	http.Redirect(w, r, a.baseUrl, http.StatusFound)
+	http.Redirect(w, r, s.baseUrl, http.StatusFound)
 	return
 
-notAuthorized:
-	http.Redirect(w, r, a.redirectNoLogin, http.StatusFound)
+notAuthenticated:
+	log.Info(LOG_REGIO, "not authenticated user tried to login: %s, %s",
+		loginEmail, userIp)
+	// reset eliona cookies
+	setCookies = http.Cookie{
+		Name:  "elionaAuthorization",
+		Value: "invalid",
+		Path:  "/"}
+
+	http.SetCookie(w, &setCookies)
+	http.Redirect(w, r, s.redirectNoLogin, http.StatusFound)
 	return
 
 internalServerError:
+	log.Warn(LOG_REGIO, "internal servererror occured while auth")
 	w.WriteHeader(http.StatusInternalServerError)
 	_, err = w.Write(errorMessage)
 	if err != nil {
@@ -165,7 +218,7 @@ internalServerError:
 	}
 }
 
-func (a *Authorization) SetUserPermissions(email string) error {
+func (s *SingleSignOn) setUserPermissions(email string) error {
 
 	var (
 		err         error

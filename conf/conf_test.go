@@ -17,6 +17,7 @@ package conf_test
 
 import (
 	"context"
+	"fmt"
 	"saml-sso/apiserver"
 	"saml-sso/conf"
 	"saml-sso/utils"
@@ -39,7 +40,7 @@ func TestConf_InitDB(t *testing.T) {
 	execFunc := app.ExecSqlFile("init.sql")
 	err = execFunc(db.NewConnection())
 	if err != nil {
-		t.Error("asdasdas", err)
+		t.Error("init.sql failed, ", err)
 	}
 }
 
@@ -186,6 +187,8 @@ func TestConf_InsertUpdateConfig(t *testing.T) {
 		if diff := deep.Equal(&advConfig1, advRet1); diff != nil {
 			t.Error("missmatch advanced config 1_1: ", diff)
 		}
+		fmt.Println(advConfig1)
+		fmt.Println(advConfig2)
 		advRet2, err := conf.SetAdvancedConfig(context.Background(), &advConfig2)
 		if err != nil {
 			t.Error(err)

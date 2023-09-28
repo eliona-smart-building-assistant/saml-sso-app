@@ -99,7 +99,7 @@ func CreateSelfsignedX509Certificate(validityDays int,
 	}
 
 	cert, err := PEMEncodeCertificate(signCert)
-	if err != nil {
+	if err == nil {
 		key, err := PEMEncodeRsaKey(privateKey)
 		return cert, key, err
 	}

@@ -29,15 +29,14 @@ import (
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
-	"github.com/gorilla/mux"
 )
 
 const (
-	LOG_REGIO       = "app"
-	API_SERVER_PORT = 3000
+	LOG_REGIO        = "app"
+	API_SERVER_PORT  = 3000
+	SAML_SERVER_PORT = 8080
 
 	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
-	EVALUATION_ENDPOINT         = "/sso/evaluate"
 )
 
 func run() {
@@ -67,13 +66,14 @@ func run() {
 		metadataResp, err := http.Get(*basicConfig.IdpMetadataUrl)
 		if err != nil {
 			log.Error(LOG_REGIO, "cannot fetch IdP metadata from url: %v", err)
+		} else {
+			defer metadataResp.Body.Close()
+			metaB, err := io.ReadAll(metadataResp.Body)
+			if err != nil {
+				log.Error(LOG_REGIO, "cannot read metadata response from IdP: %v", err)
+			}
+			metadata = metaB
 		}
-		defer metadataResp.Body.Close()
-		metaB, err := io.ReadAll(metadataResp.Body)
-		if err != nil {
-			log.Error(LOG_REGIO, "cannot read metadata response from IdP: %v", err)
-		}
-		metadata = metaB
 	} else if basicConfig.IdpMetadataXml != nil {
 		metadata = []byte(*basicConfig.IdpMetadataXml)
 	} else {
@@ -81,6 +81,7 @@ func run() {
 	}
 
 	apiPort := common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT))
+	samlSpPort := common.Getenv("SAML_SP_SERVER_PORT", strconv.Itoa(SAML_SERVER_PORT))
 
 	fmt.Println(basicConfig.OwnUrl + ":" + apiPort)
 	sp, err := saml.NewServiceProviderAdvanced(basicConfig.ServiceProviderCertificate,
@@ -92,25 +93,47 @@ func run() {
 		log.Fatal(LOG_REGIO, "cannot initialize saml service provider: %v", err)
 	}
 
-	elionaAuth := eliona.NewAuthorization(basicConfig.OwnUrl,
-		basicConfig.UserToArchive, advancedConfig.LoginFailedUrl)
-
 	// app api handle to router
-	router := mux.NewRouter()
-	router = apiserver.NewRouter(
+	router := apiserver.NewRouter(
 		apiserver.NewConfigurationApiController(apiservices.NewConfigurationApiService()),
 		apiserver.NewVersionApiController(apiservices.NewVersionApiService()),
-		apiserver.NewGenericSingleSignOnApiController(apiservices.NewGenericSingleSignOnApiService()),
-		// apiserver.NewSAML20ApiController(apiservices.NewSAML20ApiService()), // managed over thirdparty lib crewjam/saml
+
+		// separate handled in eliona/sso_handles.go (no RESTful)
+		// apiserver.NewGenericSingleSignOnApiController(apiservices.NewGenericSingleSignOnApiService()),
+
+		// managed over thirdparty lib crewjam/saml (no RESTful)
+		// apiserver.NewSAML20ApiController(apiservices.NewSAML20ApiService()),
 	)
 
-	// saml specific handle to router
-	app := router.HandleFunc(EVALUATION_ENDPOINT, elionaAuth.Authorize)
+	go func() {
+		err = http.ListenAndServe(":"+apiPort, router)
+		if err != nil {
+			log.Fatal(LOG_REGIO, "app api server: %v", err)
+		}
+	}()
 
-	router.Handle(EVALUATION_ENDPOINT, sp.GetMiddleWare().RequireAccount(app.GetHandler()))
-	router.Handle(SAML_SPECIFIC_ENDPOINT_PATH, sp.GetMiddleWare())
+	// saml specific handle (no RESTful) to router
+	elionaAuth := eliona.NewSingleSignOn(basicConfig.OwnUrl,
+		basicConfig.UserToArchive, advancedConfig.LoginFailedUrl)
 
-	err = http.ListenAndServe(":"+apiPort, router)
+	activeHandleFunc := http.HandlerFunc(elionaAuth.ActiveHandle)
+	http.Handle(eliona.ENDPOINT_SSO_GENERIC_ACTIVE, activeHandleFunc)
+	authHandleFunc := http.HandlerFunc(elionaAuth.Authentication)
+	http.Handle(eliona.ENDPOINT_SSO_GENERIC_VERIFICATION,
+		sp.GetMiddleWare().RequireAccount(authHandleFunc))
+	http.Handle(SAML_SPECIFIC_ENDPOINT_PATH, sp.GetMiddleWare())
+
+	if err != nil {
+		log.Fatal(LOG_REGIO, "saml api port: %v", err)
+	}
+	log.Info(LOG_REGIO, "started @ %v", samlSpPort)
+	err = http.ListenAndServe(":"+samlSpPort, nil)
+
+	if err != nil {
+		log.Error("sp app", "exiting due to an error: %v", err)
+	} else {
+		log.Info("sp app", "exited")
+	}
 
 	log.Fatal(LOG_REGIO, "API server: %v", err)
 }

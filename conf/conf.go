@@ -264,7 +264,7 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 
 	if exists {
 		_, err = advancedConfigDb.Update(ctx, getDb(),
-			boil.Greylist(appdb.AdvancedConfigColumns.SignedRequest))
+			boil.Infer())
 	} else {
 		err = advancedConfigDb.Insert(ctx, getDb(),
 			boil.Greylist(appdb.AdvancedConfigColumns.SignedRequest))
