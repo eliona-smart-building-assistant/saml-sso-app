@@ -37,6 +37,12 @@ func NewEliApiV2() *EliApiV2 {
 	}
 }
 
+func (e *EliApiV2) GetApiVersion() (map[string]interface{}, error) {
+	ver, _, err := e.client.VersionAPI.GetVersion(e.authCtx).Execute()
+
+	return ver, err
+}
+
 func (e *EliApiV2) GetUserIfExists(email string) (*api.User, error) {
 	users, resp, err := e.client.UsersAPI.GetUsers(e.authCtx).Execute()
 	if err != nil {
