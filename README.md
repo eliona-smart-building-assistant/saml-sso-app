@@ -16,10 +16,8 @@ This initialization can be handled by the `reset.sql` script.
 
 ### Environment variables
 
-<mark>Todo: Describe further environment variables tables the app needs for configuration</mark>
 
-
-- `APPNAME`: must be set to `template`. Some resources use this name to identify the app inside an Eliona environment.
+- `APPNAME`: must be set to `saml-sso`. Some resources use this name to identify the app inside an Eliona environment.
 
 - `CONNECTION_STRING`: configures the [Eliona database](https://github.com/eliona-smart-building-assistant/go-eliona/tree/main/db). Otherwise, the app can't be initialized and started. (e.g. `postgres://user:pass@localhost:5432/iot`)
 
@@ -27,9 +25,11 @@ This initialization can be handled by the `reset.sql` script.
 
 - `API_TOKEN`: defines the secret to authenticate the app and access the Eliona API.
 
-- `API_SERVER_PORT`(optional): define the port the API server listens. The default value is Port `3000`. <mark>Todo: Decide if the app needs its own API. If so, an API server have to implemented and the port have to be configurable.</mark>
+- `API_SERVER_PORT`(optional): define the port the API server listens. The default value is Port `3000`.
 
 - `LOG_LEVEL`(optional): defines the minimum level that should be [logged](https://github.com/eliona-smart-building-assistant/go-utils/blob/main/log/README.md). The default level is `info`.
+
+- `SSO_SERVER_PORT` (optional): defines the port for Single Sign On Services, here SAML 2.0. The default value is Port `8080`.
 
 ### Database tables ###
 
