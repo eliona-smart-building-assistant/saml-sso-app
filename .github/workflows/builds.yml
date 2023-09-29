@@ -21,3 +21,6 @@ jobs:
           vuln-type: 'os,library'
           severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
           # skip-files: 'openapi.yaml'
+      
+      - name: Build Docker Test IdP image
+        run: docker build --file Dockerfile-TestIdP
