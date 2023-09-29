@@ -22,9 +22,11 @@ jobs:
 
       - name: Run application tests
         id: run_app_test
-        run: go test -v ./...
+        run: go test -v ./... -cover
         env:
           CONNECTION_STRING: postgres://postgres:secret@172.17.0.1:5432?sslmode=disable
           API_ENDPOINT: http://172.17.0.1:3000/v2
           API_TOKEN: secret
+          APP_NAME: saml-sso
+          LOG_LEVEL: debug
           START_MODE: docker

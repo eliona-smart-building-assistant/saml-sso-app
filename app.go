@@ -32,9 +32,9 @@ import (
 )
 
 const (
-	LOG_REGIO        = "app"
-	API_SERVER_PORT  = 3000
-	SAML_SERVER_PORT = 8080
+	LOG_REGIO       = "app"
+	API_SERVER_PORT = 3000
+	SSO_SERVER_PORT = 8080
 
 	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
 )
@@ -81,7 +81,7 @@ func run() {
 	}
 
 	apiPort := common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT))
-	samlSpPort := common.Getenv("SAML_SP_SERVER_PORT", strconv.Itoa(SAML_SERVER_PORT))
+	samlSpPort := common.Getenv("SSO_SERVER_PORT", strconv.Itoa(SSO_SERVER_PORT))
 
 	fmt.Println(basicConfig.OwnUrl + ":" + apiPort)
 	sp, err := saml.NewServiceProviderAdvanced(basicConfig.ServiceProviderCertificate,

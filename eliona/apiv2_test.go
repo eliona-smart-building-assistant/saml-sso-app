@@ -25,6 +25,15 @@ import (
 
 // need a running apiv2 and exported API_TOKEN / API_ENDPOINT
 
+func TestApp_EliApi_Version(t *testing.T) {
+	eApi := eliona.NewEliApiV2()
+	ver, err := eApi.GetApiVersion()
+	if err != nil {
+		t.Error("get version,  ", err)
+	}
+	t.Log("APIv2 Version: ", ver)
+}
+
 func TestApp_EliApi_AddUser(t *testing.T) {
 	fistName := "myFirstName"
 	lastName := "myLastName"

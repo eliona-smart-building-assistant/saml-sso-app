@@ -1,0 +1,42 @@
+#  This file is part of the eliona project.
+#  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
+#  ______ _ _
+# |  ____| (_)
+# | |__  | |_  ___  _ __   __ _
+# |  __| | | |/ _ \| '_ \ / _` |
+# | |____| | | (_) | | | | (_| |
+# |______|_|_|\___/|_| |_|\__,_|
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+#  BUT NOT LIMITED  TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#  NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+#  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# docker run -d -p 8000:8000 -v ./config.json:./cmd/identity_provider/cnf.json --name identity-provider identiryProviderImage
+
+FROM eliona/base-golang:latest-1-alpine AS build
+
+RUN apk add git
+
+WORKDIR /
+COPY . ./
+
+RUN go mod download
+RUN go build -o idp ./cmd/identity_provider/main.go
+
+FROM eliona/base-alpine:latest-3.17 AS target
+
+RUN apk update
+RUN apk upgrade
+
+COPY --from=build /idp ./
+COPY cmd/identity_provider/*.pem ./ cmd/identity_provider/
+COPY cmd/identity_provider/*.json ./ cmd/identity_provider/
+
+COPY openapi.yaml ./
+
+ENV APPNAME=saml-idp
+
+ENV TZ=Europe/Zurich
+CMD [ "/idp" ]
