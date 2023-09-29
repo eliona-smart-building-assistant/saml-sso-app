@@ -23,4 +23,4 @@ jobs:
           # skip-files: 'openapi.yaml'
       
       - name: Build Docker Test IdP image
-        run: docker build --file Dockerfile-TestIdP
+        run: docker build --file Dockerfile-TestIdP .
