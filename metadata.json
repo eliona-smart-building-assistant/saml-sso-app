@@ -2,8 +2,8 @@
   "name": "saml-sso",
   "elionaMinVersion": "v10.1.0",
   "displayName": {
-    "en": "App SAML 2.0 Service Provider (SP) for Single Sign-On (SSO)",
-    "de": "App SAML 2.0 Service Provider (SP) für Single Sign-On (SSO)"
+    "en": "SAML Single Sign-On",
+    "de": "SAML Single Sign-On"
   },
   "description": {
     "en": "The SAML SSO App provides a Single Sign-On (SSO) service using Security Assertion Markup Language (SAML 2.0) for an Eliona environment.",
