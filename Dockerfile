@@ -21,13 +21,12 @@ WORKDIR /
 COPY . ./
 
 RUN go mod download
-RUN go build -o ../app
 
 RUN DATE=$(date) && \
     GIT_COMMIT=$(git rev-list -1 HEAD) && \
     go build -ldflags "-X 'saml-sso/apiservices.BuildTimestamp=$DATE' -X 'saml-sso/apiservices.GitCommit=$GIT_COMMIT'" -o ../app
 
-FROM eliona/base-alpine:latest-3.17 AS target
+FROM eliona/base-alpine:latest AS target
 
 RUN apk update
 RUN apk upgrade
