@@ -90,12 +90,11 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 		}
 	)
 
-	basicConfig.OwnURL = "https://" + GetElionaHost()
+	basicConfig.OwnURL = "https://" + getElionaHost()
 	certificate, privateKey, err := utils.CreateSelfsignedX509Certificate(
 		AUTO_CNF_DEFAULT_CERT_VALID_DAYS, AUTO_CNF_DEFAULT_KEY_LENGTH, nil, nil)
 	if err != nil {
-		log.Error(LOG_REGIO, "auto configuration generate x509 certificates: %v",
-			err)
+		log.Error(LOG_REGIO, "auto configuration generate x509 certificates: %v", err)
 	} else {
 		basicConfig.SPCertificate = certificate
 		basicConfig.SPPrivateKey = privateKey
@@ -127,9 +126,8 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) {
 
 	var (
-		err            error
-		basicConfigDb  *appdb.BasicConfig
-		basicConfigApi *apiserver.BasicConfiguration
+		err           error
+		basicConfigDb *appdb.BasicConfig
 
 		apiForm any
 	)
@@ -142,9 +140,8 @@ func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) 
 	apiForm, err = ConvertDbToApiForm(basicConfigDb)
 	if err != nil {
 		return nil, err
-	} else {
-		basicConfigApi = apiForm.(*apiserver.BasicConfiguration)
 	}
+	basicConfigApi := apiForm.(*apiserver.BasicConfiguration)
 
 	return basicConfigApi, err
 }
@@ -162,9 +159,8 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 
 	if config == nil {
 		return nil, errors.New("basic config is nil")
-	} else {
-		config.Id = 1 // set id to 1, because it must
 	}
+	config.Id = 1 // Enforced by table definition.
 
 	dbForm, err = ConvertApiToDbForm(config)
 	if err != nil {
@@ -244,9 +240,8 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 
 	if config == nil {
 		return nil, errors.New("advanced config is nil")
-	} else {
-		config.Id = 1 // set id to 1, because it must
 	}
+	config.Id = 1 // Enforced by table definition.
 
 	dbForm, err = ConvertApiToDbForm(config)
 	if err != nil {
@@ -263,8 +258,7 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 	log.Debug(LOG_REGIO, "advanced config exists %v", exists)
 
 	if exists {
-		_, err = advancedConfigDb.Update(ctx, getDb(),
-			boil.Infer())
+		_, err = advancedConfigDb.Update(ctx, getDb(), boil.Infer())
 	} else {
 		err = advancedConfigDb.Insert(ctx, getDb(),
 			boil.Greylist(appdb.AdvancedConfigColumns.SignedRequest))
@@ -326,9 +320,8 @@ func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
 
 	if mapping == nil {
 		return nil, errors.New("attribute mapping is nil")
-	} else {
-		mapping.Id = 1 // set id to 1, because it must
 	}
+	mapping.Id = 1 // Enforced by table definition.
 
 	dbForm, err = ConvertApiToDbForm(mapping)
 	if err != nil {
@@ -415,9 +408,8 @@ func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissio
 	dbForm, err = ConvertApiToDbForm(permissions)
 	if err != nil {
 		return nil, err
-	} else {
-		permissionsDb = dbForm.(*appdb.Permission)
 	}
+	permissionsDb = dbForm.(*appdb.Permission)
 
 	exists, err := appdb.Permissions().Exists(ctx, getDb())
 	if err != nil {
@@ -470,7 +462,7 @@ func DeleteAllConfigurations(ctx context.Context) error {
 	return err
 }
 
-func GetElionaHost() string {
+func getElionaHost() string {
 	var eliDomain string
 
 	db := getDb()

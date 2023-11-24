@@ -84,11 +84,17 @@ func run() {
 	samlSpPort := common.Getenv("SSO_SERVER_PORT", strconv.Itoa(SSO_SERVER_PORT))
 
 	fmt.Println(basicConfig.OwnUrl + ":" + apiPort)
-	sp, err := saml.NewServiceProviderAdvanced(basicConfig.ServiceProviderCertificate,
-		basicConfig.ServiceProviderPrivateKey, basicConfig.OwnUrl,
-		[]byte(metadata), &advancedConfig.EntityId,
-		&advancedConfig.AllowInitializationByIdp, &advancedConfig.SignedRequest,
-		&advancedConfig.ForceAuthn, &advancedConfig.CookieSecure)
+	sp, err := saml.NewServiceProviderAdvanced(
+		basicConfig.ServiceProviderCertificate,
+		basicConfig.ServiceProviderPrivateKey,
+		basicConfig.OwnUrl,
+		metadata,
+		&advancedConfig.EntityId,
+		&advancedConfig.AllowInitializationByIdp,
+		&advancedConfig.SignedRequest,
+		&advancedConfig.ForceAuthn,
+		&advancedConfig.CookieSecure,
+	)
 	if err != nil {
 		log.Fatal(LOG_REGIO, "cannot initialize saml service provider: %v", err)
 	}
@@ -106,7 +112,7 @@ func run() {
 	)
 
 	go func() {
-		err = http.ListenAndServe(":"+apiPort, router)
+		err := http.ListenAndServe(":"+apiPort, router)
 		if err != nil {
 			log.Fatal(LOG_REGIO, "app api server: %v", err)
 		}
@@ -118,17 +124,13 @@ func run() {
 
 	activeHandleFunc := http.HandlerFunc(elionaAuth.ActiveHandle)
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_ACTIVE, activeHandleFunc)
-	authHandleFunc := http.HandlerFunc(elionaAuth.Authentication)
+	authHandleFunc := http.HandlerFunc(elionaAuth.Authentication) // TODO: Not completely implemented.
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_VERIFICATION,
 		sp.GetMiddleWare().RequireAccount(authHandleFunc))
 	http.Handle(SAML_SPECIFIC_ENDPOINT_PATH, sp.GetMiddleWare())
 
-	if err != nil {
-		log.Fatal(LOG_REGIO, "saml api port: %v", err)
-	}
 	log.Info(LOG_REGIO, "started @ %v", samlSpPort)
 	err = http.ListenAndServe(":"+samlSpPort, nil)
-
 	if err != nil {
 		log.Error("sp app", "exiting due to an error: %v", err)
 	} else {

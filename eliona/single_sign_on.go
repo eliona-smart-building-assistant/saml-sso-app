@@ -104,7 +104,7 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 		errorMessage []byte
 	)
 
-	// try to optain real user ip
+	// Try to obtain real user IP.
 	userIp = r.Header.Get("X-Forwarded-For")
 	if userIp == "" {
 		userIp = r.Header.Get("X-Real-Ip")

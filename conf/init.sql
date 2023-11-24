@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS saml_sp.basic_config (
     user_to_archive  BOOLEAN         NOT NULL DEFAULT false
 ) ;
 
-CREATE TABLE IF NOT EXISTS saml_sp.attribute_map (
+CREATE TABLE IF NOT EXISTS saml_sp.attribute_map ( -- SAML session attribute names.
     id              INT PRIMARY KEY NOT NULL DEFAULT 1 REFERENCES saml_sp.basic_config(id) ON UPDATE CASCADE    ,
     email           TEXT            NOT NULL DEFAULT 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn',
     first_name      TEXT                     DEFAULT NULL                                                       ,
