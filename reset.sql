@@ -28,7 +28,7 @@ INSERT INTO public.eliona_app (app_name, enable)
 VALUES ('saml-sso', 't')
 	ON CONFLICT (app_name) DO UPDATE SET initialized_at = null;
 
-DROP SCHEMA IF EXISTS saml-sso CASCADE;
+DROP SCHEMA IF EXISTS saml_sp CASCADE;
 
 -- DELETE FROM eliona_app WHERE app_name = 'saml-sso';
 -- DELETE FROM eliona_store WHERE app_name = 'saml-sso';
