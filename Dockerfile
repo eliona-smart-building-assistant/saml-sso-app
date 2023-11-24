@@ -36,7 +36,5 @@ COPY conf/*.sql ./conf/
 
 COPY openapi.yaml ./
 
-ENV APPNAME=saml-sso
-
 ENV TZ=Europe/Zurich
 CMD [ "/app" ]
