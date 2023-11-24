@@ -30,16 +30,9 @@ This initialization can be handled by the `reset.sql` script.
 
 ### Database tables ###
 
-<mark>Todo: Describe the database objects the app needs for configuration</mark>
-
-<mark>Todo: Decide if the app uses its own data and which data should be accessible from outside the app. This is always the case with configuration data. If so, the app needs its own API server to provide access to this data. To define the API use an openapi.yaml file and generators to build the server stub.</mark>
-
-The app requires configuration data that remains in the database. To do this, the app creates its own database schema `template` during initialization. To modify and handle the configuration data the app provides an API access. Have a look at the [API specification](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/app-template/develop/openapi.yaml) how the configuration tables should be used.
-
-- `template.example_table`: <mark>Todo: Describe the database table in short.</mark>
+The app requires configuration data that remains in the database. To do this, the app creates its own database schema `saml_sp` during initialization. To modify and handle the configuration data the app provides an API access. Have a look at the [API specification](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/saml-sso-app/develop/openapi.yaml) how the configuration tables should be used.
 
 **Generation**: to generate access method to database see Generation section below.
-
 
 ## References
 
@@ -47,14 +40,9 @@ The app requires configuration data that remains in the database. To do this, th
 
 The app provides its own API to access configuration data and other functions. The full description of the API is defined in the `openapi.yaml` OpenAPI definition file.
 
-- [API Reference](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/app-template/develop/openapi.yaml) shows Details of the API
+- [API Reference](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/saml-sso-app/develop/openapi.yaml) shows Details of the API.
 
 **Generation**: to generate api server stub see Generation section below.
-
-
-### Eliona ###
-
-<mark>Todo: Describe all the data the app writes to eliona</mark>
 
 
 ## Tools
