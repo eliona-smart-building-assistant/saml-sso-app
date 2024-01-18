@@ -35,6 +35,7 @@ COPY --from=build /app ./
 COPY conf/*.sql ./conf/
 
 COPY openapi.yaml ./
+COPY metadata.json ./
 
 ENV TZ=Europe/Zurich
 CMD [ "/app" ]
