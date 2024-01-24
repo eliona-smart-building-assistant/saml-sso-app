@@ -39,14 +39,7 @@ func AssertAdvancedConfigurationRequired(obj AdvancedConfiguration) error {
 	return nil
 }
 
-// AssertRecurseAdvancedConfigurationRequired recursively checks if required fields are not zero-ed in a nested slice.
-// Accepts only nested slice of AdvancedConfiguration (e.g. [][]AdvancedConfiguration), otherwise ErrTypeAssertionError is thrown.
-func AssertRecurseAdvancedConfigurationRequired(objSlice interface{}) error {
-	return AssertRecurseInterfaceRequired(objSlice, func(obj interface{}) error {
-		aAdvancedConfiguration, ok := obj.(AdvancedConfiguration)
-		if !ok {
-			return ErrTypeAssertionError
-		}
-		return AssertAdvancedConfigurationRequired(aAdvancedConfiguration)
-	})
+// AssertAdvancedConfigurationConstraints checks if the values respects the defined constraints
+func AssertAdvancedConfigurationConstraints(obj AdvancedConfiguration) error {
+	return nil
 }

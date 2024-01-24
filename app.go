@@ -101,8 +101,8 @@ func run() {
 
 	// app api handle to router
 	router := apiserver.NewRouter(
-		apiserver.NewConfigurationApiController(apiservices.NewConfigurationApiService()),
-		apiserver.NewVersionApiController(apiservices.NewVersionApiService()),
+		apiserver.NewConfigurationAPIController(apiservices.NewConfigurationApiService()),
+		apiserver.NewVersionAPIController(apiservices.NewVersionApiService()),
 
 		// separate handled in eliona/sso_handles.go (no RESTful)
 		// apiserver.NewGenericSingleSignOnApiController(apiservices.NewGenericSingleSignOnApiService()),

@@ -33,14 +33,7 @@ func AssertAttributeMapRequired(obj AttributeMap) error {
 	return nil
 }
 
-// AssertRecurseAttributeMapRequired recursively checks if required fields are not zero-ed in a nested slice.
-// Accepts only nested slice of AttributeMap (e.g. [][]AttributeMap), otherwise ErrTypeAssertionError is thrown.
-func AssertRecurseAttributeMapRequired(objSlice interface{}) error {
-	return AssertRecurseInterfaceRequired(objSlice, func(obj interface{}) error {
-		aAttributeMap, ok := obj.(AttributeMap)
-		if !ok {
-			return ErrTypeAssertionError
-		}
-		return AssertAttributeMapRequired(aAttributeMap)
-	})
+// AssertAttributeMapConstraints checks if the values respects the defined constraints
+func AssertAttributeMapConstraints(obj AttributeMap) error {
+	return nil
 }

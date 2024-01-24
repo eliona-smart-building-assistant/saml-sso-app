@@ -11,29 +11,31 @@ package apiserver
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"strings"
 )
 
-// ConfigurationApiController binds http requests to an api service and writes the service results to the http response
-type ConfigurationApiController struct {
-	service      ConfigurationApiServicer
+// ConfigurationAPIController binds http requests to an api service and writes the service results to the http response
+type ConfigurationAPIController struct {
+	service      ConfigurationAPIServicer
 	errorHandler ErrorHandler
 }
 
-// ConfigurationApiOption for how the controller is set up.
-type ConfigurationApiOption func(*ConfigurationApiController)
+// ConfigurationAPIOption for how the controller is set up.
+type ConfigurationAPIOption func(*ConfigurationAPIController)
 
-// WithConfigurationApiErrorHandler inject ErrorHandler into controller
-func WithConfigurationApiErrorHandler(h ErrorHandler) ConfigurationApiOption {
-	return func(c *ConfigurationApiController) {
+// WithConfigurationAPIErrorHandler inject ErrorHandler into controller
+func WithConfigurationAPIErrorHandler(h ErrorHandler) ConfigurationAPIOption {
+	return func(c *ConfigurationAPIController) {
 		c.errorHandler = h
 	}
 }
 
-// NewConfigurationApiController creates a default api controller
-func NewConfigurationApiController(s ConfigurationApiServicer, opts ...ConfigurationApiOption) Router {
-	controller := &ConfigurationApiController{
+// NewConfigurationAPIController creates a default api controller
+func NewConfigurationAPIController(s ConfigurationAPIServicer, opts ...ConfigurationAPIOption) Router {
+	controller := &ConfigurationAPIController{
 		service:      s,
 		errorHandler: DefaultErrorHandler,
 	}
@@ -45,53 +47,45 @@ func NewConfigurationApiController(s ConfigurationApiServicer, opts ...Configura
 	return controller
 }
 
-// Routes returns all the api routes for the ConfigurationApiController
-func (c *ConfigurationApiController) Routes() Routes {
+// Routes returns all the api routes for the ConfigurationAPIController
+func (c *ConfigurationAPIController) Routes() Routes {
 	return Routes{
-		{
-			"GetAdvancedConfiguration",
+		"GetAdvancedConfiguration": Route{
 			strings.ToUpper("Get"),
 			"/v1/configuration/advanced",
 			c.GetAdvancedConfiguration,
 		},
-		{
-			"GetAttributeMapping",
+		"GetAttributeMapping": Route{
 			strings.ToUpper("Get"),
 			"/v1/configuration/attribute-mapping",
 			c.GetAttributeMapping,
 		},
-		{
-			"GetBasicConfiguration",
+		"GetBasicConfiguration": Route{
 			strings.ToUpper("Get"),
 			"/v1/configuration/basic",
 			c.GetBasicConfiguration,
 		},
-		{
-			"GetPermissionMapping",
+		"GetPermissionMapping": Route{
 			strings.ToUpper("Get"),
 			"/v1/configuration/permission-mapping",
 			c.GetPermissionMapping,
 		},
-		{
-			"PutAdvancedConfiguration",
+		"PutAdvancedConfiguration": Route{
 			strings.ToUpper("Put"),
 			"/v1/configuration/advanced",
 			c.PutAdvancedConfiguration,
 		},
-		{
-			"PutAttributeMapping",
+		"PutAttributeMapping": Route{
 			strings.ToUpper("Put"),
 			"/v1/configuration/attribute-mapping",
 			c.PutAttributeMapping,
 		},
-		{
-			"PutBasicConfiguration",
+		"PutBasicConfiguration": Route{
 			strings.ToUpper("Put"),
 			"/v1/configuration/basic",
 			c.PutBasicConfiguration,
 		},
-		{
-			"PutPermissionMapping",
+		"PutPermissionMapping": Route{
 			strings.ToUpper("Put"),
 			"/v1/configuration/permission-mapping",
 			c.PutPermissionMapping,
@@ -100,7 +94,7 @@ func (c *ConfigurationApiController) Routes() Routes {
 }
 
 // GetAdvancedConfiguration - Get Advanced Configuration
-func (c *ConfigurationApiController) GetAdvancedConfiguration(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) GetAdvancedConfiguration(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetAdvancedConfiguration(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -109,11 +103,10 @@ func (c *ConfigurationApiController) GetAdvancedConfiguration(w http.ResponseWri
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // GetAttributeMapping - Get Attribute Mapping
-func (c *ConfigurationApiController) GetAttributeMapping(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) GetAttributeMapping(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetAttributeMapping(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -122,11 +115,10 @@ func (c *ConfigurationApiController) GetAttributeMapping(w http.ResponseWriter, 
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // GetBasicConfiguration - Get Basic Configurations
-func (c *ConfigurationApiController) GetBasicConfiguration(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) GetBasicConfiguration(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetBasicConfiguration(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -135,11 +127,10 @@ func (c *ConfigurationApiController) GetBasicConfiguration(w http.ResponseWriter
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // GetPermissionMapping - Get Permission Mapping
-func (c *ConfigurationApiController) GetPermissionMapping(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) GetPermissionMapping(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetPermissionMapping(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -148,19 +139,22 @@ func (c *ConfigurationApiController) GetPermissionMapping(w http.ResponseWriter,
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // PutAdvancedConfiguration - Creates or Update Advanced Configuration
-func (c *ConfigurationApiController) PutAdvancedConfiguration(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) PutAdvancedConfiguration(w http.ResponseWriter, r *http.Request) {
 	advancedConfigurationParam := AdvancedConfiguration{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
-	if err := d.Decode(&advancedConfigurationParam); err != nil {
+	if err := d.Decode(&advancedConfigurationParam); err != nil && !errors.Is(err, io.EOF) {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
 	if err := AssertAdvancedConfigurationRequired(advancedConfigurationParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertAdvancedConfigurationConstraints(advancedConfigurationParam); err != nil {
 		c.errorHandler(w, r, err, nil)
 		return
 	}
@@ -172,19 +166,22 @@ func (c *ConfigurationApiController) PutAdvancedConfiguration(w http.ResponseWri
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // PutAttributeMapping - Creates or Update Attribute Mapping
-func (c *ConfigurationApiController) PutAttributeMapping(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) PutAttributeMapping(w http.ResponseWriter, r *http.Request) {
 	attributeMapParam := AttributeMap{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
-	if err := d.Decode(&attributeMapParam); err != nil {
+	if err := d.Decode(&attributeMapParam); err != nil && !errors.Is(err, io.EOF) {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
 	if err := AssertAttributeMapRequired(attributeMapParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertAttributeMapConstraints(attributeMapParam); err != nil {
 		c.errorHandler(w, r, err, nil)
 		return
 	}
@@ -196,19 +193,22 @@ func (c *ConfigurationApiController) PutAttributeMapping(w http.ResponseWriter, 
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // PutBasicConfiguration - Creates or Update Basic Configuration
-func (c *ConfigurationApiController) PutBasicConfiguration(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) PutBasicConfiguration(w http.ResponseWriter, r *http.Request) {
 	basicConfigurationParam := BasicConfiguration{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
-	if err := d.Decode(&basicConfigurationParam); err != nil {
+	if err := d.Decode(&basicConfigurationParam); err != nil && !errors.Is(err, io.EOF) {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
 	if err := AssertBasicConfigurationRequired(basicConfigurationParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertBasicConfigurationConstraints(basicConfigurationParam); err != nil {
 		c.errorHandler(w, r, err, nil)
 		return
 	}
@@ -220,19 +220,22 @@ func (c *ConfigurationApiController) PutBasicConfiguration(w http.ResponseWriter
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // PutPermissionMapping - Creates or Update Permission Mapping Configurations
-func (c *ConfigurationApiController) PutPermissionMapping(w http.ResponseWriter, r *http.Request) {
+func (c *ConfigurationAPIController) PutPermissionMapping(w http.ResponseWriter, r *http.Request) {
 	permissionsParam := Permissions{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
-	if err := d.Decode(&permissionsParam); err != nil {
+	if err := d.Decode(&permissionsParam); err != nil && !errors.Is(err, io.EOF) {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
 	if err := AssertPermissionsRequired(permissionsParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertPermissionsConstraints(permissionsParam); err != nil {
 		c.errorHandler(w, r, err, nil)
 		return
 	}
@@ -244,5 +247,4 @@ func (c *ConfigurationApiController) PutPermissionMapping(w http.ResponseWriter,
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }

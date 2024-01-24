@@ -14,25 +14,25 @@ import (
 	"strings"
 )
 
-// GenericSingleSignOnApiController binds http requests to an api service and writes the service results to the http response
-type GenericSingleSignOnApiController struct {
-	service      GenericSingleSignOnApiServicer
+// GenericSingleSignOnAPIController binds http requests to an api service and writes the service results to the http response
+type GenericSingleSignOnAPIController struct {
+	service      GenericSingleSignOnAPIServicer
 	errorHandler ErrorHandler
 }
 
-// GenericSingleSignOnApiOption for how the controller is set up.
-type GenericSingleSignOnApiOption func(*GenericSingleSignOnApiController)
+// GenericSingleSignOnAPIOption for how the controller is set up.
+type GenericSingleSignOnAPIOption func(*GenericSingleSignOnAPIController)
 
-// WithGenericSingleSignOnApiErrorHandler inject ErrorHandler into controller
-func WithGenericSingleSignOnApiErrorHandler(h ErrorHandler) GenericSingleSignOnApiOption {
-	return func(c *GenericSingleSignOnApiController) {
+// WithGenericSingleSignOnAPIErrorHandler inject ErrorHandler into controller
+func WithGenericSingleSignOnAPIErrorHandler(h ErrorHandler) GenericSingleSignOnAPIOption {
+	return func(c *GenericSingleSignOnAPIController) {
 		c.errorHandler = h
 	}
 }
 
-// NewGenericSingleSignOnApiController creates a default api controller
-func NewGenericSingleSignOnApiController(s GenericSingleSignOnApiServicer, opts ...GenericSingleSignOnApiOption) Router {
-	controller := &GenericSingleSignOnApiController{
+// NewGenericSingleSignOnAPIController creates a default api controller
+func NewGenericSingleSignOnAPIController(s GenericSingleSignOnAPIServicer, opts ...GenericSingleSignOnAPIOption) Router {
+	controller := &GenericSingleSignOnAPIController{
 		service:      s,
 		errorHandler: DefaultErrorHandler,
 	}
@@ -44,17 +44,15 @@ func NewGenericSingleSignOnApiController(s GenericSingleSignOnApiServicer, opts 
 	return controller
 }
 
-// Routes returns all the api routes for the GenericSingleSignOnApiController
-func (c *GenericSingleSignOnApiController) Routes() Routes {
+// Routes returns all the api routes for the GenericSingleSignOnAPIController
+func (c *GenericSingleSignOnAPIController) Routes() Routes {
 	return Routes{
-		{
-			"GetAuthorizationProcedure",
+		"GetAuthorizationProcedure": Route{
 			strings.ToUpper("Get"),
 			"/v1/sso/auth",
 			c.GetAuthorizationProcedure,
 		},
-		{
-			"GetSSOActive",
+		"GetSSOActive": Route{
 			strings.ToUpper("Get"),
 			"/v1/sso/active",
 			c.GetSSOActive,
@@ -63,7 +61,7 @@ func (c *GenericSingleSignOnApiController) Routes() Routes {
 }
 
 // GetAuthorizationProcedure - Begin authorization / login procedure
-func (c *GenericSingleSignOnApiController) GetAuthorizationProcedure(w http.ResponseWriter, r *http.Request) {
+func (c *GenericSingleSignOnAPIController) GetAuthorizationProcedure(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetAuthorizationProcedure(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -72,11 +70,10 @@ func (c *GenericSingleSignOnApiController) GetAuthorizationProcedure(w http.Resp
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // GetSSOActive - Check, if a SSO service is available and configured
-func (c *GenericSingleSignOnApiController) GetSSOActive(w http.ResponseWriter, r *http.Request) {
+func (c *GenericSingleSignOnAPIController) GetSSOActive(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetSSOActive(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -85,5 +82,4 @@ func (c *GenericSingleSignOnApiController) GetSSOActive(w http.ResponseWriter, r
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }

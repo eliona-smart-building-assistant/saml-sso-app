@@ -19,14 +19,7 @@ func AssertActiveRequired(obj Active) error {
 	return nil
 }
 
-// AssertRecurseActiveRequired recursively checks if required fields are not zero-ed in a nested slice.
-// Accepts only nested slice of Active (e.g. [][]Active), otherwise ErrTypeAssertionError is thrown.
-func AssertRecurseActiveRequired(objSlice interface{}) error {
-	return AssertRecurseInterfaceRequired(objSlice, func(obj interface{}) error {
-		aActive, ok := obj.(Active)
-		if !ok {
-			return ErrTypeAssertionError
-		}
-		return AssertActiveRequired(aActive)
-	})
+// AssertActiveConstraints checks if the values respects the defined constraints
+func AssertActiveConstraints(obj Active) error {
+	return nil
 }

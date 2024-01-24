@@ -42,14 +42,7 @@ func AssertBasicConfigurationRequired(obj BasicConfiguration) error {
 	return nil
 }
 
-// AssertRecurseBasicConfigurationRequired recursively checks if required fields are not zero-ed in a nested slice.
-// Accepts only nested slice of BasicConfiguration (e.g. [][]BasicConfiguration), otherwise ErrTypeAssertionError is thrown.
-func AssertRecurseBasicConfigurationRequired(objSlice interface{}) error {
-	return AssertRecurseInterfaceRequired(objSlice, func(obj interface{}) error {
-		aBasicConfiguration, ok := obj.(BasicConfiguration)
-		if !ok {
-			return ErrTypeAssertionError
-		}
-		return AssertBasicConfigurationRequired(aBasicConfiguration)
-	})
+// AssertBasicConfigurationConstraints checks if the values respects the defined constraints
+func AssertBasicConfigurationConstraints(obj BasicConfiguration) error {
+	return nil
 }

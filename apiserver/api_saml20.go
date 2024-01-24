@@ -14,25 +14,25 @@ import (
 	"strings"
 )
 
-// SAML20ApiController binds http requests to an api service and writes the service results to the http response
-type SAML20ApiController struct {
-	service      SAML20ApiServicer
+// SAML20APIController binds http requests to an api service and writes the service results to the http response
+type SAML20APIController struct {
+	service      SAML20APIServicer
 	errorHandler ErrorHandler
 }
 
-// SAML20ApiOption for how the controller is set up.
-type SAML20ApiOption func(*SAML20ApiController)
+// SAML20APIOption for how the controller is set up.
+type SAML20APIOption func(*SAML20APIController)
 
-// WithSAML20ApiErrorHandler inject ErrorHandler into controller
-func WithSAML20ApiErrorHandler(h ErrorHandler) SAML20ApiOption {
-	return func(c *SAML20ApiController) {
+// WithSAML20APIErrorHandler inject ErrorHandler into controller
+func WithSAML20APIErrorHandler(h ErrorHandler) SAML20APIOption {
+	return func(c *SAML20APIController) {
 		c.errorHandler = h
 	}
 }
 
-// NewSAML20ApiController creates a default api controller
-func NewSAML20ApiController(s SAML20ApiServicer, opts ...SAML20ApiOption) Router {
-	controller := &SAML20ApiController{
+// NewSAML20APIController creates a default api controller
+func NewSAML20APIController(s SAML20APIServicer, opts ...SAML20APIOption) Router {
+	controller := &SAML20APIController{
 		service:      s,
 		errorHandler: DefaultErrorHandler,
 	}
@@ -44,17 +44,15 @@ func NewSAML20ApiController(s SAML20ApiServicer, opts ...SAML20ApiOption) Router
 	return controller
 }
 
-// Routes returns all the api routes for the SAML20ApiController
-func (c *SAML20ApiController) Routes() Routes {
+// Routes returns all the api routes for the SAML20APIController
+func (c *SAML20APIController) Routes() Routes {
 	return Routes{
-		{
-			"SamlAcsPost",
+		"SamlAcsPost": Route{
 			strings.ToUpper("Post"),
 			"/v1/saml/acs",
 			c.SamlAcsPost,
 		},
-		{
-			"SamlSloPost",
+		"SamlSloPost": Route{
 			strings.ToUpper("Post"),
 			"/v1/saml/slo",
 			c.SamlSloPost,
@@ -63,7 +61,7 @@ func (c *SAML20ApiController) Routes() Routes {
 }
 
 // SamlAcsPost -
-func (c *SAML20ApiController) SamlAcsPost(w http.ResponseWriter, r *http.Request) {
+func (c *SAML20APIController) SamlAcsPost(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.SamlAcsPost(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -72,11 +70,10 @@ func (c *SAML20ApiController) SamlAcsPost(w http.ResponseWriter, r *http.Request
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // SamlSloPost -
-func (c *SAML20ApiController) SamlSloPost(w http.ResponseWriter, r *http.Request) {
+func (c *SAML20APIController) SamlSloPost(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.SamlSloPost(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -85,5 +82,4 @@ func (c *SAML20ApiController) SamlSloPost(w http.ResponseWriter, r *http.Request
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }

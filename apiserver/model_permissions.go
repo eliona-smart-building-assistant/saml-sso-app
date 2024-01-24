@@ -47,14 +47,7 @@ func AssertPermissionsRequired(obj Permissions) error {
 	return nil
 }
 
-// AssertRecursePermissionsRequired recursively checks if required fields are not zero-ed in a nested slice.
-// Accepts only nested slice of Permissions (e.g. [][]Permissions), otherwise ErrTypeAssertionError is thrown.
-func AssertRecursePermissionsRequired(objSlice interface{}) error {
-	return AssertRecurseInterfaceRequired(objSlice, func(obj interface{}) error {
-		aPermissions, ok := obj.(Permissions)
-		if !ok {
-			return ErrTypeAssertionError
-		}
-		return AssertPermissionsRequired(aPermissions)
-	})
+// AssertPermissionsConstraints checks if the values respects the defined constraints
+func AssertPermissionsConstraints(obj Permissions) error {
+	return nil
 }

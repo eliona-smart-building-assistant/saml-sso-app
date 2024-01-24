@@ -21,14 +21,7 @@ func AssertRoleMapRequired(obj RoleMap) error {
 	return nil
 }
 
-// AssertRecurseRoleMapRequired recursively checks if required fields are not zero-ed in a nested slice.
-// Accepts only nested slice of RoleMap (e.g. [][]RoleMap), otherwise ErrTypeAssertionError is thrown.
-func AssertRecurseRoleMapRequired(objSlice interface{}) error {
-	return AssertRecurseInterfaceRequired(objSlice, func(obj interface{}) error {
-		aRoleMap, ok := obj.(RoleMap)
-		if !ok {
-			return ErrTypeAssertionError
-		}
-		return AssertRoleMapRequired(aRoleMap)
-	})
+// AssertRoleMapConstraints checks if the values respects the defined constraints
+func AssertRoleMapConstraints(obj RoleMap) error {
+	return nil
 }

@@ -14,10 +14,10 @@ import (
 	"net/http"
 )
 
-// ConfigurationApiRouter defines the required methods for binding the api requests to a responses for the ConfigurationApi
-// The ConfigurationApiRouter implementation should parse necessary information from the http request,
-// pass the data to a ConfigurationApiServicer to perform the required actions, then write the service results to the http response.
-type ConfigurationApiRouter interface {
+// ConfigurationAPIRouter defines the required methods for binding the api requests to a responses for the ConfigurationAPI
+// The ConfigurationAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a ConfigurationAPIServicer to perform the required actions, then write the service results to the http response.
+type ConfigurationAPIRouter interface {
 	GetAdvancedConfiguration(http.ResponseWriter, *http.Request)
 	GetAttributeMapping(http.ResponseWriter, *http.Request)
 	GetBasicConfiguration(http.ResponseWriter, *http.Request)
@@ -28,35 +28,35 @@ type ConfigurationApiRouter interface {
 	PutPermissionMapping(http.ResponseWriter, *http.Request)
 }
 
-// GenericSingleSignOnApiRouter defines the required methods for binding the api requests to a responses for the GenericSingleSignOnApi
-// The GenericSingleSignOnApiRouter implementation should parse necessary information from the http request,
-// pass the data to a GenericSingleSignOnApiServicer to perform the required actions, then write the service results to the http response.
-type GenericSingleSignOnApiRouter interface {
+// GenericSingleSignOnAPIRouter defines the required methods for binding the api requests to a responses for the GenericSingleSignOnAPI
+// The GenericSingleSignOnAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a GenericSingleSignOnAPIServicer to perform the required actions, then write the service results to the http response.
+type GenericSingleSignOnAPIRouter interface {
 	GetAuthorizationProcedure(http.ResponseWriter, *http.Request)
 	GetSSOActive(http.ResponseWriter, *http.Request)
 }
 
-// SAML20ApiRouter defines the required methods for binding the api requests to a responses for the SAML20Api
-// The SAML20ApiRouter implementation should parse necessary information from the http request,
-// pass the data to a SAML20ApiServicer to perform the required actions, then write the service results to the http response.
-type SAML20ApiRouter interface {
+// SAML20APIRouter defines the required methods for binding the api requests to a responses for the SAML20API
+// The SAML20APIRouter implementation should parse necessary information from the http request,
+// pass the data to a SAML20APIServicer to perform the required actions, then write the service results to the http response.
+type SAML20APIRouter interface {
 	SamlAcsPost(http.ResponseWriter, *http.Request)
 	SamlSloPost(http.ResponseWriter, *http.Request)
 }
 
-// VersionApiRouter defines the required methods for binding the api requests to a responses for the VersionApi
-// The VersionApiRouter implementation should parse necessary information from the http request,
-// pass the data to a VersionApiServicer to perform the required actions, then write the service results to the http response.
-type VersionApiRouter interface {
+// VersionAPIRouter defines the required methods for binding the api requests to a responses for the VersionAPI
+// The VersionAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a VersionAPIServicer to perform the required actions, then write the service results to the http response.
+type VersionAPIRouter interface {
 	GetOpenAPI(http.ResponseWriter, *http.Request)
 	GetVersion(http.ResponseWriter, *http.Request)
 }
 
-// ConfigurationApiServicer defines the api actions for the ConfigurationApi service
+// ConfigurationAPIServicer defines the api actions for the ConfigurationAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
-type ConfigurationApiServicer interface {
+type ConfigurationAPIServicer interface {
 	GetAdvancedConfiguration(context.Context) (ImplResponse, error)
 	GetAttributeMapping(context.Context) (ImplResponse, error)
 	GetBasicConfiguration(context.Context) (ImplResponse, error)
@@ -67,29 +67,29 @@ type ConfigurationApiServicer interface {
 	PutPermissionMapping(context.Context, Permissions) (ImplResponse, error)
 }
 
-// GenericSingleSignOnApiServicer defines the api actions for the GenericSingleSignOnApi service
+// GenericSingleSignOnAPIServicer defines the api actions for the GenericSingleSignOnAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
-type GenericSingleSignOnApiServicer interface {
+type GenericSingleSignOnAPIServicer interface {
 	GetAuthorizationProcedure(context.Context) (ImplResponse, error)
 	GetSSOActive(context.Context) (ImplResponse, error)
 }
 
-// SAML20ApiServicer defines the api actions for the SAML20Api service
+// SAML20APIServicer defines the api actions for the SAML20API service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
-type SAML20ApiServicer interface {
+type SAML20APIServicer interface {
 	SamlAcsPost(context.Context) (ImplResponse, error)
 	SamlSloPost(context.Context) (ImplResponse, error)
 }
 
-// VersionApiServicer defines the api actions for the VersionApi service
+// VersionAPIServicer defines the api actions for the VersionAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
-type VersionApiServicer interface {
+type VersionAPIServicer interface {
 	GetOpenAPI(context.Context) (ImplResponse, error)
 	GetVersion(context.Context) (ImplResponse, error)
 }

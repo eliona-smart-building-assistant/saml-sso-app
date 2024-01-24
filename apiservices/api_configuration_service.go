@@ -22,14 +22,14 @@ import (
 	"saml-sso/apiserver"
 )
 
-// ConfigurationApiService is a service that implements the logic for the ConfigurationApiServicer
+// ConfigurationApiService is a service that implements the logic for the ConfigurationAPIServicer
 // This service should implement the business logic for every endpoint for the ConfigurationApi API.
 // Include any external packages or services that will be required by this service.
 type ConfigurationApiService struct {
 }
 
 // NewConfigurationApiService creates a default api service
-func NewConfigurationApiService() apiserver.ConfigurationApiServicer {
+func NewConfigurationApiService() apiserver.ConfigurationAPIServicer {
 	return &ConfigurationApiService{}
 }
 
