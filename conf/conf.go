@@ -124,49 +124,28 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 }
 
 func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) {
-
-	var (
-		err           error
-		basicConfigDb *appdb.BasicConfig
-
-		apiForm any
-	)
-
-	basicConfigDb, err = appdb.BasicConfigs().One(ctx, getDb())
+	basicConfigDb, err := appdb.BasicConfigs().One(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(basicConfigDb)
+	basicConfigApi, err := BasicConfigDbToApiForm(basicConfigDb)
 	if err != nil {
 		return nil, err
 	}
-	basicConfigApi := apiForm.(*apiserver.BasicConfiguration)
 
-	return basicConfigApi, err
+	return basicConfigApi, nil
 }
 
-func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
-	*apiserver.BasicConfiguration, error) {
-
-	var (
-		err           error
-		basicConfigDb *appdb.BasicConfig
-
-		apiForm any
-		dbForm  any
-	)
-
+func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (*apiserver.BasicConfiguration, error) {
 	if config == nil {
 		return nil, errors.New("basic config is nil")
 	}
 	config.Id = 1 // Enforced by table definition.
 
-	dbForm, err = ConvertApiToDbForm(config)
+	basicConfigDb, err := BasicConfigApiToDbForm(config)
 	if err != nil {
 		return nil, err
-	} else {
-		basicConfigDb = dbForm.(*appdb.BasicConfig)
 	}
 
 	exists, err := appdb.BasicConfigs().Exists(ctx, getDb())
@@ -188,12 +167,12 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(basicConfigDb)
+	apiForm, err := BasicConfigDbToApiForm(basicConfigDb)
 	if err != nil {
 		return nil, err
 	}
 
-	return apiForm.(*apiserver.BasicConfiguration), err
+	return apiForm, err
 }
 
 func DeleteBasicConfig(ctx context.Context) (int, error) {
@@ -203,51 +182,28 @@ func DeleteBasicConfig(ctx context.Context) (int, error) {
 }
 
 func GetAdvancedConfig(ctx context.Context) (*apiserver.AdvancedConfiguration, error) {
-
-	var (
-		err          error
-		advConfigDb  *appdb.AdvancedConfig
-		advConfigApi *apiserver.AdvancedConfiguration
-
-		apiForm any
-	)
-
-	advConfigDb, err = appdb.AdvancedConfigs().One(ctx, getDb())
+	advConfigDb, err := appdb.AdvancedConfigs().One(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(advConfigDb)
+	advConfigApi, err := AdvancedConfigDbToApiForm(advConfigDb)
 	if err != nil {
 		return nil, err
-	} else {
-		advConfigApi = apiForm.(*apiserver.AdvancedConfiguration)
 	}
 
 	return advConfigApi, err
 }
 
-func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfiguration) (
-	*apiserver.AdvancedConfiguration, error) {
-
-	var (
-		err              error
-		advancedConfigDb *appdb.AdvancedConfig
-
-		apiForm any
-		dbForm  any
-	)
-
+func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfiguration) (*apiserver.AdvancedConfiguration, error) {
 	if config == nil {
 		return nil, errors.New("advanced config is nil")
 	}
 	config.Id = 1 // Enforced by table definition.
 
-	dbForm, err = ConvertApiToDbForm(config)
+	advancedConfigDb, err := AdvancedConfigApiToDbForm(config)
 	if err != nil {
 		return nil, err
-	} else {
-		advancedConfigDb = dbForm.(*appdb.AdvancedConfig)
 	}
 
 	exists, err := appdb.AdvancedConfigs().Exists(ctx, getDb())
@@ -268,12 +224,12 @@ func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfigurat
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(advancedConfigDb)
+	apiForm, err := AdvancedConfigDbToApiForm(advancedConfigDb)
 	if err != nil {
 		return nil, err
 	}
 
-	return apiForm.(*apiserver.AdvancedConfiguration), err
+	return apiForm, err
 }
 
 func DeleteAdvancedConfig(ctx context.Context) (int, error) {
@@ -283,51 +239,28 @@ func DeleteAdvancedConfig(ctx context.Context) (int, error) {
 }
 
 func GetAttributeMapping(ctx context.Context) (*apiserver.AttributeMap, error) {
-
-	var (
-		err        error
-		attrMapDb  *appdb.AttributeMap
-		attrMapApi *apiserver.AttributeMap
-
-		apiForm any
-	)
-
-	attrMapDb, err = appdb.AttributeMaps().One(ctx, getDb())
+	attrMapDb, err := appdb.AttributeMaps().One(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(attrMapDb)
+	attrMapApi, err := AttributeMapDbToApiForm(attrMapDb)
 	if err != nil {
 		return nil, err
-	} else {
-		attrMapApi = apiForm.(*apiserver.AttributeMap)
 	}
 
 	return attrMapApi, err
 }
 
-func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
-	*apiserver.AttributeMap, error) {
-
-	var (
-		err                error
-		attributeMappingDb *appdb.AttributeMap
-
-		apiForm any
-		dbForm  any
-	)
-
+func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (*apiserver.AttributeMap, error) {
 	if mapping == nil {
 		return nil, errors.New("attribute mapping is nil")
 	}
 	mapping.Id = 1 // Enforced by table definition.
 
-	dbForm, err = ConvertApiToDbForm(mapping)
+	attributeMappingDb, err := AttributeMapApiToDbForm(mapping)
 	if err != nil {
 		return nil, err
-	} else {
-		attributeMappingDb = dbForm.(*appdb.AttributeMap)
 	}
 
 	exists, err := appdb.AttributeMaps().Exists(ctx, getDb())
@@ -349,12 +282,12 @@ func SetAttributeMapping(ctx context.Context, mapping *apiserver.AttributeMap) (
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(attributeMappingDb)
+	apiForm, err := AttributeMapDbToApiForm(attributeMappingDb)
 	if err != nil {
 		return nil, err
 	}
 
-	return apiForm.(*apiserver.AttributeMap), err
+	return apiForm, err
 }
 
 func DeleteAttributeMapping(ctx context.Context) (int, error) {
@@ -364,52 +297,30 @@ func DeleteAttributeMapping(ctx context.Context) (int, error) {
 }
 
 func GetPermissionSettings(ctx context.Context) (*apiserver.Permissions, error) {
-
-	var (
-		err     error
-		permDb  *appdb.Permission
-		permApi *apiserver.Permissions
-
-		apiForm any
-	)
-
-	permDb, err = appdb.Permissions().One(ctx, getDb())
+	permDb, err := appdb.Permissions().One(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(permDb)
+	permApi, err := PermissionDbToApiForm(permDb)
 	if err != nil {
 		return nil, err
-	} else {
-		permApi = apiForm.(*apiserver.Permissions)
 	}
 
 	return permApi, err
 }
 
-func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissions) (
-	*apiserver.Permissions, error) {
-
-	var (
-		err           error
-		permissionsDb *appdb.Permission
-
-		apiForm any
-		dbForm  any
-	)
-
+func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissions) (*apiserver.Permissions, error) {
 	if permissions == nil {
 		return nil, errors.New("permissions nil")
 	} else {
 		permissions.Id = 1 // set id to 1, because it must
 	}
 
-	dbForm, err = ConvertApiToDbForm(permissions)
+	permissionsDb, err := PermissionApiToDbForm(permissions)
 	if err != nil {
 		return nil, err
 	}
-	permissionsDb = dbForm.(*appdb.Permission)
 
 	exists, err := appdb.Permissions().Exists(ctx, getDb())
 	if err != nil {
@@ -430,12 +341,12 @@ func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissio
 		return nil, err
 	}
 
-	apiForm, err = ConvertDbToApiForm(permissionsDb)
+	apiForm, err := PermissionDbToApiForm(permissionsDb)
 	if err != nil {
 		return nil, err
 	}
 
-	return apiForm.(*apiserver.Permissions), err
+	return apiForm, err
 }
 
 func DeletePermissionSettings(ctx context.Context) (int, error) {

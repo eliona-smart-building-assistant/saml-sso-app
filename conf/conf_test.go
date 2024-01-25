@@ -48,7 +48,6 @@ func TestApp_Conf_InitDB(t *testing.T) {
 }
 
 func TestApp_Conf_LoadAutoConfig(t *testing.T) {
-
 	err := conf.DeleteAllConfigurations(context.Background())
 	if err != nil {
 		t.Error("Prepare DB (delete all config): ", err)
@@ -123,9 +122,7 @@ func TestApp_Conf_LoadAutoConfig(t *testing.T) {
 }
 
 func TestApp_Conf_InsertUpdateConfig(t *testing.T) {
-
 	for i := 0; i < 5; i++ {
-
 		var (
 			basicConfig1 apiserver.BasicConfiguration    = utils.CreateRandomApiBasicConfig()
 			advConfig1   apiserver.AdvancedConfiguration = utils.CreateRandomApiAdvancedConfig()

@@ -17,58 +17,11 @@ package conf
 
 import (
 	"encoding/json"
-	"errors"
 	"saml-sso/apiserver"
 	"saml-sso/appdb"
 
 	"github.com/volatiletech/null/v8"
 )
-
-func ConvertApiToDbForm(apiForm any) (any, error) {
-
-	var (
-		err    error
-		dbForm any
-	)
-
-	switch a := apiForm.(type) {
-	case *apiserver.BasicConfiguration:
-		dbForm, err = BasicConfigApiToDbForm(a)
-	case *apiserver.AdvancedConfiguration:
-		dbForm, err = AdvancedConfigApiToDbForm(a)
-	case *apiserver.AttributeMap:
-		dbForm, err = AttributeMapApiToDbForm(a)
-	case *apiserver.Permissions:
-		dbForm, err = PermissionApiToDbForm(a)
-	default:
-		err = errors.New("unknown api datatype")
-	}
-
-	return dbForm, err
-}
-
-func ConvertDbToApiForm(dbForm any) (any, error) {
-
-	var (
-		err     error
-		apiForm any
-	)
-
-	switch d := dbForm.(type) {
-	case *appdb.BasicConfig:
-		apiForm, err = BasicConfigDbToApiForm(d)
-	case *appdb.AdvancedConfig:
-		apiForm, err = AdvancedConfigDbToApiForm(d)
-	case *appdb.AttributeMap:
-		apiForm, err = AttributeMapDbToApiForm(d)
-	case *appdb.Permission:
-		apiForm, err = PermissionDbToApiForm(d)
-	default:
-		err = errors.New("unknown db datatype")
-	}
-
-	return apiForm, err
-}
 
 func BasicConfigApiToDbForm(config *apiserver.BasicConfiguration) (*appdb.BasicConfig, error) {
 

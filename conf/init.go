@@ -23,7 +23,5 @@ import (
 
 // InitConfiguration initialize the configuration of the app
 func InitConfiguration(connection db.Connection) error {
-
 	return InsertAutoSamlConfiguration(context.Background())
-	// return nil
 }
