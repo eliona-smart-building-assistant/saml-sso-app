@@ -53,20 +53,18 @@ const (
 
 func InsertAutoSamlConfiguration(ctx context.Context) error {
 
-	bs, err := GetBasicConfig(context.Background())
+	bs, err := GetConfig(context.Background())
 	if err == nil && bs != nil {
 		log.Info(LOG_REGIO, "config already exists. skip insert default config.")
 		return nil
 	}
 
 	var (
-		basicConfig appdb.BasicConfig = appdb.BasicConfig{
-			Enable:         AUTO_CNF_DEFAULT_ENABLED,
-			IdpMetadataURL: null.StringFromPtr(nil),
-			MetadataXML:    null.StringFromPtr(nil),
-			UserToArchive:  AUTO_CNF_DEFAULT_USER_TO_ARCHIVE,
-		}
-		advancedConfig appdb.AdvancedConfig = appdb.AdvancedConfig{
+		basicConfig appdb.Config = appdb.Config{
+			Enable:                   AUTO_CNF_DEFAULT_ENABLED,
+			IdpMetadataURL:           null.StringFromPtr(nil),
+			MetadataXML:              null.StringFromPtr(nil),
+			UserToArchive:            AUTO_CNF_DEFAULT_USER_TO_ARCHIVE,
 			AllowInitializationByIdp: AUTO_CNF_DEFAULT_ALLOW_INIT_BY_IDP,
 			SignedRequest:            AUTO_CNF_DEFAULT_SIGNING_REQ,
 			ForceAuthn:               AUTO_CNF_DEFAULT_FORCE_AUTHN,
@@ -105,11 +103,6 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 		return err
 	}
 
-	err = advancedConfig.Insert(ctx, getDb(), boil.Infer())
-	if err != nil {
-		return err
-	}
-
 	err = attributeMapping.Insert(ctx, getDb(), boil.Infer())
 	if err != nil {
 		return err
@@ -123,13 +116,13 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 	return err
 }
 
-func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) {
-	basicConfigDb, err := appdb.BasicConfigs().One(ctx, getDb())
+func GetConfig(ctx context.Context) (*apiserver.Configuration, error) {
+	basicConfigDb, err := appdb.Configs().One(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
 
-	basicConfigApi, err := BasicConfigDbToApiForm(basicConfigDb)
+	basicConfigApi, err := ConfigDbToApiForm(basicConfigDb)
 	if err != nil {
 		return nil, err
 	}
@@ -137,37 +130,39 @@ func GetBasicConfig(ctx context.Context) (*apiserver.BasicConfiguration, error) 
 	return basicConfigApi, nil
 }
 
-func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (*apiserver.BasicConfiguration, error) {
+func SetConfig(ctx context.Context, config *apiserver.Configuration) (*apiserver.Configuration, error) {
 	if config == nil {
-		return nil, errors.New("basic config is nil")
+		return nil, errors.New("config is nil")
 	}
 	config.Id = 1 // Enforced by table definition.
 
-	basicConfigDb, err := BasicConfigApiToDbForm(config)
+	ConfigDb, err := ConfigApiToDbForm(config)
 	if err != nil {
 		return nil, err
 	}
 
-	exists, err := appdb.BasicConfigs().Exists(ctx, getDb())
+	exists, err := appdb.Configs().Exists(ctx, getDb())
 	if err != nil {
 		return nil, err
 	}
 
-	log.Debug(LOG_REGIO, "basic config exists %v", exists)
+	log.Debug(LOG_REGIO, "config exists %v", exists)
 
 	if exists {
-		_, err = basicConfigDb.Update(ctx, getDb(),
-			boil.Blacklist(appdb.BasicConfigColumns.ID))
+		_, err = ConfigDb.Update(ctx, getDb(),
+			boil.Blacklist(appdb.ConfigColumns.ID),
+		)
 	} else {
-		err = basicConfigDb.Insert(ctx, getDb(),
-			boil.Greylist(appdb.BasicConfigColumns.Enable))
+		err = ConfigDb.Insert(ctx, getDb(),
+			boil.Greylist(appdb.ConfigColumns.Enable, appdb.ConfigColumns.SignedRequest),
+		)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	apiForm, err := BasicConfigDbToApiForm(basicConfigDb)
+	apiForm, err := ConfigDbToApiForm(ConfigDb)
 	if err != nil {
 		return nil, err
 	}
@@ -175,65 +170,8 @@ func SetBasicConfig(ctx context.Context, config *apiserver.BasicConfiguration) (
 	return apiForm, err
 }
 
-func DeleteBasicConfig(ctx context.Context) (int, error) {
-	ans, err := appdb.BasicConfigs().DeleteAll(ctx, getDb())
-
-	return int(ans), err
-}
-
-func GetAdvancedConfig(ctx context.Context) (*apiserver.AdvancedConfiguration, error) {
-	advConfigDb, err := appdb.AdvancedConfigs().One(ctx, getDb())
-	if err != nil {
-		return nil, err
-	}
-
-	advConfigApi, err := AdvancedConfigDbToApiForm(advConfigDb)
-	if err != nil {
-		return nil, err
-	}
-
-	return advConfigApi, err
-}
-
-func SetAdvancedConfig(ctx context.Context, config *apiserver.AdvancedConfiguration) (*apiserver.AdvancedConfiguration, error) {
-	if config == nil {
-		return nil, errors.New("advanced config is nil")
-	}
-	config.Id = 1 // Enforced by table definition.
-
-	advancedConfigDb, err := AdvancedConfigApiToDbForm(config)
-	if err != nil {
-		return nil, err
-	}
-
-	exists, err := appdb.AdvancedConfigs().Exists(ctx, getDb())
-	if err != nil {
-		return nil, err
-	}
-
-	log.Debug(LOG_REGIO, "advanced config exists %v", exists)
-
-	if exists {
-		_, err = advancedConfigDb.Update(ctx, getDb(), boil.Infer())
-	} else {
-		err = advancedConfigDb.Insert(ctx, getDb(),
-			boil.Greylist(appdb.AdvancedConfigColumns.SignedRequest))
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	apiForm, err := AdvancedConfigDbToApiForm(advancedConfigDb)
-	if err != nil {
-		return nil, err
-	}
-
-	return apiForm, err
-}
-
-func DeleteAdvancedConfig(ctx context.Context) (int, error) {
-	ans, err := appdb.AdvancedConfigs().DeleteAll(ctx, getDb())
+func DeleteConfig(ctx context.Context) (int, error) {
+	ans, err := appdb.Configs().DeleteAll(ctx, getDb())
 
 	return int(ans), err
 }
@@ -364,12 +302,7 @@ func DeleteAllConfigurations(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = DeleteAdvancedConfig(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = DeleteBasicConfig(ctx)
-
+	_, err = DeleteConfig(ctx)
 	return err
 }
 

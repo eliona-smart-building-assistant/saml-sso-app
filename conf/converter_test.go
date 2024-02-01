@@ -27,48 +27,25 @@ import (
 	"github.com/go-test/deep"
 )
 
-func TestApp_Converter_ConvertBasicConfig(t *testing.T) {
+func TestApp_Converter_ConvertConfig(t *testing.T) {
 	for i := 0; i < 5; i++ {
-		apiBasicCnf := utils.CreateRandomApiBasicConfig()
-		dbBasicCnf, err := conf.BasicConfigApiToDbForm(&apiBasicCnf)
+		apiBasicCnf := utils.CreateRandomApiConfig()
+		dbBasicCnf, err := conf.ConfigApiToDbForm(&apiBasicCnf)
 		if err != nil {
 			t.Error("convert basic config from api to db form using general converter: ", err)
 		}
-		err = compareBasicConfig(dbBasicCnf, &apiBasicCnf)
+		err = compareConfig(dbBasicCnf, &apiBasicCnf)
 		if err != nil {
 			t.Error("convert basic config from api to db wrong content: ", err)
 		}
 
-		apiBasicCnfReturned, err := conf.BasicConfigDbToApiForm(dbBasicCnf)
+		apiBasicCnfReturned, err := conf.ConfigDbToApiForm(dbBasicCnf)
 		if err != nil {
 			t.Error("convert basic config from db to api form using general converter: ", err)
 		}
 		diff := deep.Equal(apiBasicCnfReturned, &apiBasicCnf)
 		if diff != nil {
 			t.Error("convert basic config from db to api wrong content (not origin): ", err)
-		}
-	}
-}
-
-func TestApp_Converter_ConvertAdvancedConfig(t *testing.T) {
-	for i := 0; i < 5; i++ {
-		apiAdvCnf := utils.CreateRandomApiAdvancedConfig()
-		dbAdvCnf, err := conf.AdvancedConfigApiToDbForm(&apiAdvCnf)
-		if err != nil {
-			t.Error("convert advanced config from api to db form using general converter: ", err)
-		}
-		err = compareAdvancedConfig(dbAdvCnf, &apiAdvCnf)
-		if err != nil {
-			t.Error("convert advanced config from api to db wrong content: ", err)
-		}
-
-		apiAdvCnfReturned, err := conf.AdvancedConfigDbToApiForm(dbAdvCnf)
-		if err != nil {
-			t.Error("convert advanced config from db to api form using general converter: ", err)
-		}
-		diff := deep.Equal(apiAdvCnfReturned, &apiAdvCnf)
-		if diff != nil {
-			t.Error("convert advanced config from db to api wrong content (not origin): ", err)
 		}
 	}
 }
@@ -119,7 +96,7 @@ func TestApp_Converter_ConvertPermissionCnf(t *testing.T) {
 	}
 }
 
-func compareBasicConfig(db *appdb.BasicConfig, api *apiserver.BasicConfiguration) error {
+func compareConfig(db *appdb.Config, api *apiserver.Configuration) error {
 	if db.ID != api.Id {
 		return errors.New("id")
 	}
@@ -150,14 +127,6 @@ func compareBasicConfig(db *appdb.BasicConfig, api *apiserver.BasicConfiguration
 
 	if db.UserToArchive != api.UserToArchive {
 		return errors.New("user to archive")
-	}
-
-	return nil
-}
-
-func compareAdvancedConfig(db *appdb.AdvancedConfig, api *apiserver.AdvancedConfiguration) error {
-	if db.ID != api.Id {
-		return errors.New("id")
 	}
 
 	if db.AllowInitializationByIdp != api.AllowInitializationByIdp {

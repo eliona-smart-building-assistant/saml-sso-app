@@ -18,13 +18,11 @@ import (
 // The ConfigurationAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a ConfigurationAPIServicer to perform the required actions, then write the service results to the http response.
 type ConfigurationAPIRouter interface {
-	GetAdvancedConfiguration(http.ResponseWriter, *http.Request)
 	GetAttributeMapping(http.ResponseWriter, *http.Request)
-	GetBasicConfiguration(http.ResponseWriter, *http.Request)
+	GetConfiguration(http.ResponseWriter, *http.Request)
 	GetPermissionMapping(http.ResponseWriter, *http.Request)
-	PutAdvancedConfiguration(http.ResponseWriter, *http.Request)
 	PutAttributeMapping(http.ResponseWriter, *http.Request)
-	PutBasicConfiguration(http.ResponseWriter, *http.Request)
+	PutConfiguration(http.ResponseWriter, *http.Request)
 	PutPermissionMapping(http.ResponseWriter, *http.Request)
 }
 
@@ -57,13 +55,11 @@ type VersionAPIRouter interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type ConfigurationAPIServicer interface {
-	GetAdvancedConfiguration(context.Context) (ImplResponse, error)
 	GetAttributeMapping(context.Context) (ImplResponse, error)
-	GetBasicConfiguration(context.Context) (ImplResponse, error)
+	GetConfiguration(context.Context) (ImplResponse, error)
 	GetPermissionMapping(context.Context) (ImplResponse, error)
-	PutAdvancedConfiguration(context.Context, AdvancedConfiguration) (ImplResponse, error)
 	PutAttributeMapping(context.Context, AttributeMap) (ImplResponse, error)
-	PutBasicConfiguration(context.Context, BasicConfiguration) (ImplResponse, error)
+	PutConfiguration(context.Context, Configuration) (ImplResponse, error)
 	PutPermissionMapping(context.Context, Permissions) (ImplResponse, error)
 }
 

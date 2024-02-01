@@ -23,36 +23,16 @@ import (
 	"github.com/volatiletech/null/v8"
 )
 
-func BasicConfigApiToDbForm(config *apiserver.BasicConfiguration) (*appdb.BasicConfig, error) {
-
-	return &appdb.BasicConfig{
-		ID:             config.Id,
-		Enable:         config.Enable,
-		SPCertificate:  config.ServiceProviderCertificate,
-		SPPrivateKey:   config.ServiceProviderPrivateKey,
-		IdpMetadataURL: null.StringFromPtr(config.IdpMetadataUrl),
-		MetadataXML:    null.StringFromPtr(config.IdpMetadataXml),
-		OwnURL:         config.OwnUrl,
-		UserToArchive:  config.UserToArchive,
-	}, nil
-}
-func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfiguration, error) {
-
-	return &apiserver.BasicConfiguration{
-		Id:                         config.ID,
-		Enable:                     config.Enable,
-		ServiceProviderCertificate: config.SPCertificate,
-		ServiceProviderPrivateKey:  config.SPPrivateKey,
-		IdpMetadataUrl:             config.IdpMetadataURL.Ptr(),
-		IdpMetadataXml:             config.MetadataXML.Ptr(),
-		OwnUrl:                     config.OwnURL,
-		UserToArchive:              config.UserToArchive,
-	}, nil
-}
-
-func AdvancedConfigApiToDbForm(config *apiserver.AdvancedConfiguration) (*appdb.AdvancedConfig, error) {
-	return &appdb.AdvancedConfig{
+func ConfigApiToDbForm(config *apiserver.Configuration) (*appdb.Config, error) {
+	return &appdb.Config{
 		ID:                       config.Id,
+		Enable:                   config.Enable,
+		SPCertificate:            config.ServiceProviderCertificate,
+		SPPrivateKey:             config.ServiceProviderPrivateKey,
+		IdpMetadataURL:           null.StringFromPtr(config.IdpMetadataUrl),
+		MetadataXML:              null.StringFromPtr(config.IdpMetadataXml),
+		OwnURL:                   config.OwnUrl,
+		UserToArchive:            config.UserToArchive,
 		AllowInitializationByIdp: config.AllowInitializationByIdp,
 		SignedRequest:            config.SignedRequest,
 		ForceAuthn:               config.ForceAuthn,
@@ -61,15 +41,23 @@ func AdvancedConfigApiToDbForm(config *apiserver.AdvancedConfiguration) (*appdb.
 		LoginFailedURL:           config.LoginFailedUrl,
 	}, nil
 }
-func AdvancedConfigDbToApiForm(config *appdb.AdvancedConfig) (*apiserver.AdvancedConfiguration, error) {
-	return &apiserver.AdvancedConfiguration{
-		Id:                       config.ID,
-		AllowInitializationByIdp: config.AllowInitializationByIdp,
-		SignedRequest:            config.SignedRequest,
-		ForceAuthn:               config.ForceAuthn,
-		EntityId:                 config.EntityID,
-		CookieSecure:             config.CookieSecure,
-		LoginFailedUrl:           config.LoginFailedURL,
+
+func ConfigDbToApiForm(config *appdb.Config) (*apiserver.Configuration, error) {
+	return &apiserver.Configuration{
+		Id:                         config.ID,
+		Enable:                     config.Enable,
+		ServiceProviderCertificate: config.SPCertificate,
+		ServiceProviderPrivateKey:  config.SPPrivateKey,
+		IdpMetadataUrl:             config.IdpMetadataURL.Ptr(),
+		IdpMetadataXml:             config.MetadataXML.Ptr(),
+		OwnUrl:                     config.OwnURL,
+		UserToArchive:              config.UserToArchive,
+		AllowInitializationByIdp:   config.AllowInitializationByIdp,
+		SignedRequest:              config.SignedRequest,
+		ForceAuthn:                 config.ForceAuthn,
+		EntityId:                   config.EntityID,
+		CookieSecure:               config.CookieSecure,
+		LoginFailedUrl:             config.LoginFailedURL,
 	}, nil
 }
 

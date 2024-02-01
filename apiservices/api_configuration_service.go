@@ -33,17 +33,6 @@ func NewConfigurationApiService() apiserver.ConfigurationAPIServicer {
 	return &ConfigurationApiService{}
 }
 
-// GetAdvancedConfiguration - Get Advanced Configuration
-func (s *ConfigurationApiService) GetAdvancedConfiguration(ctx context.Context) (apiserver.ImplResponse, error) {
-	// TODO - update GetAdvancedConfiguration with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, AdvancedConfiguration{}) or use other options such as http.Ok ...
-	//return Response(200, AdvancedConfiguration{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetAdvancedConfiguration method not implemented")
-}
-
 // GetAttributeMapping - Get Attribute Mapping
 func (s *ConfigurationApiService) GetAttributeMapping(ctx context.Context) (apiserver.ImplResponse, error) {
 	// TODO - update GetAttributeMapping with the required logic for this service method.
@@ -55,15 +44,15 @@ func (s *ConfigurationApiService) GetAttributeMapping(ctx context.Context) (apis
 	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetAttributeMapping method not implemented")
 }
 
-// GetBasicConfiguration - Get Basic Configurations
-func (s *ConfigurationApiService) GetBasicConfiguration(ctx context.Context) (apiserver.ImplResponse, error) {
-	// TODO - update GetBasicConfiguration with the required logic for this service method.
+// GetConfiguration - Get Basic Configurations
+func (s *ConfigurationApiService) GetConfiguration(ctx context.Context) (apiserver.ImplResponse, error) {
+	// TODO - update GetConfiguration with the required logic for this service method.
 	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
-	//TODO: Uncomment the next line to return response Response(200, BasicConfiguration{}) or use other options such as http.Ok ...
-	//return Response(200, BasicConfiguration{}), nil
+	//TODO: Uncomment the next line to return response Response(200, Configuration{}) or use other options such as http.Ok ...
+	//return Response(200, Configuration{}), nil
 
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetBasicConfiguration method not implemented")
+	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetConfiguration method not implemented")
 }
 
 // GetPermissionMapping - Get Permission Mapping
@@ -77,17 +66,6 @@ func (s *ConfigurationApiService) GetPermissionMapping(ctx context.Context) (api
 	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetPermissionMapping method not implemented")
 }
 
-// PutAdvancedConfiguration - Creates or Update Advanced Configuration
-func (s *ConfigurationApiService) PutAdvancedConfiguration(ctx context.Context, advancedConfiguration apiserver.AdvancedConfiguration) (apiserver.ImplResponse, error) {
-	// TODO - update PutAdvancedConfiguration with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, AdvancedConfiguration{}) or use other options such as http.Ok ...
-	//return Response(200, AdvancedConfiguration{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("PutAdvancedConfiguration method not implemented")
-}
-
 // PutAttributeMapping - Creates or Update Attribute Mapping
 func (s *ConfigurationApiService) PutAttributeMapping(ctx context.Context, attributeMap apiserver.AttributeMap) (apiserver.ImplResponse, error) {
 	// TODO - update PutAttributeMapping with the required logic for this service method.
@@ -99,15 +77,15 @@ func (s *ConfigurationApiService) PutAttributeMapping(ctx context.Context, attri
 	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("PutAttributeMapping method not implemented")
 }
 
-// PutBasicConfiguration - Creates or Update Basic Configuration
-func (s *ConfigurationApiService) PutBasicConfiguration(ctx context.Context, basicConfiguration apiserver.BasicConfiguration) (apiserver.ImplResponse, error) {
-	// TODO - update PutBasicConfiguration with the required logic for this service method.
+// PutConfiguration - Creates or Update Basic Configuration
+func (s *ConfigurationApiService) PutConfiguration(ctx context.Context, basicConfiguration apiserver.Configuration) (apiserver.ImplResponse, error) {
+	// TODO - update PutConfiguration with the required logic for this service method.
 	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
-	//TODO: Uncomment the next line to return response Response(200, BasicConfiguration{}) or use other options such as http.Ok ...
-	//return Response(200, BasicConfiguration{}), nil
+	//TODO: Uncomment the next line to return response Response(200, Configuration{}) or use other options such as http.Ok ...
+	//return Response(200, Configuration{}), nil
 
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("PutBasicConfiguration method not implemented")
+	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("PutConfiguration method not implemented")
 }
 
 // PutPermissionMapping - Creates or Update Permission Mapping Configurations

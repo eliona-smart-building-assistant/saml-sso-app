@@ -118,14 +118,14 @@ var PermissionWhere = struct {
 
 // PermissionRels is where relationship names are stored.
 var PermissionRels = struct {
-	IDBasicConfig string
+	IDConfig string
 }{
-	IDBasicConfig: "IDBasicConfig",
+	IDConfig: "IDConfig",
 }
 
 // permissionR is where relationships are stored.
 type permissionR struct {
-	IDBasicConfig *BasicConfig `boil:"IDBasicConfig" json:"IDBasicConfig" toml:"IDBasicConfig" yaml:"IDBasicConfig"`
+	IDConfig *Config `boil:"IDConfig" json:"IDConfig" toml:"IDConfig" yaml:"IDConfig"`
 }
 
 // NewStruct creates a new relationship struct
@@ -133,11 +133,11 @@ func (*permissionR) NewStruct() *permissionR {
 	return &permissionR{}
 }
 
-func (r *permissionR) GetIDBasicConfig() *BasicConfig {
+func (r *permissionR) GetIDConfig() *Config {
 	if r == nil {
 		return nil
 	}
-	return r.IDBasicConfig
+	return r.IDConfig
 }
 
 // permissionL is where Load methods for each relationship are stored.
@@ -476,20 +476,20 @@ func (q permissionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) 
 	return count > 0, nil
 }
 
-// IDBasicConfig pointed to by the foreign key.
-func (o *Permission) IDBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
+// IDConfig pointed to by the foreign key.
+func (o *Permission) IDConfig(mods ...qm.QueryMod) configQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	return BasicConfigs(queryMods...)
+	return Configs(queryMods...)
 }
 
-// LoadIDBasicConfig allows an eager lookup of values, cached into the
+// LoadIDConfig allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (permissionL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybePermission interface{}, mods queries.Applicator) error {
+func (permissionL) LoadIDConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybePermission interface{}, mods queries.Applicator) error {
 	var slice []*Permission
 	var object *Permission
 
@@ -545,8 +545,8 @@ func (permissionL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor
 	}
 
 	query := NewQuery(
-		qm.From(`saml_sp.basic_config`),
-		qm.WhereIn(`saml_sp.basic_config.id in ?`, argsSlice...),
+		qm.From(`saml_sp.config`),
+		qm.WhereIn(`saml_sp.config.id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -554,22 +554,22 @@ func (permissionL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load BasicConfig")
+		return errors.Wrap(err, "failed to eager load Config")
 	}
 
-	var resultSlice []*BasicConfig
+	var resultSlice []*Config
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice BasicConfig")
+		return errors.Wrap(err, "failed to bind eager loaded slice Config")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for basic_config")
+		return errors.Wrap(err, "failed to close results of eager load for config")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for basic_config")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for config")
 	}
 
-	if len(basicConfigAfterSelectHooks) != 0 {
+	if len(configAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -583,9 +583,9 @@ func (permissionL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.IDBasicConfig = foreign
+		object.R.IDConfig = foreign
 		if foreign.R == nil {
-			foreign.R = &basicConfigR{}
+			foreign.R = &configR{}
 		}
 		foreign.R.IDPermission = object
 		return nil
@@ -594,9 +594,9 @@ func (permissionL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
 			if local.ID == foreign.ID {
-				local.R.IDBasicConfig = foreign
+				local.R.IDConfig = foreign
 				if foreign.R == nil {
-					foreign.R = &basicConfigR{}
+					foreign.R = &configR{}
 				}
 				foreign.R.IDPermission = local
 				break
@@ -607,18 +607,18 @@ func (permissionL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor
 	return nil
 }
 
-// SetIDBasicConfigG of the permission to the related item.
-// Sets o.R.IDBasicConfig to related.
+// SetIDConfigG of the permission to the related item.
+// Sets o.R.IDConfig to related.
 // Adds o to related.R.IDPermission.
 // Uses the global database handle.
-func (o *Permission) SetIDBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
-	return o.SetIDBasicConfig(ctx, boil.GetContextDB(), insert, related)
+func (o *Permission) SetIDConfigG(ctx context.Context, insert bool, related *Config) error {
+	return o.SetIDConfig(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetIDBasicConfig of the permission to the related item.
-// Sets o.R.IDBasicConfig to related.
+// SetIDConfig of the permission to the related item.
+// Sets o.R.IDConfig to related.
 // Adds o to related.R.IDPermission.
-func (o *Permission) SetIDBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
+func (o *Permission) SetIDConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Config) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -645,14 +645,14 @@ func (o *Permission) SetIDBasicConfig(ctx context.Context, exec boil.ContextExec
 	o.ID = related.ID
 	if o.R == nil {
 		o.R = &permissionR{
-			IDBasicConfig: related,
+			IDConfig: related,
 		}
 	} else {
-		o.R.IDBasicConfig = related
+		o.R.IDConfig = related
 	}
 
 	if related.R == nil {
-		related.R = &basicConfigR{
+		related.R = &configR{
 			IDPermission: o,
 		}
 	} else {

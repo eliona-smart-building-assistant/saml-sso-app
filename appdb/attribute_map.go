@@ -64,6 +64,56 @@ var AttributeMapTableColumns = struct {
 
 // Generated where
 
+type whereHelperint32 struct{ field string }
+
+func (w whereHelperint32) EQ(x int32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint32) NEQ(x int32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint32) LT(x int32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint32) LTE(x int32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint32) GT(x int32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint32) GTE(x int32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint32) IN(slice []int32) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint32) NIN(slice []int32) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod    { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod    { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod     { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod    { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) LIKE(x string) qm.QueryMod   { return qm.Where(w.field+" LIKE ?", x) }
+func (w whereHelperstring) NLIKE(x string) qm.QueryMod  { return qm.Where(w.field+" NOT LIKE ?", x) }
+func (w whereHelperstring) ILIKE(x string) qm.QueryMod  { return qm.Where(w.field+" ILIKE ?", x) }
+func (w whereHelperstring) NILIKE(x string) qm.QueryMod { return qm.Where(w.field+" NOT ILIKE ?", x) }
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 type whereHelpernull_String struct{ field string }
 
 func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
@@ -130,14 +180,14 @@ var AttributeMapWhere = struct {
 
 // AttributeMapRels is where relationship names are stored.
 var AttributeMapRels = struct {
-	IDBasicConfig string
+	IDConfig string
 }{
-	IDBasicConfig: "IDBasicConfig",
+	IDConfig: "IDConfig",
 }
 
 // attributeMapR is where relationships are stored.
 type attributeMapR struct {
-	IDBasicConfig *BasicConfig `boil:"IDBasicConfig" json:"IDBasicConfig" toml:"IDBasicConfig" yaml:"IDBasicConfig"`
+	IDConfig *Config `boil:"IDConfig" json:"IDConfig" toml:"IDConfig" yaml:"IDConfig"`
 }
 
 // NewStruct creates a new relationship struct
@@ -145,11 +195,11 @@ func (*attributeMapR) NewStruct() *attributeMapR {
 	return &attributeMapR{}
 }
 
-func (r *attributeMapR) GetIDBasicConfig() *BasicConfig {
+func (r *attributeMapR) GetIDConfig() *Config {
 	if r == nil {
 		return nil
 	}
-	return r.IDBasicConfig
+	return r.IDConfig
 }
 
 // attributeMapL is where Load methods for each relationship are stored.
@@ -488,20 +538,20 @@ func (q attributeMapQuery) Exists(ctx context.Context, exec boil.ContextExecutor
 	return count > 0, nil
 }
 
-// IDBasicConfig pointed to by the foreign key.
-func (o *AttributeMap) IDBasicConfig(mods ...qm.QueryMod) basicConfigQuery {
+// IDConfig pointed to by the foreign key.
+func (o *AttributeMap) IDConfig(mods ...qm.QueryMod) configQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.ID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	return BasicConfigs(queryMods...)
+	return Configs(queryMods...)
 }
 
-// LoadIDBasicConfig allows an eager lookup of values, cached into the
+// LoadIDConfig allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (attributeMapL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttributeMap interface{}, mods queries.Applicator) error {
+func (attributeMapL) LoadIDConfig(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAttributeMap interface{}, mods queries.Applicator) error {
 	var slice []*AttributeMap
 	var object *AttributeMap
 
@@ -557,8 +607,8 @@ func (attributeMapL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecut
 	}
 
 	query := NewQuery(
-		qm.From(`saml_sp.basic_config`),
-		qm.WhereIn(`saml_sp.basic_config.id in ?`, argsSlice...),
+		qm.From(`saml_sp.config`),
+		qm.WhereIn(`saml_sp.config.id in ?`, argsSlice...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -566,22 +616,22 @@ func (attributeMapL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecut
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load BasicConfig")
+		return errors.Wrap(err, "failed to eager load Config")
 	}
 
-	var resultSlice []*BasicConfig
+	var resultSlice []*Config
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice BasicConfig")
+		return errors.Wrap(err, "failed to bind eager loaded slice Config")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for basic_config")
+		return errors.Wrap(err, "failed to close results of eager load for config")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for basic_config")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for config")
 	}
 
-	if len(basicConfigAfterSelectHooks) != 0 {
+	if len(configAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
 			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
 				return err
@@ -595,9 +645,9 @@ func (attributeMapL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecut
 
 	if singular {
 		foreign := resultSlice[0]
-		object.R.IDBasicConfig = foreign
+		object.R.IDConfig = foreign
 		if foreign.R == nil {
-			foreign.R = &basicConfigR{}
+			foreign.R = &configR{}
 		}
 		foreign.R.IDAttributeMap = object
 		return nil
@@ -606,9 +656,9 @@ func (attributeMapL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecut
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
 			if local.ID == foreign.ID {
-				local.R.IDBasicConfig = foreign
+				local.R.IDConfig = foreign
 				if foreign.R == nil {
-					foreign.R = &basicConfigR{}
+					foreign.R = &configR{}
 				}
 				foreign.R.IDAttributeMap = local
 				break
@@ -619,18 +669,18 @@ func (attributeMapL) LoadIDBasicConfig(ctx context.Context, e boil.ContextExecut
 	return nil
 }
 
-// SetIDBasicConfigG of the attributeMap to the related item.
-// Sets o.R.IDBasicConfig to related.
+// SetIDConfigG of the attributeMap to the related item.
+// Sets o.R.IDConfig to related.
 // Adds o to related.R.IDAttributeMap.
 // Uses the global database handle.
-func (o *AttributeMap) SetIDBasicConfigG(ctx context.Context, insert bool, related *BasicConfig) error {
-	return o.SetIDBasicConfig(ctx, boil.GetContextDB(), insert, related)
+func (o *AttributeMap) SetIDConfigG(ctx context.Context, insert bool, related *Config) error {
+	return o.SetIDConfig(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetIDBasicConfig of the attributeMap to the related item.
-// Sets o.R.IDBasicConfig to related.
+// SetIDConfig of the attributeMap to the related item.
+// Sets o.R.IDConfig to related.
 // Adds o to related.R.IDAttributeMap.
-func (o *AttributeMap) SetIDBasicConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *BasicConfig) error {
+func (o *AttributeMap) SetIDConfig(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Config) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -657,14 +707,14 @@ func (o *AttributeMap) SetIDBasicConfig(ctx context.Context, exec boil.ContextEx
 	o.ID = related.ID
 	if o.R == nil {
 		o.R = &attributeMapR{
-			IDBasicConfig: related,
+			IDConfig: related,
 		}
 	} else {
-		o.R.IDBasicConfig = related
+		o.R.IDConfig = related
 	}
 
 	if related.R == nil {
-		related.R = &basicConfigR{
+		related.R = &configR{
 			IDAttributeMap: o,
 		}
 	} else {
