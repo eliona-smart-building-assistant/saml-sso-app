@@ -234,7 +234,7 @@ func DeleteAttributeMapping(ctx context.Context) (int, error) {
 	return int(ans), err
 }
 
-func GetPermissionSettings(ctx context.Context) (*apiserver.Permissions, error) {
+func GetPermissionMapping(ctx context.Context) (*apiserver.Permissions, error) {
 	permDb, err := appdb.Permissions().One(ctx, getDb())
 	if err != nil {
 		return nil, err
@@ -248,7 +248,7 @@ func GetPermissionSettings(ctx context.Context) (*apiserver.Permissions, error) 
 	return permApi, err
 }
 
-func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissions) (*apiserver.Permissions, error) {
+func SetPermissionMapping(ctx context.Context, permissions *apiserver.Permissions) (*apiserver.Permissions, error) {
 	if permissions == nil {
 		return nil, errors.New("permissions nil")
 	} else {
@@ -287,14 +287,14 @@ func SetPermissionSettings(ctx context.Context, permissions *apiserver.Permissio
 	return apiForm, err
 }
 
-func DeletePermissionSettings(ctx context.Context) (int, error) {
+func DeletePermissionMapping(ctx context.Context) (int, error) {
 	ans, err := appdb.Permissions().DeleteAll(ctx, getDb())
 
 	return int(ans), err
 }
 
 func DeleteAllConfigurations(ctx context.Context) error {
-	_, err := DeletePermissionSettings(ctx)
+	_, err := DeletePermissionMapping(ctx)
 	if err != nil {
 		return err
 	}

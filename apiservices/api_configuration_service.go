@@ -17,9 +17,9 @@ package apiservices
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"saml-sso/apiserver"
+	"saml-sso/conf"
 )
 
 // ConfigurationApiService is a service that implements the logic for the ConfigurationAPIServicer
@@ -35,66 +35,54 @@ func NewConfigurationApiService() apiserver.ConfigurationAPIServicer {
 
 // GetAttributeMapping - Get Attribute Mapping
 func (s *ConfigurationApiService) GetAttributeMapping(ctx context.Context) (apiserver.ImplResponse, error) {
-	// TODO - update GetAttributeMapping with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, AttributeMap{}) or use other options such as http.Ok ...
-	//return Response(200, AttributeMap{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetAttributeMapping method not implemented")
+	am, err := conf.GetAttributeMapping(ctx)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusOK, am), nil
 }
 
-// GetConfiguration - Get Basic Configurations
+// GetConfiguration - Get Configuration
 func (s *ConfigurationApiService) GetConfiguration(ctx context.Context) (apiserver.ImplResponse, error) {
-	// TODO - update GetConfiguration with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, Configuration{}) or use other options such as http.Ok ...
-	//return Response(200, Configuration{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetConfiguration method not implemented")
+	config, err := conf.GetConfig(ctx)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusOK, config), nil
 }
 
 // GetPermissionMapping - Get Permission Mapping
 func (s *ConfigurationApiService) GetPermissionMapping(ctx context.Context) (apiserver.ImplResponse, error) {
-	// TODO - update GetPermissionMapping with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, Permissions{}) or use other options such as http.Ok ...
-	//return Response(200, Permissions{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("GetPermissionMapping method not implemented")
+	pm, err := conf.GetPermissionMapping(ctx)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusOK, pm), nil
 }
 
 // PutAttributeMapping - Creates or Update Attribute Mapping
 func (s *ConfigurationApiService) PutAttributeMapping(ctx context.Context, attributeMap apiserver.AttributeMap) (apiserver.ImplResponse, error) {
-	// TODO - update PutAttributeMapping with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, AttributeMap{}) or use other options such as http.Ok ...
-	//return Response(200, AttributeMap{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("PutAttributeMapping method not implemented")
+	upsertedAttrMap, err := conf.SetAttributeMapping(ctx, &attributeMap)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusCreated, upsertedAttrMap), nil
 }
 
 // PutConfiguration - Creates or Update Basic Configuration
-func (s *ConfigurationApiService) PutConfiguration(ctx context.Context, basicConfiguration apiserver.Configuration) (apiserver.ImplResponse, error) {
-	// TODO - update PutConfiguration with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, Configuration{}) or use other options such as http.Ok ...
-	//return Response(200, Configuration{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("PutConfiguration method not implemented")
+func (s *ConfigurationApiService) PutConfiguration(ctx context.Context, config apiserver.Configuration) (apiserver.ImplResponse, error) {
+	upsertedConfig, err := conf.SetConfig(ctx, &config)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusCreated, upsertedConfig), nil
 }
 
 // PutPermissionMapping - Creates or Update Permission Mapping Configurations
 func (s *ConfigurationApiService) PutPermissionMapping(ctx context.Context, permissions apiserver.Permissions) (apiserver.ImplResponse, error) {
-	// TODO - update PutPermissionMapping with the required logic for this service method.
-	// Add api_configuration_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, Permissions{}) or use other options such as http.Ok ...
-	//return Response(200, Permissions{}), nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("PutPermissionMapping method not implemented")
+	upsertedPerms, err := conf.SetPermissionMapping(ctx, &permissions)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusCreated, upsertedPerms), nil
 }

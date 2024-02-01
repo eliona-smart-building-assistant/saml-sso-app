@@ -100,7 +100,7 @@ func TestApp_Conf_LoadAutoConfig(t *testing.T) {
 		t.Error("invalid attribute map auto conf")
 	}
 
-	perms, err := conf.GetPermissionSettings(context.Background())
+	perms, err := conf.GetPermissionMapping(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -195,28 +195,28 @@ func TestApp_Conf_InsertUpdateConfig(t *testing.T) {
 		}
 
 		// Permission Cnf Test
-		permsRet1, err := conf.SetPermissionSettings(context.Background(), &perms1)
+		permsRet1, err := conf.SetPermissionMapping(context.Background(), &perms1)
 		if err != nil {
 			t.Error(err)
 		}
 		if diff := deep.Equal(&perms1, permsRet1); diff != nil {
 			t.Error("missmatch permission config 1: ", diff)
 		}
-		permsRet1, err = conf.GetPermissionSettings(context.Background())
+		permsRet1, err = conf.GetPermissionMapping(context.Background())
 		if err != nil {
 			t.Error(err)
 		}
 		if diff := deep.Equal(&perms1, permsRet1); diff != nil {
 			t.Error("missmatch permission config 1_1: ", diff)
 		}
-		permsRet2, err := conf.SetPermissionSettings(context.Background(), &perms2)
+		permsRet2, err := conf.SetPermissionMapping(context.Background(), &perms2)
 		if err != nil {
 			t.Error(err)
 		}
 		if diff := deep.Equal(&perms2, permsRet2); diff != nil {
 			t.Error("missmatch permission config 2: ", diff)
 		}
-		permsRet2, err = conf.GetPermissionSettings(context.Background())
+		permsRet2, err = conf.GetPermissionMapping(context.Background())
 		if err != nil {
 			t.Error(err)
 		}

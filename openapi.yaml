@@ -103,7 +103,7 @@ paths:
       operationId: getConfiguration
       responses:
         "200":
-          description: Successfully returned all basic configuration
+          description: Successfully returned all configuration
           content:
             application/json:
               schema:
@@ -121,7 +121,7 @@ paths:
               $ref: "#/components/schemas/Configuration"
       responses:
         "200":
-          description: Successfully created / updated the basic configuration
+          description: Successfully created / updated the configuration
           content:
             application/json:
               schema:
@@ -376,7 +376,7 @@ components:
         id:
           type: integer
           format: int32
-          description: Configuration Id refer to basic config's id. Can only be 1
+          description: Configuration Id refer to config's id. Can only be 1
           nullable: false
           readOnly: true
           default: 1
@@ -417,7 +417,7 @@ components:
         id:
           type: integer
           format: int32
-          description: Configuration Id refer to basic config's id. Can only be 1
+          description: Configuration Id refer to config's id. Can only be 1
           nullable: false
           readOnly: true
           default: 1
