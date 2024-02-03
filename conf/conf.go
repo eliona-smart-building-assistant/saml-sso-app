@@ -307,16 +307,19 @@ func DeleteAllConfigurations(ctx context.Context) error {
 }
 
 func getElionaHost() string {
-	var eliDomain string
-
 	db := getDb()
 	row := db.QueryRow("SELECT domain_name FROM eliona_config ;")
+
+	var eliDomain string
 	err := row.Scan(&eliDomain)
 	if err != nil {
 		log.Error(LOG_REGIO, "scan getElionaHost: %v", err)
 	}
 
-	return eliDomain
+	publicEndpoint := "apps-public/saml-sso"
+	ownURL := eliDomain + publicEndpoint
+
+	return ownURL
 }
 
 func getDb() *sql.DB {

@@ -45,7 +45,7 @@ type Configuration struct {
 	// Normaly this value is set to false for a SP. If set to true the user has to re-authenticate (login at IdP) even it has a valid session to the IdP.
 	ForceAuthn bool `json:"forceAuthn,omitempty"`
 
-	// If you have to use a customized Entity Id, you can overwrite it here. Normaly the default value can be leave as it is.
+	// If you have to use a customized Entity Id, you can overwrite it here. Normally the default value can be left as it is.
 	EntityId string `json:"entityId,omitempty"`
 
 	// only send cookies over encrypted connection (HTTPS)

@@ -57,7 +57,7 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 	idpMeta, err := samlsp.ParseMetadata(idpMetadata)
 	if err != nil {
 		log.Warn(LOG_REGIO, "cannot parse metadata. "+
-			"continiue without, but cannot operate with a IdP in current state! ... %v", err)
+			"continuing without, but cannot operate with a IdP in current state! ... %v", err)
 		// return nil, err
 	}
 
