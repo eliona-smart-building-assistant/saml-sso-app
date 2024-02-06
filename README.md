@@ -26,7 +26,7 @@ This initialization can be handled by the `reset.sql` script.
 
 - `LOG_LEVEL`(optional): defines the minimum level that should be [logged](https://github.com/eliona-smart-building-assistant/go-utils/blob/main/log/README.md). The default level is `info`.
 
-- `SSO_SERVER_PORT` (optional): defines the port for Single Sign On Services, here SAML 2.0. The default value is Port `8080`.
+- `SSO_SERVER_PORT` (optional): defines the port for Single Sign On Services, here SAML 2.0. The default value is Port `80`.
 
 ### Database tables ###
 
