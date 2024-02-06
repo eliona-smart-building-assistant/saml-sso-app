@@ -18,7 +18,7 @@ package eliona
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"saml-sso/apiserver"
 	"saml-sso/conf"
@@ -79,7 +79,9 @@ func (s *SingleSignOn) ActiveHandle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(responseCode)
+
 	_, err = w.Write(responseMsg)
 	if err != nil {
 		log.Error(LOG_REGIO, "write internal server error: %v", err)
@@ -94,8 +96,9 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 
 		mapping *apiserver.AttributeMap
 
-		loginEmail, userIp         string
-		firstname, lastname, phone string
+		loginEmail, userIp  string
+		firstname, lastname string
+		phone               *string
 
 		user       *api.User
 		jwt        *string
@@ -133,7 +136,8 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 		lastname = samlsp.AttributeFromContext(r.Context(), *mapping.LastName)
 	}
 	if mapping.Phone != nil && *mapping.Phone != "" {
-		phone = samlsp.AttributeFromContext(r.Context(), *mapping.Phone)
+		phoneS := samlsp.AttributeFromContext(r.Context(), *mapping.Phone)
+		phone = &phoneS
 	}
 
 	log.Info(LOG_REGIO, "User with firstname: %v, lastname: %v, email/login: "+
@@ -156,18 +160,19 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 			errorMessage = []byte(err.Error())
 			goto internalServerError
 		}
-	}
 
-	err = UpdateElionaUserArchivedPhone(user.Email, &phone, s.userToArchive)
-	if err != nil {
-		log.Error(LOG_REGIO, "cannot set phone and archive flag: %v", err)
-		errorMessage = []byte(err.Error())
-		goto internalServerError
-	}
+		err = UpdateElionaUserArchivedPhone(user.Email, phone, s.userToArchive)
+		if err != nil {
+			log.Error(LOG_REGIO, "cannot set phone and archive flag: %v", err)
+			errorMessage = []byte(err.Error())
+			goto internalServerError
+		}
 
-	err = s.setUserPermissions(user.Email)
-	if err != nil {
-		log.Error(LOG_REGIO, "cannot set user permissions")
+		err = s.setUserPermissions(user.Id.Get())
+		if err != nil {
+			log.Error(LOG_REGIO, "cannot set user permissions: %v", err)
+			goto notAuthenticated
+		}
 	}
 
 	// obtain a jwt to login via cookies
@@ -218,7 +223,7 @@ internalServerError:
 	}
 }
 
-func (s *SingleSignOn) setUserPermissions(email string) error {
+func (s *SingleSignOn) setUserPermissions(userId *string) error {
 
 	var (
 		err         error
@@ -231,9 +236,24 @@ func (s *SingleSignOn) setUserPermissions(email string) error {
 	}
 
 	log.Info(LOG_REGIO,
-		"ToDo: add user to a project and set permissions according the configurations. %v",
+		"ToDo: permission map not finished yet. %v",
 		permissions)
 
-	err = errors.New("not implemented")
-	return err
+	projectId, err := GetFirstProjectId()
+	if err != nil {
+		return fmt.Errorf("cannot look up project id: %v", err)
+	}
+
+	roleId, err := GetRoleIdByDisplayName(permissions.DefaultProjRole)
+	if err != nil {
+		return fmt.Errorf("cannot get role id for role %s: %v",
+			permissions.DefaultProjRole, err)
+	}
+
+	if roleId <= 0 {
+		return fmt.Errorf("cannot get role id for %s",
+			permissions.DefaultProjRole)
+	}
+
+	return SetProjectUser(projectId, userId, roleId)
 }

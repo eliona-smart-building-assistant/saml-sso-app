@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS saml_sp.advanced_config (
 
 CREATE TABLE IF NOT EXISTS saml_sp.permissions (
     id                          INT PRIMARY KEY NOT NULL DEFAULT 1 REFERENCES saml_sp.basic_config(id) ON UPDATE CASCADE,
-    default_system_role         TEXT            NOT NULL DEFAULT 'regular'                                              , -- reference to is maybe a bad idea (due to the new ACL)
-    default_proj_role           TEXT            NOT NULL DEFAULT 'operator'                                             ,
+    default_system_role         TEXT            NOT NULL DEFAULT 'System user'                                          , -- reference to is maybe a bad idea (due to the new ACL)
+    default_proj_role           TEXT            NOT NULL DEFAULT 'Project user'                                         ,
     system_role_saml_attribute  TEXT                                                                                    ,
     system_role_map             JSON                                                                                    ,
     proj_role_saml_attribute    TEXT                                                                                    ,

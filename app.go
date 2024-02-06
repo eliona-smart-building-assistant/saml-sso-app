@@ -17,7 +17,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"saml-sso/apiserver"
@@ -34,7 +33,7 @@ import (
 const (
 	LOG_REGIO       = "app"
 	API_SERVER_PORT = 3000
-	SSO_SERVER_PORT = 8081 // Publicly accessible. See wiki.
+	SSO_SERVER_PORT = 8081 // Publicly accessible without auth. See wiki.
 
 	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
 )
@@ -83,7 +82,8 @@ func run() {
 	apiPort := common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT))
 	samlSpPort := common.Getenv("SSO_SERVER_PORT", strconv.Itoa(SSO_SERVER_PORT))
 
-	fmt.Println(basicConfig.OwnUrl + ":" + apiPort)
+	log.Debug(LOG_REGIO, "own url: %v, api port: %v", basicConfig.OwnUrl, apiPort)
+
 	sp, err := saml.NewServiceProviderAdvanced(
 		basicConfig.ServiceProviderCertificate,
 		basicConfig.ServiceProviderPrivateKey,
@@ -128,6 +128,11 @@ func run() {
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_VERIFICATION,
 		sp.GetMiddleWare().RequireAccount(authHandleFunc))
 	http.Handle(SAML_SPECIFIC_ENDPOINT_PATH, sp.GetMiddleWare())
+
+	// for backwards compatibility, can be removed when the frontend is reworked to the new generic /sso/* endpoints
+	http.Handle("/adfs/active/", activeHandleFunc)
+	http.Handle("/adfs/auth/",
+		sp.GetMiddleWare().RequireAccount(authHandleFunc))
 
 	log.Info(LOG_REGIO, "started @ %v", samlSpPort)
 	err = http.ListenAndServe(":"+samlSpPort, nil)
