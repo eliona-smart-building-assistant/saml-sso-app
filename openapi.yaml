@@ -426,14 +426,14 @@ components:
           type: string
           readOnly: false
           nullable: false
-          default: "regular"
-          example: "regular"
+          default: 'System user'
+          example: 'System user'
         default_proj_role:
           type: string
           nullable: false
           readOnly: false
-          default: "operator"
-          example: "operator"
+          default: 'Project user'
+          example: 'Project user'
         system_role_saml_attribute:
           type: string
           nullable: true
@@ -464,7 +464,7 @@ components:
         elionaRole:
           type: string
           nullable: false
-          example: "admin"
+          example: 'System user'
         samlValue:
           type: string
           nullable: false

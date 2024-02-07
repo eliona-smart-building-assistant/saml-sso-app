@@ -16,6 +16,7 @@
 package eliona_test
 
 import (
+	"os"
 	"saml-sso/eliona"
 	"testing"
 
@@ -23,6 +24,16 @@ import (
 )
 
 func TestApp_Others(t *testing.T) {
+
+	// this test needs a real eliona db to due missing tables
+	// in the test db
+	_, realDb := os.LookupEnv("REAL_DB")
+	if !realDb {
+		log.Warn("TestApp_Others", "test disabled because missing env var REAL_DB")
+		t.Log("TestApp_Others: test disabled because missing env var REAL_DB")
+		return
+	}
+
 	token, err := eliona.GetElionaJsonWebToken("su#@eliona.io")
 	if err != nil {
 		t.Error(err)
