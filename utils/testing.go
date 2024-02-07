@@ -21,12 +21,18 @@ import (
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
-func CreateRandomApiBasicConfig() apiserver.BasicConfiguration {
-	var basicCnf apiserver.BasicConfiguration = apiserver.BasicConfiguration{
-		Id:            1,
-		Enable:        RandomBoolean(),
-		OwnUrl:        RandomUrl(),
-		UserToArchive: RandomBoolean(),
+func CreateRandomApiConfig() apiserver.Configuration {
+	var basicCnf apiserver.Configuration = apiserver.Configuration{
+		Id:                       1,
+		Enable:                   RandomBoolean(),
+		OwnUrl:                   RandomUrl(),
+		UserToArchive:            RandomBoolean(),
+		AllowInitializationByIdp: RandomBoolean(),
+		SignedRequest:            RandomBoolean(),
+		ForceAuthn:               RandomBoolean(),
+		EntityId:                 RandomUrl() + "/" + RandomCharacter(5, false),
+		CookieSecure:             RandomBoolean(),
+		LoginFailedUrl:           RandomUrl() + "/" + RandomCharacter(RandomInt(2, 10), false),
 	}
 
 	cert, key, err := CreateSelfsignedX509Certificate(RandomInt(10, 1000), 2048, nil, nil)
@@ -45,18 +51,6 @@ func CreateRandomApiBasicConfig() apiserver.BasicConfiguration {
 		basicCnf.IdpMetadataXml = &xml
 	}
 	return basicCnf
-}
-
-func CreateRandomApiAdvancedConfig() apiserver.AdvancedConfiguration {
-	return apiserver.AdvancedConfiguration{
-		Id:                       1,
-		AllowInitializationByIdp: RandomBoolean(),
-		SignedRequest:            RandomBoolean(),
-		ForceAuthn:               RandomBoolean(),
-		EntityId:                 RandomUrl() + "/" + RandomCharacter(5, false),
-		CookieSecure:             RandomBoolean(),
-		LoginFailedUrl:           RandomUrl() + "/" + RandomCharacter(RandomInt(2, 10), false),
-	}
 }
 
 func CreateRandomApiAttributeMap() apiserver.AttributeMap {

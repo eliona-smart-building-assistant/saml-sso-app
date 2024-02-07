@@ -33,58 +33,56 @@ func NewConfigurationApiService() apiserver.ConfigurationAPIServicer {
 	return &ConfigurationApiService{}
 }
 
-// GetAdvancedConfiguration - Get Advanced Configuration
-func (s *ConfigurationApiService) GetAdvancedConfiguration(ctx context.Context) (apiserver.ImplResponse, error) {
-	advCnf, err := conf.GetAdvancedConfig(ctx)
-
-	return apiserver.Response(http.StatusOK, advCnf), err
-}
-
 // GetAttributeMapping - Get Attribute Mapping
 func (s *ConfigurationApiService) GetAttributeMapping(ctx context.Context) (apiserver.ImplResponse, error) {
-	attrMap, err := conf.GetAttributeMapping(ctx)
-
-	return apiserver.Response(http.StatusOK, attrMap), err
+	am, err := conf.GetAttributeMapping(ctx)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusOK, am), nil
 }
 
-// GetBasicConfiguration - Get Basic Configurations
-func (s *ConfigurationApiService) GetBasicConfiguration(ctx context.Context) (apiserver.ImplResponse, error) {
-	basicCnf, err := conf.GetBasicConfig(ctx)
-
-	return apiserver.Response(http.StatusOK, basicCnf), err
+// GetConfiguration - Get Configuration
+func (s *ConfigurationApiService) GetConfiguration(ctx context.Context) (apiserver.ImplResponse, error) {
+	config, err := conf.GetConfig(ctx)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusOK, config), nil
 }
 
 // GetPermissionMapping - Get Permission Mapping
 func (s *ConfigurationApiService) GetPermissionMapping(ctx context.Context) (apiserver.ImplResponse, error) {
-	permMap, err := conf.GetPermissionSettings(ctx)
-
-	return apiserver.Response(http.StatusOK, permMap), err
-}
-
-// PutAdvancedConfiguration - Creates or Update Advanced Configuration
-func (s *ConfigurationApiService) PutAdvancedConfiguration(ctx context.Context, advancedConfiguration apiserver.AdvancedConfiguration) (apiserver.ImplResponse, error) {
-	cnfRet, err := conf.SetAdvancedConfig(ctx, &advancedConfiguration)
-
-	return apiserver.Response(http.StatusOK, cnfRet), err
+	pm, err := conf.GetPermissionMapping(ctx)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusOK, pm), nil
 }
 
 // PutAttributeMapping - Creates or Update Attribute Mapping
 func (s *ConfigurationApiService) PutAttributeMapping(ctx context.Context, attributeMap apiserver.AttributeMap) (apiserver.ImplResponse, error) {
-	mapRet, err := conf.SetAttributeMapping(ctx, &attributeMap)
-
-	return apiserver.Response(http.StatusOK, mapRet), err
+	upsertedAttrMap, err := conf.SetAttributeMapping(ctx, &attributeMap)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusCreated, upsertedAttrMap), nil
 }
 
-// PutBasicConfiguration - Creates or Update Basic Configuration
-func (s *ConfigurationApiService) PutBasicConfiguration(ctx context.Context, basicConfiguration apiserver.BasicConfiguration) (apiserver.ImplResponse, error) {
-	cnfRet, err := conf.SetBasicConfig(ctx, &basicConfiguration)
-
-	return apiserver.Response(http.StatusOK, cnfRet), err
+// PutConfiguration - Creates or Update Basic Configuration
+func (s *ConfigurationApiService) PutConfiguration(ctx context.Context, config apiserver.Configuration) (apiserver.ImplResponse, error) {
+	upsertedConfig, err := conf.SetConfig(ctx, &config)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusCreated, upsertedConfig), nil
 }
 
 // PutPermissionMapping - Creates or Update Permission Mapping Configurations
 func (s *ConfigurationApiService) PutPermissionMapping(ctx context.Context, permissions apiserver.Permissions) (apiserver.ImplResponse, error) {
-	permRet, err := conf.SetPermissionSettings(ctx, &permissions)
-
-	return apiserver.Response(http.StatusOK, permRet), err
+	upsertedPerms, err := conf.SetPermissionMapping(ctx, &permissions)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusInternalServerError}, err
+	}
+	return apiserver.Response(http.StatusCreated, upsertedPerms), nil
 }

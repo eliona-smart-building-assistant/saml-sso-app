@@ -17,89 +17,22 @@ package conf
 
 import (
 	"encoding/json"
-	"errors"
 	"saml-sso/apiserver"
 	"saml-sso/appdb"
 
 	"github.com/volatiletech/null/v8"
 )
 
-func ConvertApiToDbForm(apiForm any) (any, error) {
-
-	var (
-		err    error
-		dbForm any
-	)
-
-	switch a := apiForm.(type) {
-	case *apiserver.BasicConfiguration:
-		dbForm, err = BasicConfigApiToDbForm(a)
-	case *apiserver.AdvancedConfiguration:
-		dbForm, err = AdvancedConfigApiToDbForm(a)
-	case *apiserver.AttributeMap:
-		dbForm, err = AttributeMapApiToDbForm(a)
-	case *apiserver.Permissions:
-		dbForm, err = PermissionApiToDbForm(a)
-	default:
-		err = errors.New("unknown api datatype")
-	}
-
-	return dbForm, err
-}
-
-func ConvertDbToApiForm(dbForm any) (any, error) {
-
-	var (
-		err     error
-		apiForm any
-	)
-
-	switch d := dbForm.(type) {
-	case *appdb.BasicConfig:
-		apiForm, err = BasicConfigDbToApiForm(d)
-	case *appdb.AdvancedConfig:
-		apiForm, err = AdvancedConfigDbToApiForm(d)
-	case *appdb.AttributeMap:
-		apiForm, err = AttributeMapDbToApiForm(d)
-	case *appdb.Permission:
-		apiForm, err = PermissionDbToApiForm(d)
-	default:
-		err = errors.New("unknown db datatype")
-	}
-
-	return apiForm, err
-}
-
-func BasicConfigApiToDbForm(config *apiserver.BasicConfiguration) (*appdb.BasicConfig, error) {
-
-	return &appdb.BasicConfig{
-		ID:             config.Id,
-		Enable:         config.Enable,
-		SPCertificate:  config.ServiceProviderCertificate,
-		SPPrivateKey:   config.ServiceProviderPrivateKey,
-		IdpMetadataURL: null.StringFromPtr(config.IdpMetadataUrl),
-		MetadataXML:    null.StringFromPtr(config.IdpMetadataXml),
-		OwnURL:         config.OwnUrl,
-		UserToArchive:  config.UserToArchive,
-	}, nil
-}
-func BasicConfigDbToApiForm(config *appdb.BasicConfig) (*apiserver.BasicConfiguration, error) {
-
-	return &apiserver.BasicConfiguration{
-		Id:                         config.ID,
-		Enable:                     config.Enable,
-		ServiceProviderCertificate: config.SPCertificate,
-		ServiceProviderPrivateKey:  config.SPPrivateKey,
-		IdpMetadataUrl:             config.IdpMetadataURL.Ptr(),
-		IdpMetadataXml:             config.MetadataXML.Ptr(),
-		OwnUrl:                     config.OwnURL,
-		UserToArchive:              config.UserToArchive,
-	}, nil
-}
-
-func AdvancedConfigApiToDbForm(config *apiserver.AdvancedConfiguration) (*appdb.AdvancedConfig, error) {
-	return &appdb.AdvancedConfig{
+func ConfigApiToDbForm(config *apiserver.Configuration) (*appdb.Config, error) {
+	return &appdb.Config{
 		ID:                       config.Id,
+		Enable:                   config.Enable,
+		SPCertificate:            config.ServiceProviderCertificate,
+		SPPrivateKey:             config.ServiceProviderPrivateKey,
+		IdpMetadataURL:           null.StringFromPtr(config.IdpMetadataUrl),
+		MetadataXML:              null.StringFromPtr(config.IdpMetadataXml),
+		OwnURL:                   config.OwnUrl,
+		UserToArchive:            config.UserToArchive,
 		AllowInitializationByIdp: config.AllowInitializationByIdp,
 		SignedRequest:            config.SignedRequest,
 		ForceAuthn:               config.ForceAuthn,
@@ -108,15 +41,23 @@ func AdvancedConfigApiToDbForm(config *apiserver.AdvancedConfiguration) (*appdb.
 		LoginFailedURL:           config.LoginFailedUrl,
 	}, nil
 }
-func AdvancedConfigDbToApiForm(config *appdb.AdvancedConfig) (*apiserver.AdvancedConfiguration, error) {
-	return &apiserver.AdvancedConfiguration{
-		Id:                       config.ID,
-		AllowInitializationByIdp: config.AllowInitializationByIdp,
-		SignedRequest:            config.SignedRequest,
-		ForceAuthn:               config.ForceAuthn,
-		EntityId:                 config.EntityID,
-		CookieSecure:             config.CookieSecure,
-		LoginFailedUrl:           config.LoginFailedURL,
+
+func ConfigDbToApiForm(config *appdb.Config) (*apiserver.Configuration, error) {
+	return &apiserver.Configuration{
+		Id:                         config.ID,
+		Enable:                     config.Enable,
+		ServiceProviderCertificate: config.SPCertificate,
+		ServiceProviderPrivateKey:  config.SPPrivateKey,
+		IdpMetadataUrl:             config.IdpMetadataURL.Ptr(),
+		IdpMetadataXml:             config.MetadataXML.Ptr(),
+		OwnUrl:                     config.OwnURL,
+		UserToArchive:              config.UserToArchive,
+		AllowInitializationByIdp:   config.AllowInitializationByIdp,
+		SignedRequest:              config.SignedRequest,
+		ForceAuthn:                 config.ForceAuthn,
+		EntityId:                   config.EntityID,
+		CookieSecure:               config.CookieSecure,
+		LoginFailedUrl:             config.LoginFailedURL,
 	}, nil
 }
 

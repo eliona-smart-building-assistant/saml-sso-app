@@ -45,17 +45,13 @@ func TestApp_AppApi_Configuration_InitDB(t *testing.T) {
 	}
 }
 
-func TestApp_AppApi_Configuration_GetBasicConfig(t *testing.T) {
+func TestApp_AppApi_Configuration_GetConfig(t *testing.T) {
 	apiService := apiservices.NewConfigurationApiService()
-	cnf, err := apiService.GetBasicConfiguration(context.Background())
+	cnf, err := apiService.GetConfiguration(context.Background())
 	if err != sql.ErrNoRows {
 		t.Error(err)
 	}
 	fmt.Println(cnf)
-}
-
-func TestApp_AppApi_Configuration_GetAdvancedConfig(t *testing.T) {
-
 }
 
 func TestApp_AppApi_Configuration_GetAttributeMapping(t *testing.T) {
@@ -66,11 +62,7 @@ func TestApp_AppApi_Configuration_GetPermissionMap(t *testing.T) {
 
 }
 
-func TestApp_AppApi_Configuration_PutBasicConfig(t *testing.T) {
-
-}
-
-func TestApp_AppApi_Configuration_PutAdvancedConfig(t *testing.T) {
+func TestApp_AppApi_Configuration_PutConfig(t *testing.T) {
 
 }
 

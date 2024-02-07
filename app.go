@@ -50,19 +50,14 @@ func run() {
 		log.Debug(LOG_REGIO, "insert default config: %v", err)
 	}
 
-	basicConfig, err := conf.GetBasicConfig(context.Background())
+	config, err := conf.GetConfig(context.Background())
 	if err != nil {
 		log.Fatal(LOG_REGIO, "cannot load basic config")
 	}
 
-	advancedConfig, err := conf.GetAdvancedConfig(context.Background())
-	if err != nil {
-		log.Fatal(LOG_REGIO, "cannot load advanced config")
-	}
-
-	if basicConfig.IdpMetadataUrl != nil && *basicConfig.IdpMetadataUrl != "" {
+	if config.IdpMetadataUrl != nil && *config.IdpMetadataUrl != "" {
 		// fetch metadata
-		metadataResp, err := http.Get(*basicConfig.IdpMetadataUrl)
+		metadataResp, err := http.Get(*config.IdpMetadataUrl)
 		if err != nil {
 			log.Error(LOG_REGIO, "cannot fetch IdP metadata from url: %v", err)
 		} else {
@@ -73,8 +68,8 @@ func run() {
 			}
 			metadata = metaB
 		}
-	} else if basicConfig.IdpMetadataXml != nil {
-		metadata = []byte(*basicConfig.IdpMetadataXml)
+	} else if config.IdpMetadataXml != nil {
+		metadata = []byte(*config.IdpMetadataXml)
 	} else {
 		log.Error(LOG_REGIO, "not able to set IdP Metadata")
 	}
@@ -82,18 +77,18 @@ func run() {
 	apiPort := common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT))
 	samlSpPort := common.Getenv("SSO_SERVER_PORT", strconv.Itoa(SSO_SERVER_PORT))
 
-	log.Debug(LOG_REGIO, "own url: %v, api port: %v", basicConfig.OwnUrl, apiPort)
+	log.Debug(LOG_REGIO, "own url: %v, api port: %v", config.OwnUrl, apiPort)
 
 	sp, err := saml.NewServiceProviderAdvanced(
-		basicConfig.ServiceProviderCertificate,
-		basicConfig.ServiceProviderPrivateKey,
-		basicConfig.OwnUrl,
+		config.ServiceProviderCertificate,
+		config.ServiceProviderPrivateKey,
+		config.OwnUrl,
 		metadata,
-		&advancedConfig.EntityId,
-		&advancedConfig.AllowInitializationByIdp,
-		&advancedConfig.SignedRequest,
-		&advancedConfig.ForceAuthn,
-		&advancedConfig.CookieSecure,
+		&config.EntityId,
+		&config.AllowInitializationByIdp,
+		&config.SignedRequest,
+		&config.ForceAuthn,
+		&config.CookieSecure,
 	)
 	if err != nil {
 		log.Fatal(LOG_REGIO, "cannot initialize saml service provider: %v", err)
@@ -119,8 +114,8 @@ func run() {
 	}()
 
 	// saml specific handle (no RESTful) to router
-	elionaAuth := eliona.NewSingleSignOn(basicConfig.OwnUrl,
-		basicConfig.UserToArchive, advancedConfig.LoginFailedUrl)
+	elionaAuth := eliona.NewSingleSignOn(config.OwnUrl,
+		config.UserToArchive, config.LoginFailedUrl)
 
 	activeHandleFunc := http.HandlerFunc(elionaAuth.ActiveHandle)
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_ACTIVE, activeHandleFunc)

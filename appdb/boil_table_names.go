@@ -4,13 +4,11 @@
 package appdb
 
 var TableNames = struct {
-	AdvancedConfig string
-	AttributeMap   string
-	BasicConfig    string
-	Permissions    string
+	AttributeMap string
+	Config       string
+	Permissions  string
 }{
-	AdvancedConfig: "advanced_config",
-	AttributeMap:   "attribute_map",
-	BasicConfig:    "basic_config",
-	Permissions:    "permissions",
+	AttributeMap: "attribute_map",
+	Config:       "config",
+	Permissions:  "permissions",
 }

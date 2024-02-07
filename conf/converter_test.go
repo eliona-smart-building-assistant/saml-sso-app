@@ -27,48 +27,25 @@ import (
 	"github.com/go-test/deep"
 )
 
-func TestApp_Converter_ConvertBasicConfig(t *testing.T) {
+func TestApp_Converter_ConvertConfig(t *testing.T) {
 	for i := 0; i < 5; i++ {
-		apiBasicCnf := utils.CreateRandomApiBasicConfig()
-		dbBasicCnf, err := conf.ConvertApiToDbForm(&apiBasicCnf)
+		apiBasicCnf := utils.CreateRandomApiConfig()
+		dbBasicCnf, err := conf.ConfigApiToDbForm(&apiBasicCnf)
 		if err != nil {
 			t.Error("convert basic config from api to db form using general converter: ", err)
 		}
-		err = compareBasicConfig(dbBasicCnf.(*appdb.BasicConfig), &apiBasicCnf)
+		err = compareConfig(dbBasicCnf, &apiBasicCnf)
 		if err != nil {
 			t.Error("convert basic config from api to db wrong content: ", err)
 		}
 
-		apiBasicCnfReturned, err := conf.ConvertDbToApiForm(dbBasicCnf.(*appdb.BasicConfig))
+		apiBasicCnfReturned, err := conf.ConfigDbToApiForm(dbBasicCnf)
 		if err != nil {
 			t.Error("convert basic config from db to api form using general converter: ", err)
 		}
-		diff := deep.Equal(apiBasicCnfReturned.(*apiserver.BasicConfiguration), &apiBasicCnf)
+		diff := deep.Equal(apiBasicCnfReturned, &apiBasicCnf)
 		if diff != nil {
 			t.Error("convert basic config from db to api wrong content (not origin): ", err)
-		}
-	}
-}
-
-func TestApp_Converter_ConvertAdvancedConfig(t *testing.T) {
-	for i := 0; i < 5; i++ {
-		apiAdvCnf := utils.CreateRandomApiAdvancedConfig()
-		dbAdvCnf, err := conf.ConvertApiToDbForm(&apiAdvCnf)
-		if err != nil {
-			t.Error("convert advanced config from api to db form using general converter: ", err)
-		}
-		err = compareAdvancedConfig(dbAdvCnf.(*appdb.AdvancedConfig), &apiAdvCnf)
-		if err != nil {
-			t.Error("convert advanced config from api to db wrong content: ", err)
-		}
-
-		apiAdvCnfReturned, err := conf.ConvertDbToApiForm(dbAdvCnf.(*appdb.AdvancedConfig))
-		if err != nil {
-			t.Error("convert advanced config from db to api form using general converter: ", err)
-		}
-		diff := deep.Equal(apiAdvCnfReturned.(*apiserver.AdvancedConfiguration), &apiAdvCnf)
-		if diff != nil {
-			t.Error("convert advanced config from db to api wrong content (not origin): ", err)
 		}
 	}
 }
@@ -76,20 +53,20 @@ func TestApp_Converter_ConvertAdvancedConfig(t *testing.T) {
 func TestApp_Converter_ConvertAttributeMapping(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		apiAttrMap := utils.CreateRandomApiAttributeMap()
-		dbAttrMap, err := conf.ConvertApiToDbForm(&apiAttrMap)
+		dbAttrMap, err := conf.AttributeMapApiToDbForm(&apiAttrMap)
 		if err != nil {
 			t.Error("convert attribute map from api to db form using general converter: ", err)
 		}
-		err = compareAttributeMaps(dbAttrMap.(*appdb.AttributeMap), &apiAttrMap)
+		err = compareAttributeMaps(dbAttrMap, &apiAttrMap)
 		if err != nil {
 			t.Error("convert attribute map config from api to db wrong content: ", err)
 		}
 
-		apiAttrMapReturned, err := conf.ConvertDbToApiForm(dbAttrMap.(*appdb.AttributeMap))
+		apiAttrMapReturned, err := conf.AttributeMapDbToApiForm(dbAttrMap)
 		if err != nil {
 			t.Error("convert attribute map config from db to api form using general converter: ", err)
 		}
-		diff := deep.Equal(apiAttrMapReturned.(*apiserver.AttributeMap), &apiAttrMap)
+		diff := deep.Equal(apiAttrMapReturned, &apiAttrMap)
 		if diff != nil {
 			t.Error("convert attribute map config from db to api wrong content (not origin): ", err)
 		}
@@ -99,27 +76,27 @@ func TestApp_Converter_ConvertAttributeMapping(t *testing.T) {
 func TestApp_Converter_ConvertPermissionCnf(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		apiPerm := utils.CreateRandomApiPermissions()
-		dbPerm, err := conf.ConvertApiToDbForm(&apiPerm)
+		dbPerm, err := conf.PermissionApiToDbForm(&apiPerm)
 		if err != nil {
 			t.Error("convert permissions from api to db form using general converter: ", err)
 		}
-		err = comparePermissions(dbPerm.(*appdb.Permission), &apiPerm)
+		err = comparePermissions(dbPerm, &apiPerm)
 		if err != nil {
 			t.Error("convert permissions config from api to db wrong content: ", err)
 		}
 
-		apiPermReturned, err := conf.ConvertDbToApiForm(dbPerm.(*appdb.Permission))
+		apiPermReturned, err := conf.PermissionDbToApiForm(dbPerm)
 		if err != nil {
 			t.Error("convert permissions config from db to api form using general converter: ", err)
 		}
-		diff := deep.Equal(apiPermReturned.(*apiserver.Permissions), &apiPerm)
+		diff := deep.Equal(apiPermReturned, &apiPerm)
 		if diff != nil {
 			t.Error("convert permissions config from db to api wrong content (not origin): ", diff)
 		}
 	}
 }
 
-func compareBasicConfig(db *appdb.BasicConfig, api *apiserver.BasicConfiguration) error {
+func compareConfig(db *appdb.Config, api *apiserver.Configuration) error {
 	if db.ID != api.Id {
 		return errors.New("id")
 	}
@@ -150,14 +127,6 @@ func compareBasicConfig(db *appdb.BasicConfig, api *apiserver.BasicConfiguration
 
 	if db.UserToArchive != api.UserToArchive {
 		return errors.New("user to archive")
-	}
-
-	return nil
-}
-
-func compareAdvancedConfig(db *appdb.AdvancedConfig, api *apiserver.AdvancedConfiguration) error {
-	if db.ID != api.Id {
-		return errors.New("id")
 	}
 
 	if db.AllowInitializationByIdp != api.AllowInitializationByIdp {

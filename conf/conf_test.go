@@ -48,7 +48,6 @@ func TestApp_Conf_InitDB(t *testing.T) {
 }
 
 func TestApp_Conf_LoadAutoConfig(t *testing.T) {
-
 	err := conf.DeleteAllConfigurations(context.Background())
 	if err != nil {
 		t.Error("Prepare DB (delete all config): ", err)
@@ -59,39 +58,33 @@ func TestApp_Conf_LoadAutoConfig(t *testing.T) {
 		t.Error(err)
 	}
 
-	basicConfig, err := conf.GetBasicConfig(context.Background())
+	config, err := conf.GetConfig(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
-	if basicConfig.Id != 1 ||
-		basicConfig.Enable != conf.AUTO_CNF_DEFAULT_ENABLED ||
-		basicConfig.UserToArchive != conf.AUTO_CNF_DEFAULT_USER_TO_ARCHIVE ||
-		!strings.Contains(basicConfig.OwnUrl, "https://") ||
-		basicConfig.IdpMetadataUrl != nil ||
-		basicConfig.IdpMetadataXml != nil ||
-		!strings.Contains(basicConfig.ServiceProviderCertificate,
+	if config.Enable != conf.AUTO_CNF_DEFAULT_ENABLED ||
+		config.UserToArchive != conf.AUTO_CNF_DEFAULT_USER_TO_ARCHIVE ||
+		!strings.Contains(config.OwnUrl, "https://") ||
+		config.IdpMetadataUrl != nil ||
+		config.IdpMetadataXml != nil ||
+		!strings.Contains(config.ServiceProviderCertificate,
 			"-----BEGIN CERTIFICATE-----") ||
-		!strings.Contains(basicConfig.ServiceProviderPrivateKey,
+		!strings.Contains(config.ServiceProviderPrivateKey,
 			"-----BEGIN RSA PRIVATE KEY-----") {
 		t.Error("mismatch auto config")
 	}
-	_, err = utils.GetCombinedX509Certificate(basicConfig.ServiceProviderCertificate,
-		basicConfig.ServiceProviderPrivateKey)
+	_, err = utils.GetCombinedX509Certificate(config.ServiceProviderCertificate,
+		config.ServiceProviderPrivateKey)
 	if err != nil {
 		t.Error("auto gen certificate")
 	}
 
-	advancedConfig, err := conf.GetAdvancedConfig(context.Background())
-	if err != nil {
-		t.Error(err)
-	}
-	if advancedConfig.Id != 1 ||
-		advancedConfig.AllowInitializationByIdp != conf.AUTO_CNF_DEFAULT_ALLOW_INIT_BY_IDP ||
-		advancedConfig.CookieSecure != conf.AUTO_CNF_DEFAULT_COOKIE_SECURE ||
-		advancedConfig.EntityId != conf.AUTO_CNF_DEFAULT_ENTITY_ID ||
-		advancedConfig.ForceAuthn != conf.AUTO_CNF_DEFAULT_FORCE_AUTHN ||
-		advancedConfig.LoginFailedUrl != conf.AUTO_CNF_DEFAULT_LOGIN_FAIL_URL ||
-		advancedConfig.SignedRequest != conf.AUTO_CNF_DEFAULT_SIGNING_REQ {
+	if config.AllowInitializationByIdp != conf.AUTO_CNF_DEFAULT_ALLOW_INIT_BY_IDP ||
+		config.CookieSecure != conf.AUTO_CNF_DEFAULT_COOKIE_SECURE ||
+		config.EntityId != conf.AUTO_CNF_DEFAULT_ENTITY_ID ||
+		config.ForceAuthn != conf.AUTO_CNF_DEFAULT_FORCE_AUTHN ||
+		config.LoginFailedUrl != conf.AUTO_CNF_DEFAULT_LOGIN_FAIL_URL ||
+		config.SignedRequest != conf.AUTO_CNF_DEFAULT_SIGNING_REQ {
 		t.Error("invalid advanced auto conf")
 	}
 
@@ -107,7 +100,7 @@ func TestApp_Conf_LoadAutoConfig(t *testing.T) {
 		t.Error("invalid attribute map auto conf")
 	}
 
-	perms, err := conf.GetPermissionSettings(context.Background())
+	perms, err := conf.GetPermissionMapping(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
@@ -123,22 +116,18 @@ func TestApp_Conf_LoadAutoConfig(t *testing.T) {
 }
 
 func TestApp_Conf_InsertUpdateConfig(t *testing.T) {
-
 	for i := 0; i < 5; i++ {
-
 		var (
-			basicConfig1 apiserver.BasicConfiguration    = utils.CreateRandomApiBasicConfig()
-			advConfig1   apiserver.AdvancedConfiguration = utils.CreateRandomApiAdvancedConfig()
-			attrMapping1 apiserver.AttributeMap          = utils.CreateRandomApiAttributeMap()
-			perms1       apiserver.Permissions           = utils.CreateRandomApiPermissions()
+			config1      apiserver.Configuration = utils.CreateRandomApiConfig()
+			attrMapping1 apiserver.AttributeMap  = utils.CreateRandomApiAttributeMap()
+			perms1       apiserver.Permissions   = utils.CreateRandomApiPermissions()
 
-			basicConfig2 apiserver.BasicConfiguration    = utils.CreateRandomApiBasicConfig()
-			advConfig2   apiserver.AdvancedConfiguration = utils.CreateRandomApiAdvancedConfig()
-			attrMapping2 apiserver.AttributeMap          = utils.CreateRandomApiAttributeMap()
-			perms2       apiserver.Permissions           = utils.CreateRandomApiPermissions()
+			config2      apiserver.Configuration = utils.CreateRandomApiConfig()
+			attrMapping2 apiserver.AttributeMap  = utils.CreateRandomApiAttributeMap()
+			perms2       apiserver.Permissions   = utils.CreateRandomApiPermissions()
 		)
-		basicConfig1.Enable = false
-		basicConfig2.Enable = true
+		config1.Enable = false
+		config2.Enable = true
 
 		err := conf.DeleteAllConfigurations(context.Background())
 		if err != nil {
@@ -146,63 +135,33 @@ func TestApp_Conf_InsertUpdateConfig(t *testing.T) {
 		}
 
 		// Basic Config Test
-		basicRet1, err := conf.SetBasicConfig(context.Background(), &basicConfig1)
+		confRet1, err := conf.SetConfig(context.Background(), &config1)
 		if err != nil {
 			t.Error(err)
 		}
-		if diff := deep.Equal(&basicConfig1, basicRet1); diff != nil {
-			t.Error("missmatch basic config 1: ", diff)
+		if diff := deep.Equal(&config1, confRet1); diff != nil {
+			t.Error("missmatch config 1: ", diff)
 		}
-		basicRet1, err = conf.GetBasicConfig(context.Background())
+		confRet1, err = conf.GetConfig(context.Background())
 		if err != nil {
 			t.Error(err)
 		}
-		if diff := deep.Equal(&basicConfig1, basicRet1); diff != nil {
-			t.Error("missmatch basic config 1_1: ", diff)
+		if diff := deep.Equal(&config1, confRet1); diff != nil {
+			t.Error("missmatch config 1_1: ", diff)
 		}
-		basicRet2, err := conf.SetBasicConfig(context.Background(), &basicConfig2)
+		confRet2, err := conf.SetConfig(context.Background(), &config2)
 		if err != nil {
 			t.Error(err)
 		}
-		if diff := deep.Equal(&basicConfig2, basicRet2); diff != nil {
-			t.Error("missmatch basic config 2: ", diff)
+		if diff := deep.Equal(&config2, confRet2); diff != nil {
+			t.Error("missmatch config 2: ", diff)
 		}
-		basicRet2, err = conf.GetBasicConfig(context.Background())
+		confRet2, err = conf.GetConfig(context.Background())
 		if err != nil {
 			t.Error(err)
 		}
-		if diff := deep.Equal(&basicConfig2, basicRet2); diff != nil {
-			t.Error("missmatch basic config 2_2: ", diff)
-		}
-
-		// Advanced Config Test
-		advRet1, err := conf.SetAdvancedConfig(context.Background(), &advConfig1)
-		if err != nil {
-			t.Error(err)
-		}
-		if diff := deep.Equal(&advConfig1, advRet1); diff != nil {
-			t.Error("missmatch advanced config 1: ", diff)
-		}
-		advRet1, err = conf.GetAdvancedConfig(context.Background())
-		if err != nil {
-			t.Error(err)
-		}
-		if diff := deep.Equal(&advConfig1, advRet1); diff != nil {
-			t.Error("missmatch advanced config 1_1: ", diff)
-		}
-		advRet2, err := conf.SetAdvancedConfig(context.Background(), &advConfig2)
-		if err != nil {
-			t.Error(err)
-		}
-		if diff := deep.Equal(&advConfig2, advRet2); diff != nil {
-			t.Error("missmatch advanced config 2: ", diff)
-		}
-		advRet2, err = conf.GetAdvancedConfig(context.Background())
-		if err != nil {
-			t.Error(err)
-		}
-		if diff := deep.Equal(&advConfig2, advRet2); diff != nil {
-			t.Error("missmatch advanced config 2_2: ", diff)
+		if diff := deep.Equal(&config2, confRet2); diff != nil {
+			t.Error("missmatch config 2_2: ", diff)
 		}
 
 		// Attribute Mapping Test
@@ -236,28 +195,28 @@ func TestApp_Conf_InsertUpdateConfig(t *testing.T) {
 		}
 
 		// Permission Cnf Test
-		permsRet1, err := conf.SetPermissionSettings(context.Background(), &perms1)
+		permsRet1, err := conf.SetPermissionMapping(context.Background(), &perms1)
 		if err != nil {
 			t.Error(err)
 		}
 		if diff := deep.Equal(&perms1, permsRet1); diff != nil {
 			t.Error("missmatch permission config 1: ", diff)
 		}
-		permsRet1, err = conf.GetPermissionSettings(context.Background())
+		permsRet1, err = conf.GetPermissionMapping(context.Background())
 		if err != nil {
 			t.Error(err)
 		}
 		if diff := deep.Equal(&perms1, permsRet1); diff != nil {
 			t.Error("missmatch permission config 1_1: ", diff)
 		}
-		permsRet2, err := conf.SetPermissionSettings(context.Background(), &perms2)
+		permsRet2, err := conf.SetPermissionMapping(context.Background(), &perms2)
 		if err != nil {
 			t.Error(err)
 		}
 		if diff := deep.Equal(&perms2, permsRet2); diff != nil {
 			t.Error("missmatch permission config 2: ", diff)
 		}
-		permsRet2, err = conf.GetPermissionSettings(context.Background())
+		permsRet2, err = conf.GetPermissionMapping(context.Background())
 		if err != nil {
 			t.Error(err)
 		}

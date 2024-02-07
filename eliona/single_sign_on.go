@@ -230,7 +230,7 @@ func (s *SingleSignOn) setUserPermissions(userId *string) error {
 		permissions *apiserver.Permissions
 	)
 
-	permissions, err = conf.GetPermissionSettings(context.Background())
+	permissions, err = conf.GetPermissionMapping(context.Background())
 	if err != nil {
 		return err
 	}
