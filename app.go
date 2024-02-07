@@ -33,7 +33,7 @@ import (
 const (
 	LOG_REGIO       = "app"
 	API_SERVER_PORT = 3000
-	SSO_SERVER_PORT = 80 // Publicly accessible without auth. See wiki.
+	SSO_SERVER_PORT = 8081 // Publicly accessible without auth. See wiki.
 
 	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
 )
