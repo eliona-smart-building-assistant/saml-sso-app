@@ -18,8 +18,10 @@ package eliona
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"saml-sso/apiserver"
 	"saml-sso/conf"
 	"saml-sso/utils"
@@ -31,6 +33,8 @@ import (
 
 const (
 	LOG_REGIO = "eliona"
+
+	DefaultLang = "en"
 )
 
 const (
@@ -112,6 +116,9 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 	if userIp == "" {
 		userIp = r.Header.Get("X-Real-Ip")
 	}
+	if userIp == "" {
+		userIp = r.RemoteAddr
+	}
 	log.Debug(LOG_REGIO, "user from %s called authentication ep", userIp)
 
 	mapping, err = conf.GetAttributeMapping(context.Background())
@@ -141,13 +148,29 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info(LOG_REGIO, "User with firstname: %v, lastname: %v, email/login: "+
-		"%v, phone: %v want to login",
-		firstname, lastname, loginEmail, phone)
+		"%v, phone: %v from %v want to login",
+		firstname, lastname, loginEmail, phone, userIp)
 
 	// get or create user
 	user, err = s.eliApi.GetUserIfExists(loginEmail)
 	if err != nil {
 		log.Info(LOG_REGIO, "user doesn't exist. creating now user...")
+
+		projectId, err := s.getProjectId()
+		if err != nil {
+			errorMessage = []byte(err.Error())
+			goto internalServerError
+		}
+
+		sysRoleId, projRoleId, lang, err := s.getPermissionsAndLang(r.Context())
+		if err != nil {
+			log.Error(LOG_REGIO, "mapping failed: sysRoleId:%v, projRoleId:%v, lang:%v",
+				sysRoleId, projRoleId, lang)
+			errorMessage = []byte(err.Error())
+			goto notAuthenticated
+		}
+
+		// cannot set role over api
 		user, err = s.eliApi.AddUser(&api.User{
 			Email:     loginEmail,
 			Firstname: *api.NewNullableString(&firstname),
@@ -168,10 +191,15 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 			goto internalServerError
 		}
 
-		err = s.setUserPermissions(user.Id.Get())
+		err = SetUserPermissions(user.Id.Get(), sysRoleId, lang)
 		if err != nil {
 			log.Error(LOG_REGIO, "cannot set user permissions: %v", err)
 			goto notAuthenticated
+		}
+		err = SetProjectUser(projectId, user.Id.Get(), projRoleId)
+		if err != nil {
+			errorMessage = []byte(err.Error())
+			goto internalServerError
 		}
 	}
 
@@ -215,7 +243,7 @@ notAuthenticated:
 	return
 
 internalServerError:
-	log.Warn(LOG_REGIO, "internal servererror occured while auth")
+	log.Warn(LOG_REGIO, "internal servererror occured while auth: %v", err)
 	w.WriteHeader(http.StatusInternalServerError)
 	_, err = w.Write(errorMessage)
 	if err != nil {
@@ -223,37 +251,94 @@ internalServerError:
 	}
 }
 
-func (s *SingleSignOn) setUserPermissions(userId *string) error {
+func (s *SingleSignOn) getPermissionsAndLang(samlCtx context.Context) (sysRoleId int,
+	projRoleId int, lang string, err error) {
 
 	var (
-		err         error
 		permissions *apiserver.Permissions
+		aclRoleMap  map[string]int
 	)
+
+	sysRoleId, projRoleId = -1, -1
+	lang = DefaultLang
 
 	permissions, err = conf.GetPermissionMapping(context.Background())
 	if err != nil {
-		return err
+		return
+	}
+	if permissions == nil {
+		err = errors.New("cannot load permission config. <nil>")
+		return
 	}
 
-	log.Info(LOG_REGIO,
-		"ToDo: permission map not finished yet. %v",
-		permissions)
-
-	projectId, err := GetFirstProjectId()
+	aclRoleMap, err = GetACLRoleMap()
 	if err != nil {
-		return fmt.Errorf("cannot look up project id: %v", err)
+		return
 	}
 
-	roleId, err := GetRoleIdByDisplayName(permissions.DefaultProjRole)
+	// get defaults
+	sysRoleId = conf.StringToRoleId(permissions.DefaultSystemRole, aclRoleMap)
+
+	projRoleId = conf.StringToRoleId(permissions.DefaultProjRole, aclRoleMap)
+
+	lang = samlsp.AttributeFromContext(samlCtx, permissions.DefaultLanguage)
+
+	// if configured, map permissions and lang
+	if permissions.SystemRoleSamlAttribute != nil &&
+		*permissions.SystemRoleSamlAttribute != "" &&
+		permissions.SystemRoleMap != nil {
+
+		systemRoleMap := conf.ApiRoleMapToGolangMap(*permissions.SystemRoleMap)
+
+		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.SystemRoleSamlAttribute)
+
+		elionaRoleOrId := systemRoleMap[samlValue]
+		sysRoleId = conf.AnyToRoleId(elionaRoleOrId, aclRoleMap)
+	}
+	if permissions.ProjRoleSamlAttribute != nil &&
+		*permissions.ProjRoleSamlAttribute != "" &&
+		permissions.ProjRoleMap != nil {
+
+		projectRoleMap := conf.ApiRoleMapToGolangMap(*permissions.ProjRoleMap)
+
+		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.ProjRoleSamlAttribute)
+
+		elionaRoleOrId := projectRoleMap[samlValue]
+		projRoleId = conf.AnyToRoleId(elionaRoleOrId, aclRoleMap)
+	}
+	if permissions.LanguageSamlAttribute != nil &&
+		*permissions.LanguageSamlAttribute != "" &&
+		permissions.LanguageMap != nil {
+
+		langMap := conf.ApiRoleMapToGolangMap(*permissions.LanguageMap)
+
+		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.LanguageSamlAttribute)
+
+		elionaLang := langMap[samlValue]
+		switch elionaLang.(type) {
+		case string:
+			lang = elionaLang.(string)
+		default:
+			log.Warn(LOG_REGIO, "language after map invalid type: %T, %v", lang, lang)
+		}
+	}
+
+	if sysRoleId <= 0 || projRoleId <= 0 || lang == "" {
+		err = errors.New("mapping unsuccessful")
+	}
+
+	return
+}
+
+func (s *SingleSignOn) getProjectId() (projectId string, err error) {
+
+	projectId = os.Getenv("PROJID")
+	if projectId == "" {
+		projectId, err = GetFirstProjectId()
+	}
 	if err != nil {
-		return fmt.Errorf("cannot get role id for role %s: %v",
-			permissions.DefaultProjRole, err)
+		err = fmt.Errorf("cannot look up project id: %v", err)
 	}
 
-	if roleId <= 0 {
-		return fmt.Errorf("cannot get role id for %s",
-			permissions.DefaultProjRole)
-	}
-
-	return SetProjectUser(projectId, userId, roleId)
+	return
 }

@@ -19,7 +19,9 @@ import (
 	"encoding/json"
 	"saml-sso/apiserver"
 	"saml-sso/appdb"
+	"strconv"
 
+	"github.com/eliona-smart-building-assistant/go-utils/log"
 	"github.com/volatiletech/null/v8"
 )
 
@@ -92,6 +94,11 @@ func PermissionApiToDbForm(permissions *apiserver.Permissions) (*appdb.Permissio
 		return nil, err
 	}
 
+	langMap, err := RoleMapToNullableJSON(permissions.LanguageMap)
+	if err != nil {
+		return nil, err
+	}
+
 	return &appdb.Permission{
 		ID:                      permissions.Id,
 		DefaultSystemRole:       permissions.DefaultSystemRole,
@@ -100,6 +107,9 @@ func PermissionApiToDbForm(permissions *apiserver.Permissions) (*appdb.Permissio
 		SystemRoleMap:           sysRoleMap,
 		ProjRoleSamlAttribute:   null.StringFromPtr(permissions.ProjRoleSamlAttribute),
 		ProjRoleMap:             projRoleMap,
+		DefaultLanguage:         permissions.DefaultLanguage,
+		LanguageSamlAttribute:   null.StringFromPtr(permissions.LanguageSamlAttribute),
+		LanguageMap:             langMap,
 	}, nil
 }
 
@@ -108,6 +118,7 @@ func PermissionDbToApiForm(permission *appdb.Permission) (*apiserver.Permissions
 	var (
 		systemRoleMap *[]apiserver.RoleMap
 		projRoleMap   *[]apiserver.RoleMap
+		langMap       *[]apiserver.RoleMap
 		err           error
 	)
 
@@ -121,6 +132,11 @@ func PermissionDbToApiForm(permission *appdb.Permission) (*apiserver.Permissions
 		return nil, err
 	}
 
+	langMap, err = NullableJSONToRoleMapPtr(permission.LanguageMap)
+	if err != nil {
+		return nil, err
+	}
+
 	return &apiserver.Permissions{
 		Id:                      permission.ID,
 		DefaultSystemRole:       permission.DefaultSystemRole,
@@ -129,32 +145,120 @@ func PermissionDbToApiForm(permission *appdb.Permission) (*apiserver.Permissions
 		SystemRoleMap:           systemRoleMap,
 		ProjRoleSamlAttribute:   permission.ProjRoleSamlAttribute.Ptr(),
 		ProjRoleMap:             projRoleMap,
+		DefaultLanguage:         permission.DefaultLanguage,
+		LanguageSamlAttribute:   permission.LanguageSamlAttribute.Ptr(),
+		LanguageMap:             langMap,
 	}, nil
 }
 
+// convert [{"ElionaRole":"roleIdOrRoleName", "SamlValue":"samlValue"}] to {"samlValue":"roleIdOrRoleName"}
+// to use it as map[string]any
 func RoleMapToNullableJSON(roleMapPtr *[]apiserver.RoleMap) (null.JSON, error) {
 	var (
 		jsonBytes []byte
 		err       error
+
+		roleMap map[string]any
 	)
 
 	if roleMapPtr == nil {
 		return null.JSONFromPtr(nil), nil
 	}
-	jsonBytes, err = json.Marshal(*roleMapPtr)
+
+	roleMap = ApiRoleMapToGolangMap(*roleMapPtr)
+
+	jsonBytes, err = json.Marshal(roleMap)
 	return null.JSONFrom(jsonBytes), err
 }
 
 func NullableJSONToRoleMapPtr(nullableJson null.JSON) (*[]apiserver.RoleMap, error) {
 	var (
-		roleMap []apiserver.RoleMap = []apiserver.RoleMap{}
-		err     error
+		roleMapApi []apiserver.RoleMap
+		roleMapDb  map[string]any
+		err        error
 	)
 
 	if nullableJson.Ptr() == nil {
 		return nil, nil
 	}
 
-	err = json.Unmarshal(nullableJson.JSON, &roleMap)
-	return &roleMap, err
+	err = json.Unmarshal(nullableJson.JSON, &roleMapDb)
+
+	roleMapApi = DBRoleToApiRole(roleMapDb)
+
+	return &roleMapApi, err
+}
+
+func ApiRoleMapToGolangMap(roleMap []apiserver.RoleMap) (gRoleMap map[string]any) {
+
+	gRoleMap = make(map[string]any)
+
+	for _, m := range roleMap {
+		var elionaRole any = m.ElionaRole
+
+		if i, err := strconv.Atoi(m.ElionaRole); err == nil {
+			elionaRole = i
+		}
+
+		gRoleMap[m.SamlValue] = elionaRole
+	}
+
+	return
+}
+
+func DBRoleToApiRole(roleMap map[string]any) (apiRoleMap []apiserver.RoleMap) {
+
+	apiRoleMap = make([]apiserver.RoleMap, 0)
+
+	for samlValue, elionaRole := range roleMap {
+		var elionaRoleS string
+
+		switch v := elionaRole.(type) {
+		case string:
+			elionaRoleS = v
+		case int:
+			elionaRoleS = strconv.Itoa(v)
+		case float64:
+			elionaRoleS = strconv.Itoa(int(v))
+		default:
+			log.Warn(LOG_REGIO, "unknown type for eliona role: %T, %v", v, v)
+		}
+
+		var singleApiMap apiserver.RoleMap = apiserver.RoleMap{
+			ElionaRole: elionaRoleS,
+			SamlValue:  samlValue,
+		}
+
+		apiRoleMap = append(apiRoleMap, singleApiMap)
+	}
+
+	return
+}
+
+func AnyToRoleId(roleNameOrId any, aclRoles map[string]int) (roleId int) {
+	roleId = -1
+
+	switch v := roleNameOrId.(type) {
+	case string:
+		roleId = StringToRoleId(v, aclRoles)
+	case int:
+		roleId = v
+	case float64:
+		roleId = int(v)
+	default:
+		log.Warn(LOG_REGIO, "unknown type for roleNameOrId: %T, %v", v, v)
+	}
+
+	return
+}
+
+func StringToRoleId(roleNameOrId string, aclRoles map[string]int) (roleId int) {
+	var err error
+
+	roleId, err = strconv.Atoi(roleNameOrId)
+	if err != nil {
+		roleId = aclRoles[roleNameOrId]
+	}
+
+	return
 }

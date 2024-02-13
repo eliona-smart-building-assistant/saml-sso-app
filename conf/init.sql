@@ -1,5 +1,5 @@
 --  This file is part of the eliona project.
---  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
+--  Copyright © 2024 Eliona by IoTEC AG. All Rights Reserved.
 --  ______ _ _
 -- |  ____| (_)
 -- | |__  | |_  ___  _ __   __ _
@@ -46,9 +46,13 @@ CREATE TABLE IF NOT EXISTS saml_sp.attribute_map ( -- SAML session attribute nam
 CREATE TABLE IF NOT EXISTS saml_sp.permissions (
     id                          INT PRIMARY KEY NOT NULL DEFAULT 1 REFERENCES saml_sp.config(id) ON UPDATE CASCADE,
     default_system_role         TEXT            NOT NULL DEFAULT 'System user'                                          , -- reference to is maybe a bad idea (due to the new ACL)
-    default_proj_role           TEXT            NOT NULL DEFAULT 'Project user'                                         ,
+    default_proj_role           TEXT            NOT NULL DEFAULT 'Project user'                                         , -- can be the role name or role id
+    default_language            TEXT            NOT NULL DEFAULT 'en'                                                   ,
     system_role_saml_attribute  TEXT                                                                                    ,
-    system_role_map             JSON                                                                                    ,
+    system_role_map             JSON                                                                                    , -- e.g. {"firm xy-Admin":"System admin", ...}
     proj_role_saml_attribute    TEXT                                                                                    ,
-    proj_role_map               JSON
+    proj_role_map               JSON                                                                                    ,
+    language_saml_attribute     TEXT                                                                                    ,
+    language_map                JSON                                                                                    , -- e.g. {"Sprache:Deutsch":"de", "Sprache:Englisch":"en"}
+    CONSTRAINT chk_language CHECK (default_language IN ('en', 'de', 'it', 'fr'))
 ) ;

@@ -422,40 +422,61 @@ components:
           readOnly: true
           default: 1
           example: 1
-        default_system_role:
+        defaultSystemRole:
           type: string
           readOnly: false
           nullable: false
           default: 'System user'
           example: 'System user'
-        default_proj_role:
+        defaultProjRole:
           type: string
           nullable: false
           readOnly: false
           default: 'Project user'
           example: 'Project user'
-        system_role_saml_attribute:
+        defaultLanguage:
+          type: string
+          readOnly: false
+          nullable: false
+          example: 'en'
+          enum:
+            - en
+            - de
+            - it
+            - fr
+        systemRoleSamlAttribute:
           type: string
           nullable: true
           readOnly: false
           example: "systemRightsSamlAttribute"
-        system_role_map:
+        systemRoleMap:
           type: array
           items:
             $ref: "#/components/schemas/RoleMap"
           nullable: true
           readOnly: false
-        proj_role_saml_attribute:
+        projRoleSamlAttribute:
           type: string
           nullable: true
           readOnly: false
           example: "projectRightsSamlAttribute"
-        proj_role_map:
+        projRoleMap:
           type: array
           items:
             $ref: "#/components/schemas/RoleMap"
           nullable: true
           readOnly: false
+        languageSamlAttribute:
+          type: string
+          nullable: true
+          readOnly: false
+          example: "language"
+        languageMap:
+          type: array
+          nullable: true
+          readOnly: false
+          items:
+            $ref: "#/components/schemas/RoleMap"
 
     RoleMap:
       type: object
