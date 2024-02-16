@@ -166,7 +166,6 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Error(LOG_REGIO, "mapping failed: sysRoleId:%v, projRoleId:%v, lang:%v",
 				sysRoleId, projRoleId, lang)
-			errorMessage = []byte(err.Error())
 			goto notAuthenticated
 		}
 
@@ -315,9 +314,9 @@ func (s *SingleSignOn) getPermissionsAndLang(samlCtx context.Context) (sysRoleId
 		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.LanguageSamlAttribute)
 
 		elionaLang := langMap[samlValue]
-		switch elionaLang.(type) {
+		switch l := elionaLang.(type) {
 		case string:
-			lang = elionaLang.(string)
+			lang = l
 		default:
 			log.Warn(LOG_REGIO, "language after map invalid type: %T, %v", lang, lang)
 		}
