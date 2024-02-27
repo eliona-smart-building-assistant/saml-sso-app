@@ -6,11 +6,11 @@ no-tests = true
 add-enum-types = true
 
 [psql]
-dbname = "postgres"
+dbname = "iot"
 host   = "localhost"
-port   = 5432
-user   = "postgres"
-pass   = "secret"
+port   = 5433
+user   = "leicom"
+pass   = ".test"
 schema = "saml_sp"
 sslmode = "disable"
 
