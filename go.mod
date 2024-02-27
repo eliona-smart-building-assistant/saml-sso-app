@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/crewjam/saml v0.4.14
-	github.com/eliona-smart-building-assistant/go-eliona v1.9.31
+	github.com/eliona-smart-building-assistant/go-eliona v1.9.32
 	github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.6.3
-	github.com/eliona-smart-building-assistant/go-utils v1.0.61
+	github.com/eliona-smart-building-assistant/go-utils v1.0.62
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-test/deep v1.1.0
 	github.com/gorilla/mux v1.8.1
