@@ -39,13 +39,7 @@ func main() {
 		boil.DebugWriter = log.GetWriter(log.TraceLevel, "database")
 	}
 
-	// Necessary to close used init resources, because db.Pool() is used in this app.
-	defer db.ClosePool()
-
-	// Init the app before the first run.
-	app.Init(db.Pool(), app.AppName(),
-		app.ExecSqlFile("conf/init.sql"),
-	)
+	initialize()
 
 	// Starting the service to collect the data for this app.
 	common.WaitForWithOs(

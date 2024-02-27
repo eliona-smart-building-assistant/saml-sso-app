@@ -26,7 +26,9 @@ import (
 	"saml-sso/saml"
 	"strconv"
 
+	"github.com/eliona-smart-building-assistant/go-eliona/app"
 	"github.com/eliona-smart-building-assistant/go-utils/common"
+	"github.com/eliona-smart-building-assistant/go-utils/db"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
@@ -37,6 +39,19 @@ const (
 
 	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
 )
+
+func initialize() {
+	ctx := context.Background()
+
+	// Necessary to close used init resources
+	conn := db.NewInitConnectionWithContextAndApplicationName(ctx, app.AppName())
+	defer conn.Close(ctx)
+
+	// Init the app before the first run.
+	app.Init(conn, app.AppName(),
+		app.ExecSqlFile("conf/init.sql"),
+	)
+}
 
 func run() {
 
