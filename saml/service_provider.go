@@ -69,7 +69,7 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 	}
 
 	if entityId != nil {
-		opts.EntityID = utils.SubstituteOwnUrlUrlString(*entityId, baseUrl)
+		opts.EntityID, _ = utils.SubstituteOwnUrlUrlString(*entityId, baseUrl)
 	}
 	if allowInitByIdp != nil {
 		opts.AllowIDPInitiated = *allowInitByIdp
