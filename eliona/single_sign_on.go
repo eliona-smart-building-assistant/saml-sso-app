@@ -39,8 +39,9 @@ const (
 )
 
 const (
-	ENDPOINT_SSO_GENERIC_VERIFICATION = "/sso/auth"
-	ENDPOINT_SSO_GENERIC_ACTIVE       = "/sso/active"
+	ENDPOINT_SSO_GENERIC_VERIFICATION = "/saml-sso/auth"
+	ENDPOINT_SSO_GENERIC_ACTIVE       = "/saml-sso/active"
+	ENDPOINT_SSO_GENERIC_ERROR        = "/saml-sso/error.html"
 )
 
 type SingleSignOn struct {
@@ -95,6 +96,18 @@ func (s *SingleSignOn) ActiveHandle(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write(responseMsg)
 	if err != nil {
 		log.Error(LOG_REGIO, "write internal server error: %v", err)
+	}
+}
+
+func (s *SingleSignOn) DefaultLoginError(w http.ResponseWriter, r *http.Request) {
+	content, err := os.ReadFile("html/error.html")
+	if err != nil {
+		log.Error(LOG_REGIO, "read def err page: %v", err)
+	}
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(content)
+	if err != nil {
+		log.Error(LOG_REGIO, "send def err page: %v", err)
 	}
 }
 
@@ -258,7 +271,7 @@ func (s *SingleSignOn) authFailed(intError bool, login string, ip string, errorM
 		if err != nil {
 			log.Error(LOG_REGIO, "cannot parse fallback redirect url: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMsg + ":" + err.Error()))
+			_, _ = w.Write([]byte(errorMsg + ":" + err.Error()))
 			return
 		}
 		queries := url.Values{}
@@ -278,7 +291,10 @@ func (s *SingleSignOn) authFailed(intError bool, login string, ip string, errorM
 		http.Redirect(w, r, s.redirectNoLogin, http.StatusFound)
 	} else {
 		// write html content
-		w.Write([]byte(utils.SubstituteError(s.redirectNoLogin, []byte(errorMsg))))
+		_, err := w.Write([]byte(utils.SubstituteError(s.redirectNoLogin, []byte(errorMsg))))
+		if err != nil {
+			log.Error(LOG_REGIO, "write error page content: %v", err)
+		}
 	}
 }
 

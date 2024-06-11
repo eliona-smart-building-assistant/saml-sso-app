@@ -37,7 +37,7 @@ const (
 	API_SERVER_PORT = 3000
 	SSO_SERVER_PORT = 8081 // Publicly accessible without auth. See wiki.
 
-	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
+	SAML_SPECIFIC_ENDPOINT_PATH = "/saml-sso/"
 )
 
 func initialize() {
@@ -129,20 +129,17 @@ func run() {
 	}()
 
 	// saml specific handle (no RESTful) to router
-	elionaAuth := eliona.NewSingleSignOn(config.OwnUrl,
+	sso := eliona.NewSingleSignOn(config.OwnUrl,
 		config.UserToArchive, config.LoginFailedUrl)
 
-	activeHandleFunc := http.HandlerFunc(elionaAuth.ActiveHandle)
+	activeHandleFunc := http.HandlerFunc(sso.ActiveHandle)
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_ACTIVE, activeHandleFunc)
-	authHandleFunc := http.HandlerFunc(elionaAuth.Authentication) // TODO: Not completely implemented.
+	samlErrHandleFunc := http.HandlerFunc(sso.DefaultLoginError)
+	http.Handle(eliona.ENDPOINT_SSO_GENERIC_ERROR, samlErrHandleFunc)
+	authHandleFunc := http.HandlerFunc(sso.Authentication)
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_VERIFICATION,
 		sp.GetMiddleWare().RequireAccount(authHandleFunc))
 	http.Handle(SAML_SPECIFIC_ENDPOINT_PATH, sp.GetMiddleWare())
-
-	// for backwards compatibility, can be removed when the frontend is reworked to the new generic /sso/* endpoints
-	http.Handle("/adfs/active/", activeHandleFunc)
-	http.Handle("/adfs/auth/",
-		sp.GetMiddleWare().RequireAccount(authHandleFunc))
 
 	log.Info(LOG_REGIO, "started @ %v", samlSpPort)
 	err = http.ListenAndServe(":"+samlSpPort, nil)
