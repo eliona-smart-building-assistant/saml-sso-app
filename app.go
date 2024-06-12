@@ -86,7 +86,7 @@ func run() {
 	} else if config.IdpMetadataXml != nil {
 		metadata = []byte(*config.IdpMetadataXml)
 	} else {
-		log.Error(LOG_REGIO, "not able to set IdP Metadata")
+		log.Warn(LOG_REGIO, "not able to set IdP Metadata. PLS setup the IdP Metadata in config!")
 	}
 
 	apiPort := common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT))
