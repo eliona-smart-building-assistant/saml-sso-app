@@ -39,9 +39,9 @@ const (
 )
 
 const (
-	ENDPOINT_SSO_GENERIC_VERIFICATION = "/saml-sso/auth"
-	ENDPOINT_SSO_GENERIC_ACTIVE       = "/saml-sso/active"
-	ENDPOINT_SSO_GENERIC_ERROR        = "/saml-sso/error.html"
+	ENDPOINT_SSO_GENERIC_VERIFICATION = "/auth"
+	ENDPOINT_SSO_GENERIC_ACTIVE       = "/active"
+	ENDPOINT_SSO_GENERIC_ERROR        = "/error.html"
 )
 
 type SingleSignOn struct {
@@ -254,8 +254,10 @@ func (s *SingleSignOn) authFailed(intError bool, login string, ip string, errorM
 	if intError {
 		log.Warn(LOG_REGIO, "internal server error occured: %s", errorMsg)
 		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusUnauthorized)
+		if _, err := w.Write([]byte(errorMsg)); err != nil {
+			log.Warn(LOG_REGIO, "couldn't write internal server error: %v", err)
+		}
+		return
 	}
 
 	// reset eliona cookies
@@ -267,7 +269,7 @@ func (s *SingleSignOn) authFailed(intError bool, login string, ip string, errorM
 
 	if s.redirectNoLogin == "" {
 		// fallback
-		u, err := url.Parse(s.baseUrl + "/adfs/error.html")
+		u, err := url.Parse(s.baseUrl + "/apps-public/saml-sso/error.html")
 		if err != nil {
 			log.Error(LOG_REGIO, "cannot parse fallback redirect url: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -284,13 +286,16 @@ func (s *SingleSignOn) authFailed(intError bool, login string, ip string, errorM
 
 		u.RawQuery = queries.Encode()
 
+		log.Debug(LOG_REGIO, "login failed. redirect to error.html")
 		http.Redirect(w, r, u.String(), http.StatusFound)
 
 	} else if !s.htmlContent {
 		// redirect
+		log.Debug(LOG_REGIO, "login failed. redirect to custom url %s", s.redirectNoLogin)
 		http.Redirect(w, r, s.redirectNoLogin, http.StatusFound)
 	} else {
 		// write html content
+		log.Debug(LOG_REGIO, "login failed. show custom html content")
 		_, err := w.Write([]byte(utils.SubstituteError(s.redirectNoLogin, []byte(errorMsg))))
 		if err != nil {
 			log.Error(LOG_REGIO, "write error page content: %v", err)

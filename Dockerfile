@@ -33,6 +33,7 @@ RUN apk upgrade
 
 COPY --from=build /app ./
 COPY conf/*.sql ./conf/
+COPY html/*.html ./html/
 
 COPY openapi.yaml ./
 COPY metadata.json ./

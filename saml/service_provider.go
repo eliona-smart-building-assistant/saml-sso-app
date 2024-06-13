@@ -17,6 +17,7 @@ package saml
 
 import (
 	"crypto/rsa"
+	"net/http"
 	"net/url"
 	"saml-sso/utils"
 
@@ -25,26 +26,31 @@ import (
 )
 
 const (
-	LOG_REGIO = "service provider"
+	LOG_REGIO           = "service provider"
+	SP_HANDLE_BASE_PATH = "/saml/" // used from saml middleware for ACS, ACL, etc.
+	PUBLIC_BASE_PATH    = "/apps-public/saml-sso"
 )
 
 type ServiceProvider struct {
-	sp *samlsp.Middleware
+	pubBasePath string
+	sp          *samlsp.Middleware
 }
 
-func NewServiceProvider(certificate string, privateKey string, baseUrl string,
+func NewServiceProvider(certificate string, privateKey string, pubBaseUrl string,
 	idpMetadata []byte) (*ServiceProvider, error) {
 
-	return NewServiceProviderAdvanced(certificate, privateKey, baseUrl, idpMetadata, nil, nil,
-		nil, nil, nil)
+	return NewServiceProviderAdvanced(certificate, privateKey, pubBaseUrl, idpMetadata, nil, nil,
+		nil, nil, nil, "")
 }
 
 func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl string, idpMetadata []byte,
 	entityId *string, allowInitByIdp *bool, signedRequest *bool, forceAuthn *bool,
-	cookieSecure *bool) (*ServiceProvider, error) {
-	var serviceProvider ServiceProvider = ServiceProvider{}
+	cookieSecure *bool, pubBasePath string) (*ServiceProvider, error) {
+	var serviceProvider ServiceProvider = ServiceProvider{
+		pubBasePath: pubBasePath,
+	}
 
-	rootUrl, err := url.Parse(baseUrl)
+	rootUrl, err := url.Parse(baseUrl + pubBasePath + "/")
 	if err != nil {
 		return nil, err
 	}
@@ -62,10 +68,11 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 	}
 
 	opts := samlsp.Options{
-		URL:         *rootUrl,
-		Key:         keyPair.PrivateKey.(*rsa.PrivateKey),
-		Certificate: keyPair.Leaf,
-		IDPMetadata: idpMeta,
+		URL:                *rootUrl,
+		Key:                keyPair.PrivateKey.(*rsa.PrivateKey),
+		Certificate:        keyPair.Leaf,
+		IDPMetadata:        idpMeta,
+		DefaultRedirectURI: PUBLIC_BASE_PATH + "/",
 	}
 
 	if entityId != nil {
@@ -82,14 +89,29 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 	}
 	if cookieSecure != nil {
 		// opts.CookieSecure: true // option not available any more
-		log.Debug(LOG_REGIO, "not implemented")
+		log.Debug(LOG_REGIO, "cookie secure not implemented")
 	}
 
 	serviceProvider.sp, err = samlsp.New(opts)
+
+	log.Debug(LOG_REGIO, "ACS URL %v", serviceProvider.sp.ServiceProvider.AcsURL)
+	log.Info(LOG_REGIO, "Metadata URL %v", serviceProvider.sp.ServiceProvider.MetadataURL)
+	log.Debug(LOG_REGIO, "SLO URL %v", serviceProvider.sp.ServiceProvider.SloURL)
 
 	return &serviceProvider, err
 }
 
 func (s *ServiceProvider) GetMiddleWare() *samlsp.Middleware {
+
 	return s.sp
+}
+
+func (s *ServiceProvider) FixPath(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		r.URL.Path = s.pubBasePath + r.URL.Path
+
+		next.ServeHTTP(w, r)
+	})
 }
