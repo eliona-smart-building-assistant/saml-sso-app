@@ -122,12 +122,12 @@ func PermissionDbToApiForm(permission *appdb.Permission) (*apiserver.Permissions
 		err           error
 	)
 
-	systemRoleMap, err = NullableJSONToRoleMapPtr(permission.ProjRoleMap)
+	systemRoleMap, err = NullableJSONToRoleMapPtr(permission.SystemRoleMap)
 	if err != nil {
 		return nil, err
 	}
 
-	projRoleMap, err = NullableJSONToRoleMapPtr(permission.SystemRoleMap)
+	projRoleMap, err = NullableJSONToRoleMapPtr(permission.ProjRoleMap)
 	if err != nil {
 		return nil, err
 	}

@@ -347,6 +347,8 @@ func (s *SingleSignOn) getPermissionsAndLang(samlCtx context.Context) (sysRoleId
 		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.SystemRoleSamlAttribute)
 
 		elionaRoleOrId := systemRoleMap[samlValue]
+		log.Debug(LOG_REGIO, "saml value for sysRole: %s, elionaRole: %v -> map %v",
+			samlValue, elionaRoleOrId, systemRoleMap)
 		sysRoleId = conf.AnyToRoleId(elionaRoleOrId, aclRoleMap)
 	}
 	if permissions.ProjRoleSamlAttribute != nil &&
@@ -358,6 +360,9 @@ func (s *SingleSignOn) getPermissionsAndLang(samlCtx context.Context) (sysRoleId
 		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.ProjRoleSamlAttribute)
 
 		elionaRoleOrId := projectRoleMap[samlValue]
+		log.Debug(LOG_REGIO, "saml value for projRole: %s, elionaRole: %v -> map %v",
+			samlValue, elionaRoleOrId, projectRoleMap)
+
 		projRoleId = conf.AnyToRoleId(elionaRoleOrId, aclRoleMap)
 	}
 	if permissions.LanguageSamlAttribute != nil &&
