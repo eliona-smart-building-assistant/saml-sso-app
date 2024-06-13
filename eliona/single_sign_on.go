@@ -187,6 +187,8 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		log.Debug(LOG_REGIO, "assigned sysRole: %d, projRole: %d, lang: %s", sysRoleId, projRoleId, lang)
+
 		// cannot set role over api
 		user, err = s.eliApi.AddUser(&api.User{
 			Email:     loginEmail,
