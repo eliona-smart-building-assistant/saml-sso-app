@@ -179,8 +179,8 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 
 		sysRoleId, projRoleId, lang, err := s.getPermissionsAndLang(r.Context())
 		if err != nil {
-			log.Info(LOG_REGIO, "mapping failed: sysRoleId:%v, projRoleId:%v, lang:%v",
-				sysRoleId, projRoleId, lang)
+			log.Info(LOG_REGIO, "mapping failed: sysRoleId:%v, projRoleId:%v, lang:%v err:%v",
+				sysRoleId, projRoleId, lang, err)
 			// a wrong, uncomplete mapping is not a internal error
 			// maybe even wanted for some user groups
 			s.authFailed(false, loginEmail, userIp, fmt.Sprintf("cannot map saml attributes: %v", err), w, r)
@@ -333,7 +333,7 @@ func (s *SingleSignOn) getPermissionsAndLang(samlCtx context.Context) (sysRoleId
 
 	projRoleId = conf.StringToRoleId(permissions.DefaultProjRole, aclRoleMap)
 
-	lang = samlsp.AttributeFromContext(samlCtx, permissions.DefaultLanguage)
+	lang = permissions.DefaultLanguage
 
 	// if configured, map permissions and lang
 	if permissions.SystemRoleSamlAttribute != nil &&
