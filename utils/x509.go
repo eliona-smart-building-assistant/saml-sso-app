@@ -39,8 +39,14 @@ const (
 	CERT_COMMON_NAME_CN       = "eliona-saml-sp"
 )
 
-func GetCombinedX509Certificate(certificate string, privateKey string) (tls.Certificate, error) {
-	return tls.X509KeyPair([]byte(certificate), []byte(privateKey))
+func GetCombinedX509Certificate(certificate string, privateKey string) (pair tls.Certificate, err error) {
+	pair, err = tls.X509KeyPair([]byte(certificate), []byte(privateKey))
+	if err != nil {
+		return
+	}
+
+	pair.Leaf, err = x509.ParseCertificate(pair.Certificate[0])
+	return
 }
 
 func CreateSelfsignedX509Certificate(validityDays int,

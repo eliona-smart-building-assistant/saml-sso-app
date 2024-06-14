@@ -20,6 +20,7 @@ package eliona
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/eliona-smart-building-assistant/go-eliona/app"
@@ -119,14 +120,35 @@ func GetFirstProjectId() (projectId string, err error) {
 	return
 }
 
-func GetRoleIdByDisplayName(displayName string) (roleId int, err error) {
-	row := getDb().QueryRow("SELECT role_id FROM acl_role WHERE displayname = $1", displayName)
+func GetACLRoleMap() (roleMap map[string]int, err error) {
 
-	if err = row.Err(); err != nil {
+	roleMap = make(map[string]int)
+
+	rows, err := getDb().Query("SELECT role_id, displayname FROM acl_role")
+
+	if err != nil {
+		err = fmt.Errorf("cannot get acl roles: %v", err)
 		return
 	}
 
-	err = row.Scan(&roleId)
+	for rows.Next() {
+		var (
+			roleId       int
+			roleDispName string
+		)
+		err = rows.Scan(&roleId, &roleDispName)
+		if err != nil {
+			return
+		}
+		roleMap[roleDispName] = roleId
+	}
+
+	return
+}
+
+func SetUserPermissions(userId *string, systemRoleId int, language string) (err error) {
+	_, err = getDb().Exec("UPDATE public.eliona_user SET role_id = $1, language = $2 WHERE user_id = $3",
+		systemRoleId, language, userId)
 	return
 }
 

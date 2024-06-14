@@ -28,8 +28,8 @@ func TestApp_Utils_ConfigSubstitution(t *testing.T) {
 		expected string = "https://example.org/metadata"
 	)
 
-	is := utils.SubstituteOwnUrlUrlString(test, ownUrl)
-	if is != expected {
+	is, isHtml := utils.SubstituteOwnUrlUrlString(test, ownUrl)
+	if is != expected || isHtml {
 		t.Error("subistitution of {ownUrl}")
 	}
 }

@@ -15,17 +15,23 @@ type Permissions struct {
 	// Configuration Id refer to config's id. Can only be 1
 	Id int32 `json:"id,omitempty"`
 
-	DefaultSystemRole string `json:"default_system_role,omitempty"`
+	DefaultSystemRole string `json:"defaultSystemRole,omitempty"`
 
-	DefaultProjRole string `json:"default_proj_role,omitempty"`
+	DefaultProjRole string `json:"defaultProjRole,omitempty"`
 
-	SystemRoleSamlAttribute *string `json:"system_role_saml_attribute,omitempty"`
+	DefaultLanguage string `json:"defaultLanguage,omitempty"`
 
-	SystemRoleMap *[]RoleMap `json:"system_role_map,omitempty"`
+	SystemRoleSamlAttribute *string `json:"systemRoleSamlAttribute,omitempty"`
 
-	ProjRoleSamlAttribute *string `json:"proj_role_saml_attribute,omitempty"`
+	SystemRoleMap *[]RoleMap `json:"systemRoleMap,omitempty"`
 
-	ProjRoleMap *[]RoleMap `json:"proj_role_map,omitempty"`
+	ProjRoleSamlAttribute *string `json:"projRoleSamlAttribute,omitempty"`
+
+	ProjRoleMap *[]RoleMap `json:"projRoleMap,omitempty"`
+
+	LanguageSamlAttribute *string `json:"languageSamlAttribute,omitempty"`
+
+	LanguageMap *[]RoleMap `json:"languageMap,omitempty"`
 }
 
 // AssertPermissionsRequired checks if the required fields are not zero-ed
@@ -39,6 +45,13 @@ func AssertPermissionsRequired(obj Permissions) error {
 	}
 	if obj.ProjRoleMap != nil {
 		for _, el := range *obj.ProjRoleMap {
+			if err := AssertRoleMapRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.LanguageMap != nil {
+		for _, el := range *obj.LanguageMap {
 			if err := AssertRoleMapRequired(el); err != nil {
 				return err
 			}

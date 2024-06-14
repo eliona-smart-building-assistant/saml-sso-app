@@ -78,6 +78,9 @@ func CreateRandomApiPermissions() apiserver.Permissions {
 		SystemRoleMap:           nil, // ToDo
 		ProjRoleSamlAttribute:   nil, // ToDo
 		ProjRoleMap:             nil, // ToDo
+		DefaultLanguage:         "en",
+		LanguageSamlAttribute:   nil, // ToDo
+		LanguageMap:             nil, // ToDo
 	}
 
 	if RandomBoolean() {

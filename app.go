@@ -36,8 +36,6 @@ const (
 	LOG_REGIO       = "app"
 	API_SERVER_PORT = 3000
 	SSO_SERVER_PORT = 8081 // Publicly accessible without auth. See wiki.
-
-	SAML_SPECIFIC_ENDPOINT_PATH = "/saml/"
 )
 
 func initialize() {
@@ -86,7 +84,7 @@ func run() {
 	} else if config.IdpMetadataXml != nil {
 		metadata = []byte(*config.IdpMetadataXml)
 	} else {
-		log.Error(LOG_REGIO, "not able to set IdP Metadata")
+		log.Warn(LOG_REGIO, "not able to set IdP Metadata. PLS setup the IdP Metadata in config!")
 	}
 
 	apiPort := common.Getenv("API_SERVER_PORT", strconv.Itoa(API_SERVER_PORT))
@@ -104,6 +102,7 @@ func run() {
 		&config.SignedRequest,
 		&config.ForceAuthn,
 		&config.CookieSecure,
+		saml.PUBLIC_BASE_PATH,
 	)
 	if err != nil {
 		log.Fatal(LOG_REGIO, "cannot initialize saml service provider: %v", err)
@@ -122,6 +121,7 @@ func run() {
 	)
 
 	go func() {
+		log.Info(LOG_REGIO, "api server started @ %v", apiPort)
 		err := http.ListenAndServe(":"+apiPort, router)
 		if err != nil {
 			log.Fatal(LOG_REGIO, "app api server: %v", err)
@@ -129,22 +129,19 @@ func run() {
 	}()
 
 	// saml specific handle (no RESTful) to router
-	elionaAuth := eliona.NewSingleSignOn(config.OwnUrl,
+	sso := eliona.NewSingleSignOn(config.OwnUrl,
 		config.UserToArchive, config.LoginFailedUrl)
 
-	activeHandleFunc := http.HandlerFunc(elionaAuth.ActiveHandle)
+	activeHandleFunc := http.HandlerFunc(sso.ActiveHandle)
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_ACTIVE, activeHandleFunc)
-	authHandleFunc := http.HandlerFunc(elionaAuth.Authentication) // TODO: Not completely implemented.
+	samlErrHandleFunc := http.HandlerFunc(sso.DefaultLoginError)
+	http.Handle(eliona.ENDPOINT_SSO_GENERIC_ERROR, samlErrHandleFunc)
+	authHandleFunc := http.HandlerFunc(sso.Authentication)
 	http.Handle(eliona.ENDPOINT_SSO_GENERIC_VERIFICATION,
-		sp.GetMiddleWare().RequireAccount(authHandleFunc))
-	http.Handle(SAML_SPECIFIC_ENDPOINT_PATH, sp.GetMiddleWare())
+		sp.FixPath((sp.GetMiddleWare().RequireAccount(authHandleFunc))))
+	http.Handle(saml.SP_HANDLE_BASE_PATH, sp.FixPath(sp.GetMiddleWare()))
 
-	// for backwards compatibility, can be removed when the frontend is reworked to the new generic /sso/* endpoints
-	http.Handle("/adfs/active/", activeHandleFunc)
-	http.Handle("/adfs/auth/",
-		sp.GetMiddleWare().RequireAccount(authHandleFunc))
-
-	log.Info(LOG_REGIO, "started @ %v", samlSpPort)
+	log.Info(LOG_REGIO, "public http server started @ %v", samlSpPort)
 	err = http.ListenAndServe(":"+samlSpPort, nil)
 	if err != nil {
 		log.Error("sp app", "exiting due to an error: %v", err)

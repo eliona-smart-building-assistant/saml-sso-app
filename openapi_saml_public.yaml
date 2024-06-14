@@ -1,0 +1,118 @@
+openapi: 3.0.3
+
+#  This file is part of the eliona project.
+#  Copyright © 2023 Eliona by IoTEC AG. All Rights Reserved.
+#  ______ _ _
+# |  ____| (_)
+# | |__  | |_  ___  _ __   __ _
+# |  __| | | |/ _ \| '_ \ / _` |
+# | |____| | | (_) | | | | (_| |
+# |______|_|_|\___/|_| |_|\__,_|
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+#  BUT NOT LIMITED  TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#  NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+#  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+info:
+  version: 1.0.0
+  title: App SAML 2.0 SSO SAML specific Public Endpoints
+  description: Endpoints related to the SAML 2.0 Workflow
+externalDocs:
+  description: Find out more about the app saml-sso
+  url: https://github.com/eliona-smart-building-assistant/app-saml-sso
+servers:
+  - url: https://{customer}.eliona.cloud/apps-public/saml-sso
+    description: SAML Endpoints on Cloud
+    variables:
+      customer:
+        default: demo
+        description: Customer Name in a cloud installation
+  - url: '{server}/apps-public/saml-sso'
+    description: SAML Endpoints SaaS and OnPremise
+    variables:
+      server:
+        default: https://eliona.muster.int
+        description: URL @ Customer
+
+tags:
+  - name: 'SAML2.0'
+    description: SAML 2.0 specific entpoint
+    externalDocs:
+      url: https://github.com/eliona-smart-building-assistant/app-saml-sso
+
+  - name: 'Generic Single Sign-On'
+    description: Generic endpoints for all Single Sign-On Applications
+    externalDocs:
+      url: https://github.com/eliona-smart-building-assistant/sso
+
+paths:
+  /active:
+    get:
+      tags:
+        - 'Generic Single Sign-On'
+      summary: Check, if a SSO service is available and configured
+      description: This endpoint is for checking, if any SSO service is running on Eliona
+      operationId: getSSOActive
+      responses:
+        "200":
+          description: Successfully returned, if any SSO service is running
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Active"
+
+  /auth:
+    get:
+      tags:
+        - 'Generic Single Sign-On'
+      summary: Begin authorization / login procedure
+      description: Startpoint for each SSO service to process the authorization
+      operationId: getAuthorizationProcedure
+      responses:
+        "302":
+          description: Started login, redirect to the IdP with the SAML request
+
+  /saml/acs:
+    description: SAML's Assertion Consumer Service
+    post:
+      tags:
+        - 'SAML2.0'
+      responses:
+        "302":
+          description: SAML response returned from the IdP redirected to the auth endpoint to evaluate and login
+
+  /saml/slo:
+    description: SAML's Single Logout Service
+    post:
+      tags:
+        - 'SAML2.0'
+      responses:
+        "302":
+          description: SAML response returned from the IdP redirected to the auth endpoint to logout
+
+  /saml/metadata:
+    description: Metadata of this SAML Service Provider (SP)
+    get:
+      tags:
+        - 'SAML2.0'
+      responses:
+        "200":
+          description: Successfully returned, if any SSO service is running
+          content:
+            application/xml:
+              example: <EntityDescriptor>...</EntityDescriptor>
+
+components:
+  schemas:
+    Active:
+      type: object
+      description: If the service is active
+      properties:
+        active:
+          type: boolean
+          nullable: false
+          readOnly: true
+          default: true
+          example: true

@@ -18,8 +18,11 @@ package eliona
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 	"saml-sso/apiserver"
 	"saml-sso/conf"
 	"saml-sso/utils"
@@ -31,16 +34,20 @@ import (
 
 const (
 	LOG_REGIO = "eliona"
+
+	DefaultLang = "en"
 )
 
 const (
-	ENDPOINT_SSO_GENERIC_VERIFICATION = "/sso/auth"
-	ENDPOINT_SSO_GENERIC_ACTIVE       = "/sso/active"
+	ENDPOINT_SSO_GENERIC_VERIFICATION = "/auth"
+	ENDPOINT_SSO_GENERIC_ACTIVE       = "/active"
+	ENDPOINT_SSO_GENERIC_ERROR        = "/error.html"
 )
 
 type SingleSignOn struct {
 	baseUrl         string
 	redirectNoLogin string
+	htmlContent     bool
 	userToArchive   bool
 	eliApi          *EliApiV2
 }
@@ -48,12 +55,16 @@ type SingleSignOn struct {
 func NewSingleSignOn(baseUrl string, userToArchive bool,
 	redirectNoLogin string) *SingleSignOn {
 
-	return &SingleSignOn{
-		baseUrl:         baseUrl,
-		userToArchive:   userToArchive,
-		eliApi:          NewEliApiV2(),
-		redirectNoLogin: utils.SubstituteOwnUrlUrlString(redirectNoLogin, baseUrl),
+	sso := &SingleSignOn{
+		baseUrl:       baseUrl,
+		userToArchive: userToArchive,
+		eliApi:        NewEliApiV2(),
 	}
+
+	sso.redirectNoLogin, sso.htmlContent =
+		utils.SubstituteOwnUrlUrlString(redirectNoLogin, baseUrl)
+
+	return sso
 }
 
 func (s *SingleSignOn) ActiveHandle(w http.ResponseWriter, r *http.Request) {
@@ -88,6 +99,18 @@ func (s *SingleSignOn) ActiveHandle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *SingleSignOn) DefaultLoginError(w http.ResponseWriter, r *http.Request) {
+	content, err := os.ReadFile("html/error.html")
+	if err != nil {
+		log.Error(LOG_REGIO, "read def err page: %v", err)
+	}
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(content)
+	if err != nil {
+		log.Error(LOG_REGIO, "send def err page: %v", err)
+	}
+}
+
 func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 	log.Info(LOG_REGIO, "authentication handle called [%s]", r.Method)
 
@@ -100,11 +123,8 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 		firstname, lastname string
 		phone               *string
 
-		user       *api.User
-		jwt        *string
-		setCookies http.Cookie
-
-		errorMessage []byte
+		user *api.User
+		jwt  *string
 	)
 
 	// Try to obtain real user IP.
@@ -112,13 +132,15 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 	if userIp == "" {
 		userIp = r.Header.Get("X-Real-Ip")
 	}
+	if userIp == "" {
+		userIp = r.RemoteAddr
+	}
 	log.Debug(LOG_REGIO, "user from %s called authentication ep", userIp)
 
 	mapping, err = conf.GetAttributeMapping(context.Background())
 	if err != nil {
-		log.Error(LOG_REGIO, "cannot get attribute mapping. skip auth. %v", err)
-		errorMessage = []byte(err.Error())
-		goto internalServerError
+		s.authFailed(true, loginEmail, userIp, fmt.Sprintf("cannot get attribute mapping: %v", err), w, r)
+		return
 	}
 
 	if mapping.Email != "" {
@@ -141,13 +163,33 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info(LOG_REGIO, "User with firstname: %v, lastname: %v, email/login: "+
-		"%v, phone: %v want to login",
-		firstname, lastname, loginEmail, phone)
+		"%v, phone: %v from %v want to login",
+		firstname, lastname, loginEmail, phone, userIp)
 
 	// get or create user
 	user, err = s.eliApi.GetUserIfExists(loginEmail)
 	if err != nil {
 		log.Info(LOG_REGIO, "user doesn't exist. creating now user...")
+
+		projectId, err := s.getProjectId()
+		if err != nil {
+			s.authFailed(true, loginEmail, userIp, fmt.Sprintf("cannot obtain project id: %v", err), w, r)
+			return
+		}
+
+		sysRoleId, projRoleId, lang, err := s.getPermissionsAndLang(r.Context())
+		if err != nil {
+			log.Info(LOG_REGIO, "mapping failed: sysRoleId:%v, projRoleId:%v, lang:%v err:%v",
+				sysRoleId, projRoleId, lang, err)
+			// a wrong, uncomplete mapping is not a internal error
+			// maybe even wanted for some user groups
+			s.authFailed(false, loginEmail, userIp, fmt.Sprintf("cannot map saml attributes: %v", err), w, r)
+			return
+		}
+
+		log.Debug(LOG_REGIO, "assigned sysRole: %d, projRole: %d, lang: %s", sysRoleId, projRoleId, lang)
+
+		// cannot set role over api
 		user, err = s.eliApi.AddUser(&api.User{
 			Email:     loginEmail,
 			Firstname: *api.NewNullableString(&firstname),
@@ -156,104 +198,206 @@ func (s *SingleSignOn) Authentication(w http.ResponseWriter, r *http.Request) {
 			// Archived: a.userToArchive,				// not possible over APIv2
 		})
 		if err != nil {
-			log.Error(LOG_REGIO, "creating user: %v", err)
-			errorMessage = []byte(err.Error())
-			goto internalServerError
+			s.authFailed(true, loginEmail, userIp, fmt.Sprintf("cannot add user: %v", err), w, r)
+			return
 		}
 
 		err = UpdateElionaUserArchivedPhone(user.Email, phone, s.userToArchive)
 		if err != nil {
-			log.Error(LOG_REGIO, "cannot set phone and archive flag: %v", err)
-			errorMessage = []byte(err.Error())
-			goto internalServerError
+			s.authFailed(true, loginEmail, userIp, fmt.Sprintf("failed to set phone number and archived flag: %v", err), w, r)
+			return
 		}
 
-		err = s.setUserPermissions(user.Id.Get())
+		err = SetUserPermissions(user.Id.Get(), sysRoleId, lang)
 		if err != nil {
-			log.Error(LOG_REGIO, "cannot set user permissions: %v", err)
-			goto notAuthenticated
+			s.authFailed(true, loginEmail, userIp, fmt.Sprintf("cannot set system user cnf: %v", err), w, r)
+			return
+		}
+		err = SetProjectUser(projectId, user.Id.Get(), projRoleId)
+		if err != nil {
+			s.authFailed(true, loginEmail, userIp, fmt.Sprintf("cannot set project user cnf: %v", err), w, r)
+			return
 		}
 	}
 
 	// obtain a jwt to login via cookies
 	jwt, err = GetElionaJsonWebToken(user.Email)
 	if err != nil {
-		log.Error(LOG_REGIO, "cannot obtain a JWT")
-		errorMessage = []byte("cannot obtain a JWT")
-		goto internalServerError
+		s.authFailed(true, loginEmail, userIp, "cannot obtain a JWT", w, r)
+		return
 	}
 
 	log.Debug(LOG_REGIO, "User %s with token %v", user.Email, jwt)
 	if jwt == nil || *jwt == "" {
-		goto notAuthenticated
+		s.authFailed(true, loginEmail, userIp, "invalid JWT returned", w, r)
+		return
+	} else {
+		s.authSuccessful(loginEmail, jwt, w, r)
 	}
+}
 
-	goto authenticated
-
-authenticated:
-	log.Info(LOG_REGIO, "authenticated user login: %s", loginEmail)
-	setCookies = http.Cookie{
+func (s *SingleSignOn) authSuccessful(login string, jwt *string, w http.ResponseWriter, r *http.Request) {
+	log.Info(LOG_REGIO, "authenticated user login: %s", login)
+	setCookies := http.Cookie{
 		Name:  "elionaAuthorization",
 		Value: *jwt,
 		Path:  "/"}
 
 	http.SetCookie(w, &setCookies)
 	http.Redirect(w, r, s.baseUrl, http.StatusFound)
-	return
+}
 
-notAuthenticated:
+func (s *SingleSignOn) authFailed(intError bool, login string, ip string, errorMsg string,
+	w http.ResponseWriter, r *http.Request) {
+
 	log.Info(LOG_REGIO, "not authenticated user tried to login: %s, %s",
-		loginEmail, userIp)
+		login, ip)
+
+	if intError {
+		log.Warn(LOG_REGIO, "internal server error occured: %s", errorMsg)
+		w.WriteHeader(http.StatusInternalServerError)
+		if _, err := w.Write([]byte(errorMsg)); err != nil {
+			log.Warn(LOG_REGIO, "couldn't write internal server error: %v", err)
+		}
+		return
+	}
+
 	// reset eliona cookies
-	setCookies = http.Cookie{
+	setCookies := http.Cookie{
 		Name:  "elionaAuthorization",
 		Value: "invalid",
 		Path:  "/"}
-
 	http.SetCookie(w, &setCookies)
-	http.Redirect(w, r, s.redirectNoLogin, http.StatusFound)
-	return
 
-internalServerError:
-	log.Warn(LOG_REGIO, "internal servererror occured while auth")
-	w.WriteHeader(http.StatusInternalServerError)
-	_, err = w.Write(errorMessage)
-	if err != nil {
-		log.Error(LOG_REGIO, "write internal server error: %v", err)
+	if s.redirectNoLogin == "" {
+		// fallback
+		u, err := url.Parse(s.baseUrl + "/apps-public/saml-sso/error.html")
+		if err != nil {
+			log.Error(LOG_REGIO, "cannot parse fallback redirect url: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(errorMsg + ":" + err.Error()))
+			return
+		}
+		queries := url.Values{}
+
+		queries.Add("title", "Login Error")
+		queries.Add("message", errorMsg)
+		queries.Add("details", errorMsg)
+		queries.Add("linkText", "Go To Login")
+		queries.Add("link", s.baseUrl)
+
+		u.RawQuery = queries.Encode()
+
+		log.Debug(LOG_REGIO, "login failed. redirect to error.html")
+		http.Redirect(w, r, u.String(), http.StatusFound)
+
+	} else if !s.htmlContent {
+		// redirect
+		log.Debug(LOG_REGIO, "login failed. redirect to custom url %s", s.redirectNoLogin)
+		http.Redirect(w, r, s.redirectNoLogin, http.StatusFound)
+	} else {
+		// write html content
+		log.Debug(LOG_REGIO, "login failed. show custom html content")
+		_, err := w.Write([]byte(utils.SubstituteError(s.redirectNoLogin, []byte(errorMsg))))
+		if err != nil {
+			log.Error(LOG_REGIO, "write error page content: %v", err)
+		}
 	}
 }
 
-func (s *SingleSignOn) setUserPermissions(userId *string) error {
+func (s *SingleSignOn) getPermissionsAndLang(samlCtx context.Context) (sysRoleId int,
+	projRoleId int, lang string, err error) {
 
 	var (
-		err         error
 		permissions *apiserver.Permissions
+		aclRoleMap  map[string]int
 	)
+
+	sysRoleId, projRoleId = -1, -1
+	lang = DefaultLang
 
 	permissions, err = conf.GetPermissionMapping(context.Background())
 	if err != nil {
-		return err
+		return
+	}
+	if permissions == nil {
+		err = errors.New("cannot load permission config. <nil>")
+		return
 	}
 
-	log.Info(LOG_REGIO,
-		"ToDo: permission map not finished yet. %v",
-		permissions)
-
-	projectId, err := GetFirstProjectId()
+	aclRoleMap, err = GetACLRoleMap()
 	if err != nil {
-		return fmt.Errorf("cannot look up project id: %v", err)
+		return
 	}
 
-	roleId, err := GetRoleIdByDisplayName(permissions.DefaultProjRole)
+	// get defaults
+	sysRoleId = conf.StringToRoleId(permissions.DefaultSystemRole, aclRoleMap)
+
+	projRoleId = conf.StringToRoleId(permissions.DefaultProjRole, aclRoleMap)
+
+	lang = permissions.DefaultLanguage
+
+	// if configured, map permissions and lang
+	if permissions.SystemRoleSamlAttribute != nil &&
+		*permissions.SystemRoleSamlAttribute != "" &&
+		permissions.SystemRoleMap != nil {
+
+		systemRoleMap := conf.ApiRoleMapToGolangMap(*permissions.SystemRoleMap)
+
+		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.SystemRoleSamlAttribute)
+
+		elionaRoleOrId := systemRoleMap[samlValue]
+		log.Debug(LOG_REGIO, "saml value for sysRole: %s, elionaRole: %v -> map %v",
+			samlValue, elionaRoleOrId, systemRoleMap)
+		sysRoleId = conf.AnyToRoleId(elionaRoleOrId, aclRoleMap)
+	}
+	if permissions.ProjRoleSamlAttribute != nil &&
+		*permissions.ProjRoleSamlAttribute != "" &&
+		permissions.ProjRoleMap != nil {
+
+		projectRoleMap := conf.ApiRoleMapToGolangMap(*permissions.ProjRoleMap)
+
+		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.ProjRoleSamlAttribute)
+
+		elionaRoleOrId := projectRoleMap[samlValue]
+		log.Debug(LOG_REGIO, "saml value for projRole: %s, elionaRole: %v -> map %v",
+			samlValue, elionaRoleOrId, projectRoleMap)
+
+		projRoleId = conf.AnyToRoleId(elionaRoleOrId, aclRoleMap)
+	}
+	if permissions.LanguageSamlAttribute != nil &&
+		*permissions.LanguageSamlAttribute != "" &&
+		permissions.LanguageMap != nil {
+
+		langMap := conf.ApiRoleMapToGolangMap(*permissions.LanguageMap)
+
+		samlValue := samlsp.AttributeFromContext(samlCtx, *permissions.LanguageSamlAttribute)
+
+		elionaLang := langMap[samlValue]
+		switch l := elionaLang.(type) {
+		case string:
+			lang = l
+		default:
+			log.Warn(LOG_REGIO, "language after map invalid type: %T, %v", lang, lang)
+		}
+	}
+
+	if sysRoleId <= 0 || projRoleId <= 0 || lang == "" {
+		err = errors.New("mapping unsuccessful")
+	}
+
+	return
+}
+
+func (s *SingleSignOn) getProjectId() (projectId string, err error) {
+
+	projectId = os.Getenv("PROJID")
+	if projectId == "" {
+		projectId, err = GetFirstProjectId()
+	}
 	if err != nil {
-		return fmt.Errorf("cannot get role id for role %s: %v",
-			permissions.DefaultProjRole, err)
+		err = fmt.Errorf("cannot look up project id: %v", err)
 	}
 
-	if roleId <= 0 {
-		return fmt.Errorf("cannot get role id for %s",
-			permissions.DefaultProjRole)
-	}
-
-	return SetProjectUser(projectId, userId, roleId)
+	return
 }

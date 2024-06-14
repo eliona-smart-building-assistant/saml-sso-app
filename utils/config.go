@@ -19,8 +19,19 @@ import "strings"
 
 const (
 	UTILS_OWN_URL_PLACEHOLDER = "{ownUrl}"
+	UTILS_ERROR_PLACEHODER    = "{error}"
 )
 
-func SubstituteOwnUrlUrlString(url string, ownUrl string) string {
-	return strings.ReplaceAll(url, UTILS_OWN_URL_PLACEHOLDER, ownUrl)
+func SubstituteOwnUrlUrlString(url string, ownUrl string) (urlOrHtml string, isHtml bool) {
+	isHtml = false
+
+	if strings.Contains(url, "<html>") {
+		isHtml = true
+	}
+
+	return strings.ReplaceAll(url, UTILS_OWN_URL_PLACEHOLDER, ownUrl), isHtml
+}
+
+func SubstituteError(content string, err []byte) (result string) {
+	return strings.ReplaceAll(content, UTILS_ERROR_PLACEHODER, string(err))
 }
