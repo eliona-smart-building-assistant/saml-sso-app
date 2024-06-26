@@ -101,7 +101,6 @@ func run() {
 		&config.AllowInitializationByIdp,
 		&config.SignedRequest,
 		&config.ForceAuthn,
-		&config.CookieSecure,
 		saml.PUBLIC_BASE_PATH,
 	)
 	if err != nil {

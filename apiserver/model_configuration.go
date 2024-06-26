@@ -48,9 +48,6 @@ type Configuration struct {
 	// If you have to use a customized Entity Id, you can overwrite it here. Normally the default value can be left as it is.
 	EntityId string `json:"entityId,omitempty"`
 
-	// Only send cookies over encrypted connection (HTTPS)
-	CookieSecure bool `json:"cookieSecure,omitempty"`
-
 	// The url to redirect if the login failed. If this value is null the default page /noLogin will showed up
 	LoginFailedUrl string `json:"loginFailedUrl,omitempty"`
 }

@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS saml_sp.config (
     signed_request              BOOLEAN         NOT NULL DEFAULT true                                         , -- sign the SAML request
     force_authn                 BOOLEAN         NOT NULL DEFAULT false                                        ,
     entity_id                   TEXT            NOT NULL DEFAULT '{ownUrl}/apps-public/saml-sso/saml/metadata',
-    cookie_secure               BOOLEAN         NOT NULL DEFAULT false                                        ,
     login_failed_url            TEXT            NOT NULL DEFAULT '{ownUrl}/noLogin'                             -- redirect url when a user login fails
 ) ;
 

@@ -39,7 +39,6 @@ func ConfigApiToDbForm(config *apiserver.Configuration) (*appdb.Config, error) {
 		SignedRequest:            config.SignedRequest,
 		ForceAuthn:               config.ForceAuthn,
 		EntityID:                 config.EntityId,
-		CookieSecure:             config.CookieSecure,
 		LoginFailedURL:           config.LoginFailedUrl,
 	}, nil
 }
@@ -58,7 +57,6 @@ func ConfigDbToApiForm(config *appdb.Config) (*apiserver.Configuration, error) {
 		SignedRequest:              config.SignedRequest,
 		ForceAuthn:                 config.ForceAuthn,
 		EntityId:                   config.EntityID,
-		CookieSecure:               config.CookieSecure,
 		LoginFailedUrl:             config.LoginFailedURL,
 	}, nil
 }

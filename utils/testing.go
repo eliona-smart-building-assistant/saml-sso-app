@@ -31,7 +31,6 @@ func CreateRandomApiConfig() apiserver.Configuration {
 		SignedRequest:            RandomBoolean(),
 		ForceAuthn:               RandomBoolean(),
 		EntityId:                 RandomUrl() + "/" + RandomCharacter(5, false),
-		CookieSecure:             RandomBoolean(),
 		LoginFailedUrl:           RandomUrl() + "/" + RandomCharacter(RandomInt(2, 10), false),
 	}
 

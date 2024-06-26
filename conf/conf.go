@@ -69,7 +69,6 @@ func InsertAutoSamlConfiguration(ctx context.Context) error {
 			SignedRequest:            AUTO_CNF_DEFAULT_SIGNING_REQ,
 			ForceAuthn:               AUTO_CNF_DEFAULT_FORCE_AUTHN,
 			EntityID:                 AUTO_CNF_DEFAULT_ENTITY_ID,
-			CookieSecure:             AUTO_CNF_DEFAULT_COOKIE_SECURE,
 			LoginFailedURL:           AUTO_CNF_DEFAULT_LOGIN_FAIL_URL,
 		}
 		attributeMapping appdb.AttributeMap = appdb.AttributeMap{

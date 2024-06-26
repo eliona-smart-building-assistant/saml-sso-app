@@ -36,7 +36,6 @@ type Config struct {
 	SignedRequest            bool        `boil:"signed_request" json:"signed_request" toml:"signed_request" yaml:"signed_request"`
 	ForceAuthn               bool        `boil:"force_authn" json:"force_authn" toml:"force_authn" yaml:"force_authn"`
 	EntityID                 string      `boil:"entity_id" json:"entity_id" toml:"entity_id" yaml:"entity_id"`
-	CookieSecure             bool        `boil:"cookie_secure" json:"cookie_secure" toml:"cookie_secure" yaml:"cookie_secure"`
 	LoginFailedURL           string      `boil:"login_failed_url" json:"login_failed_url" toml:"login_failed_url" yaml:"login_failed_url"`
 
 	R *configR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -56,7 +55,6 @@ var ConfigColumns = struct {
 	SignedRequest            string
 	ForceAuthn               string
 	EntityID                 string
-	CookieSecure             string
 	LoginFailedURL           string
 }{
 	ID:                       "id",
@@ -71,7 +69,6 @@ var ConfigColumns = struct {
 	SignedRequest:            "signed_request",
 	ForceAuthn:               "force_authn",
 	EntityID:                 "entity_id",
-	CookieSecure:             "cookie_secure",
 	LoginFailedURL:           "login_failed_url",
 }
 
@@ -88,7 +85,6 @@ var ConfigTableColumns = struct {
 	SignedRequest            string
 	ForceAuthn               string
 	EntityID                 string
-	CookieSecure             string
 	LoginFailedURL           string
 }{
 	ID:                       "config.id",
@@ -103,7 +99,6 @@ var ConfigTableColumns = struct {
 	SignedRequest:            "config.signed_request",
 	ForceAuthn:               "config.force_authn",
 	EntityID:                 "config.entity_id",
-	CookieSecure:             "config.cookie_secure",
 	LoginFailedURL:           "config.login_failed_url",
 }
 
@@ -131,7 +126,6 @@ var ConfigWhere = struct {
 	SignedRequest            whereHelperbool
 	ForceAuthn               whereHelperbool
 	EntityID                 whereHelperstring
-	CookieSecure             whereHelperbool
 	LoginFailedURL           whereHelperstring
 }{
 	ID:                       whereHelperint32{field: "\"saml_sp\".\"config\".\"id\""},
@@ -146,7 +140,6 @@ var ConfigWhere = struct {
 	SignedRequest:            whereHelperbool{field: "\"saml_sp\".\"config\".\"signed_request\""},
 	ForceAuthn:               whereHelperbool{field: "\"saml_sp\".\"config\".\"force_authn\""},
 	EntityID:                 whereHelperstring{field: "\"saml_sp\".\"config\".\"entity_id\""},
-	CookieSecure:             whereHelperbool{field: "\"saml_sp\".\"config\".\"cookie_secure\""},
 	LoginFailedURL:           whereHelperstring{field: "\"saml_sp\".\"config\".\"login_failed_url\""},
 }
 
@@ -188,9 +181,9 @@ func (r *configR) GetIDPermission() *Permission {
 type configL struct{}
 
 var (
-	configAllColumns            = []string{"id", "enable", "sp_certificate", "sp_private_key", "idp_metadata_url", "metadata_xml", "own_url", "user_to_archive", "allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "cookie_secure", "login_failed_url"}
+	configAllColumns            = []string{"id", "enable", "sp_certificate", "sp_private_key", "idp_metadata_url", "metadata_xml", "own_url", "user_to_archive", "allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "login_failed_url"}
 	configColumnsWithoutDefault = []string{"sp_certificate", "sp_private_key", "own_url"}
-	configColumnsWithDefault    = []string{"id", "enable", "idp_metadata_url", "metadata_xml", "user_to_archive", "allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "cookie_secure", "login_failed_url"}
+	configColumnsWithDefault    = []string{"id", "enable", "idp_metadata_url", "metadata_xml", "user_to_archive", "allow_initialization_by_idp", "signed_request", "force_authn", "entity_id", "login_failed_url"}
 	configPrimaryKeyColumns     = []string{"id"}
 	configGeneratedColumns      = []string{}
 )

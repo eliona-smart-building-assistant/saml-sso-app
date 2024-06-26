@@ -40,12 +40,12 @@ func NewServiceProvider(certificate string, privateKey string, pubBaseUrl string
 	idpMetadata []byte) (*ServiceProvider, error) {
 
 	return NewServiceProviderAdvanced(certificate, privateKey, pubBaseUrl, idpMetadata, nil, nil,
-		nil, nil, nil, "")
+		nil, nil, "")
 }
 
 func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl string, idpMetadata []byte,
-	entityId *string, allowInitByIdp *bool, signedRequest *bool, forceAuthn *bool,
-	cookieSecure *bool, pubBasePath string) (*ServiceProvider, error) {
+	entityId *string, allowInitByIdp *bool, signedRequest *bool, forceAuthn *bool, pubBasePath string,
+) (*ServiceProvider, error) {
 	var serviceProvider ServiceProvider = ServiceProvider{
 		pubBasePath: pubBasePath,
 	}
@@ -86,10 +86,6 @@ func NewServiceProviderAdvanced(certificate string, privateKey string, baseUrl s
 	}
 	if forceAuthn != nil {
 		opts.ForceAuthn = *forceAuthn
-	}
-	if cookieSecure != nil {
-		// opts.CookieSecure: true // option not available any more
-		log.Debug(LOG_REGIO, "cookie secure not implemented")
 	}
 
 	serviceProvider.sp, err = samlsp.New(opts)

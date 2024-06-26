@@ -297,13 +297,6 @@ components:
           readOnly: false
           default: "{ownUrl}/saml/metadata"
           example: "{ownUrl}/saml/metadata"
-        cookieSecure:
-          description: Only send cookies over encrypted connection (HTTPS)
-          type: boolean
-          nullable: false
-          readOnly: false
-          default: false
-          example: false
         loginFailedUrl:
           description: The url to redirect if the login failed. If this value is null the default page /noLogin will showed up
           type: string
