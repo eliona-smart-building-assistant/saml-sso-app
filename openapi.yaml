@@ -134,8 +134,8 @@ paths:
     put:
       tags:
         - Configuration
-      summary: Creates or Update Permission Mapping Configurations
-      description: Creates or Update the configuration which maps SAML Attributes/Values with the Eliona Roles.
+      summary: Creates or Updates Permission Mapping Configurations
+      description: Creates or Updates the configuration which maps SAML Attributes/Values with the Eliona Roles.
       operationId: putPermissionMapping
       requestBody:
         content:
@@ -312,7 +312,7 @@ components:
           default: "{ownUrl}/saml/metadata"
           example: "{ownUrl}/saml/metadata"
         cookieSecure:
-          description: only send cookies over encrypted connection (HTTPS)
+          description: Only send cookies over encrypted connection (HTTPS)
           type: boolean
           nullable: false
           readOnly: false
