@@ -23,20 +23,7 @@ externalDocs:
   description: Find out more about the app saml-sso
   url: https://github.com/eliona-smart-building-assistant/app-saml-sso
 servers:
-  - url: https://{customer}.eliona.cloud/apps/saml-sso/api
-    description: Application API Cloud
-    variables:
-      customer:
-        default: demo
-        description: Customer Name in a cloud installation
-  - url: '{server}/apps/saml-sso/api'
-    description: Application API SaaS and OnPremise
-    variables:
-      server:
-        default: https://eliona.muster.int
-        description: URL @ Customer
-security:
-  - ApiKeyAuth: []
+  - url: http://booking/v1
 
 tags:
   - name: Configuration
@@ -50,7 +37,6 @@ tags:
       url: https://github.com/eliona-smart-building-assistant/app-saml-sso
 
 paths:
-
   /configuration:
     get:
       tags:
@@ -383,19 +369,19 @@ components:
           type: string
           readOnly: false
           nullable: false
-          default: 'System user'
-          example: 'System user'
+          default: "System user"
+          example: "System user"
         defaultProjRole:
           type: string
           nullable: false
           readOnly: false
-          default: 'Project user'
-          example: 'Project user'
+          default: "Project user"
+          example: "Project user"
         defaultLanguage:
           type: string
           readOnly: false
           nullable: false
-          example: 'en'
+          example: "en"
           enum:
             - en
             - de
@@ -442,7 +428,7 @@ components:
         elionaRole:
           type: string
           nullable: false
-          example: 'System user'
+          example: "System user"
         samlValue:
           type: string
           nullable: false

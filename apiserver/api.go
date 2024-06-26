@@ -26,22 +26,6 @@ type ConfigurationAPIRouter interface {
 	PutPermissionMapping(http.ResponseWriter, *http.Request)
 }
 
-// GenericSingleSignOnAPIRouter defines the required methods for binding the api requests to a responses for the GenericSingleSignOnAPI
-// The GenericSingleSignOnAPIRouter implementation should parse necessary information from the http request,
-// pass the data to a GenericSingleSignOnAPIServicer to perform the required actions, then write the service results to the http response.
-type GenericSingleSignOnAPIRouter interface {
-	GetAuthorizationProcedure(http.ResponseWriter, *http.Request)
-	GetSSOActive(http.ResponseWriter, *http.Request)
-}
-
-// SAML20APIRouter defines the required methods for binding the api requests to a responses for the SAML20API
-// The SAML20APIRouter implementation should parse necessary information from the http request,
-// pass the data to a SAML20APIServicer to perform the required actions, then write the service results to the http response.
-type SAML20APIRouter interface {
-	SamlAcsPost(http.ResponseWriter, *http.Request)
-	SamlSloPost(http.ResponseWriter, *http.Request)
-}
-
 // VersionAPIRouter defines the required methods for binding the api requests to a responses for the VersionAPI
 // The VersionAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a VersionAPIServicer to perform the required actions, then write the service results to the http response.
@@ -61,24 +45,6 @@ type ConfigurationAPIServicer interface {
 	PutAttributeMapping(context.Context, AttributeMap) (ImplResponse, error)
 	PutConfiguration(context.Context, Configuration) (ImplResponse, error)
 	PutPermissionMapping(context.Context, Permissions) (ImplResponse, error)
-}
-
-// GenericSingleSignOnAPIServicer defines the api actions for the GenericSingleSignOnAPI service
-// This interface intended to stay up to date with the openapi yaml used to generate it,
-// while the service implementation can be ignored with the .openapi-generator-ignore file
-// and updated with the logic required for the API.
-type GenericSingleSignOnAPIServicer interface {
-	GetAuthorizationProcedure(context.Context) (ImplResponse, error)
-	GetSSOActive(context.Context) (ImplResponse, error)
-}
-
-// SAML20APIServicer defines the api actions for the SAML20API service
-// This interface intended to stay up to date with the openapi yaml used to generate it,
-// while the service implementation can be ignored with the .openapi-generator-ignore file
-// and updated with the logic required for the API.
-type SAML20APIServicer interface {
-	SamlAcsPost(context.Context) (ImplResponse, error)
-	SamlSloPost(context.Context) (ImplResponse, error)
 }
 
 // VersionAPIServicer defines the api actions for the VersionAPI service

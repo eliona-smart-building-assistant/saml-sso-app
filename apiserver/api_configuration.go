@@ -173,7 +173,7 @@ func (c *ConfigurationAPIController) PutConfiguration(w http.ResponseWriter, r *
 	EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// PutPermissionMapping - Creates or Update Permission Mapping Configurations
+// PutPermissionMapping - Creates or Updates Permission Mapping Configurations
 func (c *ConfigurationAPIController) PutPermissionMapping(w http.ResponseWriter, r *http.Request) {
 	permissionsParam := Permissions{}
 	d := json.NewDecoder(r.Body)
