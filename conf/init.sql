@@ -55,3 +55,58 @@ CREATE TABLE IF NOT EXISTS saml_sp.permissions (
     language_map                JSON                                                                              , -- e.g. {"Sprache:Deutsch":"de", "Sprache:Englisch":"en"}
     CONSTRAINT chk_language CHECK (default_language IN ('en', 'de', 'it', 'fr'))
 ) ;
+
+DO $$
+BEGIN
+    -- Check if the adfs schema exists
+    IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'adfs') THEN
+        -- Migrate data from the existing adfs.config table to the new saml_sp.config table
+        INSERT INTO saml_sp.config (id, enable, sp_certificate, sp_private_key, idp_metadata_url, own_url, user_to_archive, allow_initialization_by_idp, signed_request, force_authn, entity_id, login_failed_url)
+        SELECT 
+            1 AS id, 
+            enabled AS enable, 
+            cert AS sp_certificate, 
+            key AS sp_private_key, 
+            metadata_url, 
+            own_url, 
+            false AS user_to_archive, 
+            false AS allow_initialization_by_idp, 
+            true AS signed_request, 
+            false AS force_authn, 
+            own_url || '/apps-public/saml-sso/saml/metadata' AS entity_id, 
+            COALESCE(redirect_on_fail_url, own_url || '/noLogin') AS login_failed_url
+        FROM adfs.config
+        WHERE config_id = 1
+        ON CONFLICT (id)
+        DO NOTHING;
+
+        -- Migrate data from the existing adfs.attribute_map table to the new saml_sp.attribute_map table
+        INSERT INTO saml_sp.attribute_map (id, email, first_name, last_name, phone)
+        SELECT 
+            1 AS id, 
+            email, 
+            first_name, 
+            last_name, 
+            phone
+        FROM adfs.attribute_map
+        ON CONFLICT (id)
+        DO NOTHING;
+
+        -- Migrate additional attribute mappings to the saml_sp.permissions table
+        INSERT INTO saml_sp.permissions (id, default_system_role, default_proj_role, default_language, system_role_saml_attribute, system_role_map, proj_role_saml_attribute, proj_role_map, language_saml_attribute, language_map)
+        SELECT 
+            1 AS id, 
+            default_system_role, 
+            default_project_role, 
+            default_language, 
+            system_role_attr, 
+            system_role_attr_map, 
+            project_role_attr, 
+            project_role_attr_map, 
+            language_attr, 
+            language_attr_map
+        FROM adfs.attribute_map
+        ON CONFLICT (id)
+        DO NOTHING;
+    END IF;
+END $$;
